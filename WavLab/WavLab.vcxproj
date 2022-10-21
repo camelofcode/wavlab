@@ -127,7 +127,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="WavFile.cpp" />
     <ClCompile Include="WavLab.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="WavFile.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
