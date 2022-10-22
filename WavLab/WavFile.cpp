@@ -2,12 +2,12 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "BinaryHelpers.h"
+#include "ConversionHelpers.h"
 #include "WavFile.h"
 
 WavFile::WavFile(std::string path)
 {
-	std::vector<char> buffer;
-
 	infile.open(path, std::ofstream::binary);
 
 	if (infile.good() != 1)
@@ -20,23 +20,34 @@ WavFile::WavFile(std::string path)
 	lengthInBytes = infile.tellg();
 	infile.seekg(0, std::ios::beg);
 
-	fileChunkId = readString(infile, 4);
-	fileChunkSize = readInt32(infile);
-	format = readString(infile, 4);
+	fileChunkId = BinaryHelpers::readString(infile, 4);
+	fileChunkSize = BinaryHelpers::readInt32(infile);
+	format = BinaryHelpers::readString(infile, 4);
 
-	formatChunkId = readString(infile, 4);
-	formatChunkSize = readInt32(infile);
-	audioFormat = readInt16(infile);
-	numberOfChannels = readInt16(infile);
-	sampleRate = readInt32(infile);
-	byteRate = readInt32(infile);
-	blockAlign = readInt16(infile);
-	bitsPerSample = readInt16(infile);
+	formatChunkId = BinaryHelpers::readString(infile, 4);
+	formatChunkSize = BinaryHelpers::readInt32(infile);
+	audioFormat = BinaryHelpers::readInt16(infile);
+	numberOfChannels = BinaryHelpers::readInt16(infile);
+	sampleRate = BinaryHelpers::readInt32(infile);
+	byteRate = BinaryHelpers::readInt32(infile);
+	blockAlign = BinaryHelpers::readInt16(infile);
+	bitsPerSample = BinaryHelpers::readInt16(infile);
 
-	//TODO: BWAV fields.
+	auto nextChunk = BinaryHelpers::readString(infile, 4);
+	if(nextChunk == "bext")
+	{
+		//TODO: BWAV fields.
+		isBroadcastWav = true;
 
-	dataChunkId = readString(infile, 4);
-	dataChunkSize = readInt32(infile);
+	}
+	else if(nextChunk == "data")
+	{
+		isBroadcastWav = false;
+		dataChunkId = nextChunk;
+		dataChunkSize = BinaryHelpers::readInt32(infile);
+	}
+
+	//TODO: Random text at end of file?
 
 	validate();
 }
@@ -80,9 +91,15 @@ void WavFile::validate()
 		exit(1);
 	}
 
-	if (bitsPerSample != 16 && bitsPerSample != 24 && bitsPerSample == 32)
+	if (bitsPerSample != 16 && bitsPerSample != 24 && bitsPerSample != 32)
 	{
 		std::cout << "File is not 16, 24 or 32 bit and is not supported" << std::endl;
+		exit(1);
+	}
+
+	if (isBroadcastWav)
+	{
+		std::cout << "File is a broadcast wav, which is not currently supported (but will be like really soon)" << std::endl;
 		exit(1);
 	}
 }
@@ -96,21 +113,21 @@ void WavFile::loadSamplesFromFile()
 	{
 		for (size_t i = 0; i < numberOfSamples; i++)
 		{
-			samples[i] = sixteenBitToDouble(readInt16(infile));
+			samples[i] = ConversionHelpers::sixteenBitToDouble(BinaryHelpers::readInt16(infile));
 		}
 	}
 	else if (bitsPerSample == 24)
 	{
 		for (size_t i = 0; i < numberOfSamples; i++)
 		{
-			samples[i] = twentyfourBitToDouble(readInt24(infile));
+			samples[i] = ConversionHelpers::twentyfourBitToDouble(BinaryHelpers::readInt24(infile));
 		}
 	}
 	else if (bitsPerSample == 32)
 	{
 		for (size_t i = 0; i < numberOfSamples; i++)
 		{
-			samples[i] = thirtytwoBitToDouble(readInt32(infile));
+			samples[i] = ConversionHelpers::thirtytwoBitToDouble(BinaryHelpers::readInt32(infile));
 		}
 	}
 }
@@ -141,212 +158,62 @@ void WavFile::printDetails()
 	std::cout << "dataChunkSize: " << dataChunkSize << std::endl;
 }
 
+void WavFile::save(std::string path)
+{
+	outfile.open(path, std::ofstream::binary);
+
+	if (outfile.good() != 1)
+	{
+		std::cout << "File " << path << " could not be opened for writing, check destination directory" << std::endl;
+		exit(1);
+	}
+
+	BinaryHelpers::writeString(outfile, fileChunkId);
+	BinaryHelpers::writeInt32(outfile, fileChunkSize);
+	BinaryHelpers::writeString(outfile, format);
+
+	BinaryHelpers::writeString(outfile, formatChunkId);
+	BinaryHelpers::writeInt32(outfile, formatChunkSize);
+	BinaryHelpers::writeInt16(outfile, audioFormat);
+	BinaryHelpers::writeInt16(outfile, numberOfChannels);
+	BinaryHelpers::writeInt32(outfile, sampleRate);
+	BinaryHelpers::writeInt32(outfile, byteRate);
+	BinaryHelpers::writeInt16(outfile, blockAlign);
+	BinaryHelpers::writeInt16(outfile, bitsPerSample);
+
+	//TODO: BWav stuff
+
+	BinaryHelpers::writeString(outfile, dataChunkId);
+	BinaryHelpers::writeInt32(outfile, dataChunkSize);
+
+	if (bitsPerSample == 16)
+	{
+		for (size_t i = 0; i < numberOfSamples; i++)
+		{
+			BinaryHelpers::writeInt16(outfile, ConversionHelpers::doubleToSixteenBit(samples[i]));
+		}
+	}
+	else if (bitsPerSample == 24)
+	{
+		for (size_t i = 0; i < numberOfSamples; i++)
+		{
+			BinaryHelpers::writeInt24(outfile, ConversionHelpers::doubleToThirtyTwoBit(samples[i]));
+		}
+	}
+	else if (bitsPerSample == 32)
+	{
+		for (size_t i = 0; i < numberOfSamples; i++)
+		{
+			BinaryHelpers::writeInt32(outfile, ConversionHelpers::doubleToThirtyTwoBit(samples[i]));
+		}
+	}
+
+	//TODO: Random text at end of file?
+	outfile.close();
+}
+
 //Destructor
 WavFile::~WavFile()
 {
 	//TODO: Implement destructor
-}
-
-
-//Private functions
-std::string WavFile::readString(std::ifstream& file, int length)
-{
-	std::vector<char> buffer;
-	buffer.resize(length);
-	file.read(&buffer[0], length);
-	std::string header(buffer.begin(), buffer.end());
-	return header;
-}
-
-short WavFile::readInt16(std::ifstream& file)
-{
-	//TODO: Don't trust these, seems like we are not getting negative numbers.
-	union uni
-	{
-		short s;
-		struct bytes
-		{
-			char b0;
-			char b1;
-		} b;
-	} conversionUnion;
-
-	file.read((char*)&conversionUnion.b.b0, 1);
-	file.read((char*)&conversionUnion.b.b1, 1);
-
-	return conversionUnion.s;
-}
-
-int WavFile::readInt24(std::ifstream& file)
-{
-	//TODO: Don't trust these, seems like we are not getting negative numbers.
-	union uni
-	{
-		int i;
-		struct bytes
-		{
-			char b0;
-			char b1;
-			char b2;
-			char b3;
-		} b;
-	} conversionUnion;
-
-	file.read((char*)&conversionUnion.b.b0, 1);
-	file.read((char*)&conversionUnion.b.b1, 1);
-	file.read((char*)&conversionUnion.b.b2, 1);
-	conversionUnion.b.b3 = 0;
-
-	return conversionUnion.i;
-}
-
-int WavFile::readInt32(std::ifstream& file)
-{
-	//TODO: Don't trust these, seems like we are not getting negative numbers.
-	union uni
-	{
-		int i;
-		struct bytes
-		{
-			char b0;
-			char b1;
-			char b2;
-			char b3;
-		} b;
-	} conversionUnion;
-
-	file.read((char*)&conversionUnion.b.b0, 1);
-	file.read((char*)&conversionUnion.b.b1, 1);
-	file.read((char*)&conversionUnion.b.b2, 1);
-	file.read((char*)&conversionUnion.b.b3, 1);
-
-	return conversionUnion.i;
-}
-
-void WavFile::writeString(std::ofstream& file, std::string value)
-{
-	file.write(value.c_str(), value.size());
-}
-
-void WavFile::writeInt16(std::ofstream& file, short value)
-{
-	file.write((char*)&value, 2);
-}
-
-void WavFile::writeInt24(std::ofstream& file, int value)
-{
-	file.write((char*)&value, 3);
-}
-
-void WavFile::writeInt32(std::ofstream& file, int value)
-{
-	file.write((char*)&value, 4);
-}
-
-double WavFile::sixteenBitToDouble(short input)
-{
-	double min = 32767.0;
-	double max = 32768.0;
-	double sample = 0.0;
-
-	if (input > 0)
-	{
-		sample = static_cast<double>(input) / max;
-	}
-	else
-	{
-		sample = static_cast<double>(input) / min;
-	}
-
-	return sample - 1;
-}
-
-short WavFile::doubleToSixteenBit(double input)
-{
-	double max = 32767.0;
-	double min = 32768.0;
-	double sample = 0.0;
-
-	if (input > 0)
-	{
-		sample = input * max;
-	}
-	else
-	{
-		sample = input * min;
-	}
-	return static_cast<short>(sample);
-}
-
-double WavFile::twentyfourBitToDouble(int input)
-{
-	double min = 8388608.0;
-	double max = 8388607.0;
-	double sample = 0.0;
-
-	if (input > 0)
-	{
-		sample = static_cast<double>(input) / max;
-	}
-	else
-	{
-		sample = static_cast<double>(input) / min;
-	}
-
-	return sample;
-}
-
-int WavFile::doubleToTwentyFourBit(double input)
-{
-	double max = 8388607.0;
-	double min = 8388608.0;
-	double sample = 0.0;
-
-	input = input + 1;
-
-	if (input > 0)
-	{
-		sample = input * max;
-	}
-	else
-	{
-		sample = input * min;
-	}
-	return static_cast<int>(sample);
-}
-
-
-double WavFile::thirtytwoBitToDouble(int input)
-{
-	double min = 2147483648.0;
-	double max = 2147483647.0;
-	double sample = 0.0;
-
-	if (input > 0)
-	{
-		sample = static_cast<double>(input) / max;
-	}
-	else
-	{
-		sample = static_cast<double>(input) / min;
-	}
-
-	return sample;
-}
-
-int WavFile::doubleToThirtyTwoBit(double input)
-{
-	double max = 2147483647.0;
-	double min = 2147483648.0;
-	double sample = 0.0;
-
-	if (input > 0)
-	{
-		sample = input * max;
-	}
-	else
-	{
-		sample = input * min;
-	}
-	return static_cast<int>(sample);
 }

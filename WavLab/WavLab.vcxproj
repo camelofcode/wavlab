@@ -127,10 +127,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BinaryHelpers.cpp" />
+    <ClCompile Include="ConversionHelpers.cpp" />
     <ClCompile Include="WavFile.cpp" />
     <ClCompile Include="WavLab.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BinaryHelpers.h" />
+    <ClInclude Include="ConversionHelpers.h" />
     <ClInclude Include="WavFile.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

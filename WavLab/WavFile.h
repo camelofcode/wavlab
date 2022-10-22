@@ -15,53 +15,39 @@ public:
 	void printDetails();
 	void loadSamplesFromFile();
 
+	void save(std::string path);
+
 	std::vector<double> getSamples();
 
 private:
 	std::ifstream infile;
+	std::ofstream outfile;
 	size_t lengthInBytes;
 	
 	//File
 	std::string fileChunkId;
-	int fileChunkSize;
+	int32_t fileChunkSize;
 	std::string format;
 
 	//Format
 	std::string formatChunkId;
-	int formatChunkSize;
+	int32_t formatChunkSize;
 	short audioFormat;
 	short numberOfChannels;
-	int sampleRate;
-	int byteRate;
+	int32_t sampleRate;
+	int32_t byteRate;
 	short blockAlign;
 	short bitsPerSample;
 
 	//TODO: BWAV Chunks
+	bool isBroadcastWav;
 
 	//Data
 	std::string dataChunkId;
-	int dataChunkSize;
+	int32_t dataChunkSize;
 
 	//Samples
 	int numberOfSamples;
 	std::vector<double> samples;
-
-	//IO functions
-	std::string readString(std::ifstream& file, int length);
-	short readInt16(std::ifstream& file);
-	int readInt24(std::ifstream& file);
-	int readInt32(std::ifstream& file);
-	void writeString(std::ofstream& file, std::string value);
-	void writeInt16(std::ofstream& file, short value);
-	void writeInt24(std::ofstream& file, int value);
-	void writeInt32(std::ofstream& file, int value);
-
-	//Normalisation functions
-	double sixteenBitToDouble(short input);
-	short doubleToSixteenBit(double input);
-	double twentyfourBitToDouble(int input);
-	int doubleToTwentyFourBit(double input);
-	double thirtytwoBitToDouble(int input);
-	int doubleToThirtyTwoBit(double input);
 };
 
