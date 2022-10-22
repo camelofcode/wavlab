@@ -28,7 +28,7 @@ short BinaryHelpers::readInt16(std::ifstream& file)
 	return conversionUnion.s;
 }
 
-int BinaryHelpers::readInt24(std::ifstream& file)
+int32_t BinaryHelpers::readInt24(std::ifstream& file)
 {
 	char b0, b1, b2;
 
@@ -71,7 +71,7 @@ void BinaryHelpers::writeInt16(std::ofstream& file, short value)
 	file.write((char*)&value, 2);
 }
 
-void BinaryHelpers::writeInt24(std::ofstream& file, int value)
+void BinaryHelpers::writeInt24(std::ofstream& file, int32_t value)
 {
 	file.write((char*)&value, 3);
 }

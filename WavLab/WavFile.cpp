@@ -197,7 +197,7 @@ void WavFile::save(std::string path)
 	{
 		for (size_t i = 0; i < numberOfSamples; i++)
 		{
-			BinaryHelpers::writeInt24(outfile, ConversionHelpers::doubleToThirtyTwoBit(samples[i]));
+			BinaryHelpers::writeInt24(outfile, ConversionHelpers::doubleToTwentyFourBit(samples[i]));
 		}
 	}
 	else if (bitsPerSample == 32)
