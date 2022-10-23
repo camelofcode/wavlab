@@ -77,6 +77,11 @@ void BinaryHelpers::writeString(std::ofstream& file, std::string value)
 	file.write(value.c_str(), value.size());
 }
 
+void BinaryHelpers::writeString(std::ofstream& file, std::string value, size_t size)
+{
+	file.write(value.c_str(), size);
+}
+
 void BinaryHelpers::writeInt16(std::ofstream& file, short value)
 {
 	file.write((char*)&value, 2);

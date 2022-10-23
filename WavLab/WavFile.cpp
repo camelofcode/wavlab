@@ -34,20 +34,51 @@ WavFile::WavFile(std::string path)
 	bitsPerSample = BinaryHelpers::readInt16(infile);
 
 	auto nextChunk = BinaryHelpers::readString(infile, 4);
+
 	if(nextChunk == "bext")
 	{
-		//TODO: BWAV fields.
 		isBroadcastWav = true;
+		readBextFields(infile, false);
 
+		nextChunk = BinaryHelpers::readString(infile, 4);
 	}
-	else if(nextChunk == "data")
+
+	if (nextChunk == "JUNK" || nextChunk == "junk") //I've seen both........
 	{
-		isBroadcastWav = false;
+		auto junkSize = BinaryHelpers::readInt32(infile);
+		if (junkSize % 2 != 0)
+		{
+			junkSize += 1;
+		}
+		infile.ignore(junkSize);
+
+		nextChunk = BinaryHelpers::readString(infile, 4); //Should be "data" if we have read the bext chunk and junk chunks properly.
+	}
+
+	if(nextChunk == "data")
+	{
 		dataChunkId = nextChunk;
 		dataChunkSize = BinaryHelpers::readInt32(infile);
+		dataChunkStart = infile.tellg();
 	}
 
-	//TODO: Random text at end of file?
+	if ((dataChunkStart + dataChunkSize) != lengthInBytes)
+	{
+		//There is a footer...
+		infile.seekg(dataChunkStart + dataChunkSize + 1);
+		auto nextChunk = BinaryHelpers::readString(infile, 4);
+		if (nextChunk == "bext")
+		{
+			//Unsurprisingly some geniuses think it makes sense to put BWAV ***HEADER*** info as a footer. 
+			//Also unsurprisingly those fine folks at AVID seem to think this is a great idea. So I'm supporting it I guess. Jeeeeez.
+			isBroadcastWav = true;
+			readBextFields(infile, true);
+		}
+		else
+		{
+			//It's a non-standard footer. Let's just ignore it. This branch exists to note I'm doing it on purpose, I'm sure it will be optimised out.
+		}
+	}
 
 	validate();
 }
@@ -96,16 +127,12 @@ void WavFile::validate()
 		std::cout << "File is not 16, 24 or 32 bit and is not supported" << std::endl;
 		exit(1);
 	}
-
-	if (isBroadcastWav)
-	{
-		std::cout << "File is a broadcast wav, which is not currently supported (but will be like really soon)" << std::endl;
-		exit(1);
-	}
 }
 
 void WavFile::loadSamplesFromFile()
 {
+	infile.seekg(dataChunkStart);
+
 	numberOfSamples = dataChunkSize / blockAlign * numberOfChannels;
 	samples.resize(numberOfSamples);
 
@@ -139,11 +166,11 @@ std::vector<double> WavFile::getSamples()
 
 void WavFile::printDetails()
 {
-	std::cout << "lengthInBytes: " << lengthInBytes << std::endl;
+	std::cout << "lengthInBytes: " << lengthInBytes << std::endl << std::endl;
 
 	std::cout << "fileChunkId: " << fileChunkId << std::endl;
 	std::cout << "fileChunkSize: " << fileChunkSize << std::endl;
-	std::cout << "format: " << format << std::endl;
+	std::cout << "format: " << format << std::endl << std::endl;
 
 	std::cout << "formatChunkId: " << formatChunkId << std::endl;
 	std::cout << "formatChunkSize: " << formatChunkSize << std::endl;
@@ -152,10 +179,24 @@ void WavFile::printDetails()
 	std::cout << "sampleRate: " << sampleRate << std::endl;
 	std::cout << "byteRate: " << byteRate << std::endl;
 	std::cout << "blockAlign: " << blockAlign << std::endl;
-	std::cout << "bitsPerSample: " << bitsPerSample << std::endl;
+	std::cout << "bitsPerSample: " << bitsPerSample << std::endl << std::endl;
 
 	std::cout << "dataChunkId: " << dataChunkId << std::endl;
-	std::cout << "dataChunkSize: " << dataChunkSize << std::endl;
+	std::cout << "dataChunkSize: " << dataChunkSize << std::endl << std::endl;
+
+	if (isBroadcastWav)
+	{
+		std::cout << "bextChunkId: " << bextChunkId << std::endl;
+		std::cout << "bextChunkSize: " << bextChunkSize << std::endl;
+		std::cout << "description: " << description << std::endl;
+		std::cout << "originator: " << originator << std::endl;
+		std::cout << "originatorReference: " << originatorReference << std::endl;
+		std::cout << "originationDate: " << originationDate << std::endl;
+		std::cout << "originationTime: " << originationTime << std::endl;
+		std::cout << "timeReferenceLow: " << timeReferenceLow << std::endl;
+		std::cout << "timeReferenceHigh: " << timeReferenceHigh << std::endl;
+		std::cout << "version: " << version << std::endl;
+	}
 }
 
 void WavFile::save(std::string path)
@@ -181,7 +222,30 @@ void WavFile::save(std::string path)
 	BinaryHelpers::writeInt16(outfile, blockAlign);
 	BinaryHelpers::writeInt16(outfile, bitsPerSample);
 
-	//TODO: BWav stuff
+	if (isBroadcastWav) 
+	{
+		BinaryHelpers::writeString(outfile, bextChunkId);
+		BinaryHelpers::writeInt32(outfile, bextChunkSize);
+
+		BinaryHelpers::writeString(outfile, description, 256);
+		BinaryHelpers::writeString(outfile, originator, 32);
+		BinaryHelpers::writeString(outfile, originatorReference, 32);
+		BinaryHelpers::writeString(outfile, originationDate, 10);
+		BinaryHelpers::writeString(outfile, originationTime, 8);
+
+		BinaryHelpers::writeInt32(outfile, timeReferenceLow);
+		BinaryHelpers::writeInt32(outfile, timeReferenceHigh);
+		BinaryHelpers::writeInt16(outfile, version);
+
+		//Write reserved bytes. There should be 254 because we are not yet supporting v1 and v2 fields.
+		for (size_t i = 0; i < 254; i++)
+		{
+			outfile.write("\0", 1);
+		}
+	}
+
+	//TODO: Write Junk chunk?! Not sure why we need it
+	//"To align RIFF chunks to certain boundaries (i.e. 2048bytes for CD-ROMs) the RIFF specification includes a JUNK chunk. Its contents are to be skipped when reading. When writing RIFFs, JUNK chunks should not have odd number as Size."
 
 	BinaryHelpers::writeString(outfile, dataChunkId);
 	BinaryHelpers::writeInt32(outfile, dataChunkSize);
@@ -208,8 +272,44 @@ void WavFile::save(std::string path)
 		}
 	}
 
-	//TODO: Random text at end of file?
 	outfile.close();
+}
+
+
+//Private functions
+void WavFile::readBextFields(std::ifstream& file, bool isFooter)
+{
+	bextChunkId = "bext";
+	bextChunkSize = BinaryHelpers::readInt32(file);
+
+	description = BinaryHelpers::readString(file, 256);
+	originator = BinaryHelpers::readString(file, 32);
+	originatorReference = BinaryHelpers::readString(file, 32);
+	originationDate = BinaryHelpers::readString(file, 10);
+	originationTime = BinaryHelpers::readString(file, 8);
+	timeReferenceLow = BinaryHelpers::readInt32(file);
+	timeReferenceHigh = BinaryHelpers::readInt32(file);
+	version = BinaryHelpers::readInt16(file);
+
+	if (version == 1)
+	{
+		std::cout << "BWAV v1 fields are not currently supported" << std::endl;
+	}
+	else if (version == 2)
+	{
+		std::cout << "BWAV v1 and v2 fields are not currently supported" << std::endl;
+	}
+
+	if (isFooter)
+	{
+		//Might be a JUNK Chunk but we are pretty much done caring at this point.
+	}
+	else 
+	{
+		//Need to get to end of this chunk. We are ignoring v1 and v2 fields for now so need to skip the 254 reserved bytes
+		std::streamoff position = file.tellg();
+		file.seekg(position + 254);
+	}
 }
 
 //Destructor
