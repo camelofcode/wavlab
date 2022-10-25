@@ -258,7 +258,7 @@ int main(int argc, char* argv[])
             return 1;
         }
 
-        double sampleRate = 44100;
+        uint32_t sampleRate = 44100;
         if (!tryParse(argv[4], sampleRate))
         {
             std::cout << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;

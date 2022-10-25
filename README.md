@@ -92,7 +92,6 @@ wavlab sine-wave <output> <frequency> <sampleRate> <bitDepth> <length>
 * 8 bit support for extra crunchyness
 
 ## Known issues
-* Files that have been output fail validation when reimported due to file chunk size being incorrect
 * JUNK chunks are not written which may have as yet un-understood impact
 * If chunks are in some weird random order that doesn't match spec bad stuff will happen
 
