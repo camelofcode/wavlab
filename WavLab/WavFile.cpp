@@ -183,7 +183,7 @@ void WavFile::validate()
 	}
 }
 
-void WavFile::printDetails()
+void WavFile::printDetailsDebug()
 {
 	std::cout << "lengthInBytes: " << lengthInBytes << std::endl << std::endl;
 
@@ -215,6 +215,27 @@ void WavFile::printDetails()
 		std::cout << "timeReferenceLow: " << timeReferenceLow << std::endl;
 		std::cout << "timeReferenceHigh: " << timeReferenceHigh << std::endl;
 		std::cout << "version: " << version << std::endl;
+	}
+}
+
+void WavFile::printDetails()
+{
+	std::cout << "Number Of Channels: " << numberOfChannels << std::endl;
+	std::cout << "Sample Rate: " << sampleRate << std::endl;
+	std::cout << "Bit Depth: " << bitsPerSample << std::endl << std::endl;
+
+	if (isBroadcastWav)
+	{
+		std::cout << "Description: " << description << std::endl;
+		std::cout << "Originator: " << originator << std::endl;
+		std::cout << "Originator Reference: " << originatorReference << std::endl;
+		std::cout << "Origination Date/Time: " << originationDate << " " << originationTime << std::endl;
+
+		//TODO: These need to be combined into a presumably 64 bit number to get a useful value
+		//std::cout << "timeReferenceLow: " << timeReferenceLow << std::endl;
+		//std::cout << "timeReferenceHigh: " << timeReferenceHigh << std::endl;
+
+		std::cout << "Broadcast Wave Version: " << version << std::endl;
 	}
 }
 

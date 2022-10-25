@@ -31,6 +31,11 @@ public:
 	void validate();
 
 	/// <summary>
+	/// Prints full details of the WAV file to stdout, including things only useful to developers
+	/// </summary>
+	void printDetailsDebug();
+
+	/// <summary>
 	/// Prints the details of the WAV file to stdout.
 	/// </summary>
 	void printDetails();

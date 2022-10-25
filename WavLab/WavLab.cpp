@@ -8,11 +8,11 @@ int main()
     //WavFile wav(1, 44100, 32);
     //Generators::sineWave(wav, 1000, 50);
 
-    WavFile wav("C:\\Temp\\test_normalize_mono.wav", true);
+    WavFile wav("C:\\Temp\\test_bwav.wav", false);
 
-    std::cout << Tools::GetPeakDecibels(wav) << std::endl;
+    wav.printDetails();
 
-    wav.save("C:\\Temp\\test_normalize_mono_out.wav");
+    //wav.save("C:\\Temp\\test_normalize_mono_out.wav");
 
     return 0;
 }
