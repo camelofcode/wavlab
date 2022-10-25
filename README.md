@@ -11,66 +11,65 @@ Only compiled and tested on windows so far but the aim from the start has been c
 
 ## Usage
 ```
-help
+wavlab help
         description: shows the command list
 
-stat <input>
+wavlab stat <input>
         description: show stats of a wave file
         parameters:
                 input: path to wave file
 
-normalise <input> [output]
+wavlab normalise <input> [output]
         description: normalises a wave file
         parameters:
                 input: path to wave file
                 output: path to output file. Optional, if not specified input will be overwritten
 
-reverse <input> [output]
+wavlab reverse <input> [output]
         description: reverses a wave file
         parameters:
                 input: path to wave file
                 output: path to output file. Optional, if not specified input will be overwritten
 
-flip-phase <input> [output]
+wavlab flip-phase <input> [output]
         description: reverses the phase of a wave file
         parameters:
                 input: path to wave file
                 output: path to output file. Optional, if not specified input will be overwritten
 
-swap-channels <input> [output]
+wavlab swap-channels <input> [output]
         description: swaps the left and right channels of a stereo wave file
-
         parameters:
                 input: path to wave file
                 output: path to output file. Optional, if not specified input will be overwritten
 
-get-peak-db <input>
+wavlab get-peak-db <input>
         description: shows the peak dB level of a wave file
         parameters:
                 input: path to wave file
 
-gain <input> <gain> [output]
+wavlab gain <input> <gain> [output]
         description: applies gain to a wave file
         parameters:
                 input: path to wave file
                 gain: gain multiplier
                 output: path to output file. Optional, if not specified input will be overwritten
 
-gain-db <input> <dB> [output]
+wavlab gain-db <input> <dB> [output]
         description: applies gain to a wave file, with input in decibels
         parameters:
                 input: path to wave file
                 dB: gain to apply in decibels
                 output: path to output file. Optional, if not specified input will be overwritten
 
-saturate <input> <drive> [output]
+wavlab saturate <input> <drive> [output]
         description: applies a tape saturation effect to a wave file
         parameters:
                 input: path to wave file
                 drive: increase for dirtier sound
                 output: path to output file. Optional, if not specified input will be overwritten
 
-sine-wave <output> <frequency> <sampleRate> <bitDepth> <length>
+wavlab sine-wave <output> <frequency> <sampleRate> <bitDepth> <length>
         description: writes a sine wave to the specified output file
         parameters:
                 output: path to output wave file
