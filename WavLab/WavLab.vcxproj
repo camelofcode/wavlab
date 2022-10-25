@@ -141,6 +141,7 @@
     <ClInclude Include="FX.h" />
     <ClInclude Include="Generators.h" />
     <ClInclude Include="Tools.h" />
+    <ClInclude Include="TryParse.h" />
     <ClInclude Include="WavFile.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

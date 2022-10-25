@@ -1,4 +1,5 @@
 #include "ConversionHelpers.h"
+#include <string>
 
 double ConversionHelpers::sixteenBitToDouble(short input)
 {
