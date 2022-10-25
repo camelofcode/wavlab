@@ -1,22 +1,13 @@
 #include <iostream>
 #include "WavFile.h"
+#include "Generators.h"
 
 int main()
 {
-    WavFile wav("C:\\Temp\\test_mono_24.wav");
+    WavFile wav(1, 44100, 32);
+    Generators::sineWave(wav, 1000, 50);
 
-    wav.printDetails();
-
-    wav.loadSamplesFromFile();
-
-    wav.save("C:\\Temp\\test_mono_24_out.wav");
-
-    /*
-    for (auto& sample : wav.getSamples())
-    {
-        std::cout << sample << std::endl;
-    }
-    */
+    wav.save("C:\\Temp\\test_sine_wave_out.wav");
 
     return 0;
 }
