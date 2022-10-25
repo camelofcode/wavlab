@@ -130,6 +130,7 @@
     <ClCompile Include="BinaryHelpers.cpp" />
     <ClCompile Include="ConversionHelpers.cpp" />
     <ClCompile Include="Generators.cpp" />
+    <ClCompile Include="Tools.cpp" />
     <ClCompile Include="WavFile.cpp" />
     <ClCompile Include="WavLab.cpp" />
   </ItemGroup>
@@ -137,6 +138,7 @@
     <ClInclude Include="BinaryHelpers.h" />
     <ClInclude Include="ConversionHelpers.h" />
     <ClInclude Include="Generators.h" />
+    <ClInclude Include="Tools.h" />
     <ClInclude Include="WavFile.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -8,4 +8,6 @@ namespace ConversionHelpers
 	int doubleToTwentyFourBit(double input);
 	double thirtytwoBitToDouble(int input);
 	int doubleToThirtyTwoBit(double input);
+
+	double safeScaleDouble(double input, double max, double min);
 }

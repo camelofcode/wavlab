@@ -4,7 +4,7 @@
 namespace Generators
 {
 	/// <summary>
-	/// Constructor for generating a sine wave and writing it to a wave file.
+	/// Generate a sine wave and writing it to a wave file.
 	/// </summary>
 	/// <param name="wave">The wave file to write to</param>
 	/// <param name="lengthMs">The length in ms of the generated wave</param>

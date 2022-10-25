@@ -22,16 +22,8 @@ short ConversionHelpers::doubleToSixteenBit(double input)
 {
 	double max = 32767.0;
 	double min = 32768.0;
-	double sample = 0.0;
 
-	if (input > 0)
-	{
-		sample = input * max;
-	}
-	else
-	{
-		sample = input * min;
-	}
+	double sample = safeScaleDouble(input, max, min);
 	return static_cast<short>(sample);
 }
 
@@ -57,16 +49,8 @@ int ConversionHelpers::doubleToTwentyFourBit(double input)
 {
 	double max = 8388607.0;
 	double min = 8388608.0;
-	double sample = 0.0;
 
-	if (input > 0)
-	{
-		sample = input * max;
-	}
-	else
-	{
-		sample = input * min;
-	}
+	double sample = safeScaleDouble(input, max, min);
 	return static_cast<int>(sample);
 }
 
@@ -93,15 +77,31 @@ int ConversionHelpers::doubleToThirtyTwoBit(double input)
 {
 	double max = 2147483647.0;
 	double min = 2147483648.0;
+	
+	double sample = safeScaleDouble(input, max, min);
+	return static_cast<int>(sample);
+}
+
+double ConversionHelpers::safeScaleDouble(double input, double max, double min)
+{
 	double sample = 0.0;
 
 	if (input > 0)
 	{
 		sample = input * max;
+		if (sample > max)
+		{
+			sample = max;
+		}
 	}
 	else
 	{
 		sample = input * min;
+		if (sample < -min)
+		{
+			sample = -min;
+		}
 	}
-	return static_cast<int>(sample);
+
+	return sample;
 }
