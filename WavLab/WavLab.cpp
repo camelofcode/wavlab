@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
         std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl << std::endl;
 
         std::cout << "swap-channels <input> [output]" << std::endl;
-        std::cout << "\tdescription: swaps the left and right channels of a stereo wave file" << std::endl << std::endl;
+        std::cout << "\tdescription: swaps the left and right channels of a stereo wave file" << std::endl;
         std::cout << "\tparameters:" << std::endl;
         std::cout << "\t\tinput: path to wave file" << std::endl;
         std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl << std::endl;
