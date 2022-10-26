@@ -4,6 +4,7 @@
 #include "Generators.h"
 #include "Tools.h"
 #include "FX.h"
+#include "EQ.h"
 
 int main(int argc, char* argv[])
 {
@@ -68,6 +69,65 @@ int main(int argc, char* argv[])
         std::cout << "\tparameters:" << std::endl;
         std::cout << "\t\tinput: path to wave file" << std::endl;
         std::cout << "\t\tdB: gain to apply in decibels" << std::endl;
+        std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl << std::endl;
+
+        std::cout << "eq-peak <input> <frequency> <gain> <q> [output]" << std::endl;
+        std::cout << "\tdescription: applies a positive or negative peak EQ to a wave file" << std::endl;
+        std::cout << "\tparameters:" << std::endl;
+        std::cout << "\t\tinput: path to wave file" << std::endl;
+        std::cout << "\t\tfrequency: frequency in Hz of the cut/boost" << std::endl;
+        std::cout << "\t\tgain: gain in dB to cut/boost" << std::endl;
+        std::cout << "\t\tq: q factor of the filter" << std::endl;
+        std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl << std::endl;
+
+        std::cout << "eq-lowshelf <input> <frequency> <gain> <q> [output]" << std::endl;
+        std::cout << "\tdescription: applies a positive or negative low shelf EQ to a wave file" << std::endl;
+        std::cout << "\tparameters:" << std::endl;
+        std::cout << "\t\tinput: path to wave file" << std::endl;
+        std::cout << "\t\tfrequency: frequency in Hz of the start of the shelf" << std::endl;
+        std::cout << "\t\tgain: gain in dB to cut/boost" << std::endl;
+        std::cout << "\t\tq: q factor of the filter" << std::endl;
+        std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl << std::endl;
+
+        std::cout << "eq-highshelf <input> <frequency> <gain> <q> [output]" << std::endl;
+        std::cout << "\tdescription: applies a positive or negative high shelf EQ to a wave file" << std::endl;
+        std::cout << "\tparameters:" << std::endl;
+        std::cout << "\t\tinput: path to wave file" << std::endl;
+        std::cout << "\t\tfrequency: frequency in Hz of the start of the shelf" << std::endl;
+        std::cout << "\t\tgain: gain in dB to cut/boost" << std::endl;
+        std::cout << "\t\tq: q factor of the filter" << std::endl;
+        std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl << std::endl;
+
+        std::cout << "eq-allpass <input> <frequency> <q> [output]" << std::endl;
+        std::cout << "\tdescription: applies an all pass filter to a wave file" << std::endl;
+        std::cout << "\tparameters:" << std::endl;
+        std::cout << "\t\tinput: path to wave file" << std::endl;
+        std::cout << "\t\tfrequency: centre frequency of the filter in Hz" << std::endl;
+        std::cout << "\t\tq: q factor of the filter" << std::endl;
+        std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl << std::endl;
+
+        std::cout << "eq-bandpass <input> <frequency> <q> [output]" << std::endl;
+        std::cout << "\tdescription: applies a band pass filter to a wave file" << std::endl;
+        std::cout << "\tparameters:" << std::endl;
+        std::cout << "\t\tinput: path to wave file" << std::endl;
+        std::cout << "\t\tfrequency: centre frequency of the filter in Hz" << std::endl;
+        std::cout << "\t\tq: q factor of the filter" << std::endl;
+        std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl << std::endl;
+
+        std::cout << "eq-lowpass <input> <frequency> <q> [output]" << std::endl;
+        std::cout << "\tdescription: applies a low pass filter to a wave file" << std::endl;
+        std::cout << "\tparameters:" << std::endl;
+        std::cout << "\t\tinput: path to wave file" << std::endl;
+        std::cout << "\t\tfrequency: centre frequency of the filter in Hz" << std::endl;
+        std::cout << "\t\tq: q factor of the filter" << std::endl;
+        std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl << std::endl;
+
+        std::cout << "eq-highpass <input> <frequency> <q> [output]" << std::endl;
+        std::cout << "\tdescription: applies a high pass filter to a wave file" << std::endl;
+        std::cout << "\tparameters:" << std::endl;
+        std::cout << "\t\tinput: path to wave file" << std::endl;
+        std::cout << "\t\tfrequency: centre frequency of the filter in Hz" << std::endl;
+        std::cout << "\t\tq: q factor of the filter" << std::endl;
         std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl << std::endl;
 
         std::cout << "saturate <input> <drive> [output]" << std::endl;
@@ -285,6 +345,89 @@ int main(int argc, char* argv[])
 
         return 0;
     }
+    else if (command == "eq-peak" || command == "eq-lowshelf" || command == "eq-highshelf")
+    {
+        if (argc != 6 && argc != 7)
+        {
+            std::cout << "Incorrect number of arguments for command '" << command << "'.To see available commands run 'wavlab help'" << std::endl;
+            return 1;
+        }
 
-    return 0;
+        std::string input = static_cast<std::string>(argv[2]);
+
+        double frequency = 1000;
+        if (!tryParse(argv[3], frequency))
+        {
+            std::cout << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+            return 1;
+        }
+
+        double gain = 6;
+        if (!tryParse(argv[4], gain))
+        {
+            std::cout << "Parameter 'gain' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
+            return 1;
+        }
+
+        double q = 1;
+        if (!tryParse(argv[5], q))
+        {
+            std::cout << "Parameter 'q' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
+            return 1;
+        }
+
+        std::string output = argc == 7 ? static_cast<std::string>(argv[6]) : input;
+
+        FilterType type = FilterType::None;
+        if (command == "eq-peak") type = FilterType::Peak;
+        if (command == "eq-lowshelf") type = FilterType::LowShelf;
+        if (command == "eq-highshelf") type = FilterType::HighShelf;
+
+        WavFile wav(input, true);
+        EQ::process(wav, type, gain, frequency, q);
+        wav.save(output);
+
+        return 0;
+    }
+    else if (command == "eq-allpass" || command == "eq-bandpass" || command == "eq-lowpass" || command == "eq-highpass")
+    {
+        if (argc != 5 && argc != 6)
+        {
+            std::cout << "Incorrect number of arguments for command '" << command << "'.To see available commands run 'wavlab help'" << std::endl;
+            return 1;
+        }
+
+        std::string input = static_cast<std::string>(argv[2]);
+
+        double frequency = 1000;
+        if (!tryParse(argv[3], frequency))
+        {
+            std::cout << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+            return 1;
+        }
+
+        double q = 1;
+        if (!tryParse(argv[4], q))
+        {
+            std::cout << "Parameter 'q' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
+            return 1;
+        }
+
+        std::string output = argc == 6 ? static_cast<std::string>(argv[5]) : input;
+
+        FilterType type = FilterType::None;
+        if (command == "eq-allpass") type = FilterType::AllPass;
+        if (command == "eq-bandpass") type = FilterType::BandPass;
+        if (command == "eq-lowpass") type = FilterType::LowPass;
+        if (command == "eq-highpass") type = FilterType::HighPass;
+
+        WavFile wav(input, true);
+        EQ::process(wav, type, 0, frequency, q);
+        wav.save(output);
+
+        return 0;
+    }
+
+    std::cout << "Unrecognised command specified. To see available commands run 'wavlab help'" << std::endl;
+    return 1;
 }

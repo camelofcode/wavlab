@@ -61,6 +61,65 @@ wavlab gain-db <input> <dB> [output]
                 input: path to wave file
                 dB: gain to apply in decibels
                 output: path to output file. Optional, if not specified input will be overwritten
+				
+wavlab eq-peak <input> <frequency> <gain> <q> [output]
+        description: applies a positive or negative peak EQ to a wave file
+        parameters:
+                input: path to wave file
+                frequency: frequency in Hz of the cut/boost
+                gain: gain in dB to cut/boost
+                q: q factor of the filter
+                output: path to output file. Optional, if not specified input will be overwritten
+
+wavlab eq-lowshelf <input> <frequency> <gain> <q> [output]
+        description: applies a positive or negative low shelf EQ to a wave file
+        parameters:
+                input: path to wave file
+                frequency: frequency in Hz of the start of the shelf
+                gain: gain in dB to cut/boost
+                q: q factor of the filter
+                output: path to output file. Optional, if not specified input will be overwritten
+
+wavlab eq-highshelf <input> <frequency> <gain> <q> [output]
+        description: applies a positive or negative high shelf EQ to a wave file
+        parameters:
+                input: path to wave file
+                frequency: frequency in Hz of the start of the shelf
+                gain: gain in dB to cut/boost
+                q: q factor of the filter
+                output: path to output file. Optional, if not specified input will be overwritten
+
+wavlab eq-allpass <input> <frequency> <q> [output]
+        description: applies an all pass filter to a wave file
+        parameters:
+                input: path to wave file
+                frequency: centre frequency of the filter in Hz
+                q: q factor of the filter
+                output: path to output file. Optional, if not specified input will be overwritten
+
+wavlab eq-bandpass <input> <frequency> <q> [output]
+        description: applies a band pass filter to a wave file
+        parameters:
+                input: path to wave file
+                frequency: centre frequency of the filter in Hz
+                q: q factor of the filter
+                output: path to output file. Optional, if not specified input will be overwritten
+
+wavlab eq-lowpass <input> <frequency> <q> [output]
+        description: applies a low pass filter to a wave file
+        parameters:
+                input: path to wave file
+                frequency: centre frequency of the filter in Hz
+                q: q factor of the filter
+                output: path to output file. Optional, if not specified input will be overwritten
+
+wavlab eq-highpass <input> <frequency> <q> [output]
+        description: applies a high pass filter to a wave file
+        parameters:
+                input: path to wave file
+                frequency: centre frequency of the filter in Hz
+                q: q factor of the filter
+                output: path to output file. Optional, if not specified input will be overwritten
 
 wavlab saturate <input> <drive> [output]
         description: applies a tape saturation effect to a wave file
@@ -84,8 +143,7 @@ wavlab sine-wave <output> <frequency> <sampleRate> <bitDepth> <length>
 * Mixing wave files
 * Joining and splitting wave files
 * Delay, reverb, chorus, phaser, flanger and many more FX
-* Various EQ/biquad filters
-* Sample rate (hard) and bit rate (probably already supported internally) conversion
+* Sample rate and bit rate (with dithering) conversion
 * Fades and ADSR
 * Dynamic processing (gate/compression)
 * Adding broadcast chunks to existing waves

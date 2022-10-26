@@ -129,6 +129,7 @@
   <ItemGroup>
     <ClCompile Include="BinaryHelpers.cpp" />
     <ClCompile Include="ConversionHelpers.cpp" />
+    <ClCompile Include="EQ.cpp" />
     <ClCompile Include="FX.cpp" />
     <ClCompile Include="Generators.cpp" />
     <ClCompile Include="Tools.cpp" />
@@ -138,6 +139,7 @@
   <ItemGroup>
     <ClInclude Include="BinaryHelpers.h" />
     <ClInclude Include="ConversionHelpers.h" />
+    <ClInclude Include="EQ.h" />
     <ClInclude Include="FX.h" />
     <ClInclude Include="Generators.h" />
     <ClInclude Include="Tools.h" />
