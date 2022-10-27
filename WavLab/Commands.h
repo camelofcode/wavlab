@@ -23,6 +23,8 @@ private:
 
 namespace Commands
 {
+	//Command help and command line parsing functions are defined here, but implemented in their respective files
+
 	//Tools
 
 	void statHelp();
