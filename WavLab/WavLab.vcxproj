@@ -128,21 +128,24 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BinaryHelpers.cpp" />
+    <ClCompile Include="Commands.cpp" />
     <ClCompile Include="ConversionHelpers.cpp" />
     <ClCompile Include="EQ.cpp" />
     <ClCompile Include="FX.cpp" />
     <ClCompile Include="Generators.cpp" />
+    <ClCompile Include="StringHelpers.cpp" />
     <ClCompile Include="Tools.cpp" />
     <ClCompile Include="WavFile.cpp" />
     <ClCompile Include="WavLab.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BinaryHelpers.h" />
+    <ClInclude Include="Commands.h" />
     <ClInclude Include="ConversionHelpers.h" />
     <ClInclude Include="EQ.h" />
     <ClInclude Include="FX.h" />
     <ClInclude Include="Generators.h" />
-    <ClInclude Include="StringReplace.h" />
+    <ClInclude Include="StringHelpers.h" />
     <ClInclude Include="Tools.h" />
     <ClInclude Include="TryParse.h" />
     <ClInclude Include="WavFile.h" />

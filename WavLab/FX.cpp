@@ -1,6 +1,42 @@
 #define _USE_MATH_DEFINES
 #include "FX.h"
+#include "Commands.h"
 #include <cmath>
+
+/* saturate command */
+void Commands::saturateHelp()
+{
+    std::cout << "saturate <input> <drive> [output]" << std::endl;
+    std::cout << "\tdescription: applies a tape saturation effect to a wave file" << std::endl;
+    std::cout << "\tparameters:" << std::endl;
+    std::cout << "\t\tinput: path to wave file" << std::endl;
+    std::cout << "\t\tdrive: increase for dirtier sound" << std::endl;
+    std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl << std::endl;
+}
+
+int Commands::saturateCommand(std::string command, int argc, char* argv[])
+{
+    if (argc != 4 && argc != 5)
+    {
+        std::cout << "Incorrect number of arguments for command 'saturate'. To see available commands run 'wavlab help'" << std::endl;
+        return 1;
+    }
+    std::string input = static_cast<std::string>(argv[2]);
+
+    double drive = 0.0;
+    if (!tryParse(argv[3], drive))
+    {
+        std::cout << "Parameter 'drive' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+        return 1;
+    }
+
+    std::string output = argc == 5 ? static_cast<std::string>(argv[4]) : input;
+
+    WavFile wav(input, true);
+    FX::saturate(wav, drive);
+    wav.save(output);
+    return 0;
+}
 
 void FX::saturate(WavFile& wave, double drive)
 {
