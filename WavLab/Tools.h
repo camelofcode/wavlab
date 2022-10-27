@@ -28,6 +28,12 @@ namespace Tools
 	void swapChannels(WavFile& wave);
 
 	/// <summary>
+	/// Splits a stero wav into left and right mono files
+	/// </summary>
+	/// <param name="wave">The wave file to split</param>
+	void splitStereo(WavFile& stereo, WavFile& left, WavFile& right);
+
+	/// <summary>
 	/// Applies a gain multiplier to the wave file
 	/// </summary>
 	/// <param name="wave">The wave file to apply gain to</param>

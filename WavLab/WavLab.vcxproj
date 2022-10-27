@@ -142,6 +142,7 @@
     <ClInclude Include="EQ.h" />
     <ClInclude Include="FX.h" />
     <ClInclude Include="Generators.h" />
+    <ClInclude Include="StringReplace.h" />
     <ClInclude Include="Tools.h" />
     <ClInclude Include="TryParse.h" />
     <ClInclude Include="WavFile.h" />

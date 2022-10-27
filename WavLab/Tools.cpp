@@ -87,6 +87,25 @@ void Tools::swapChannels(WavFile& wave)
     }
 }
 
+void Tools::splitStereo(WavFile& stereo, WavFile& left, WavFile& right)
+{
+    std::vector<double> original = stereo.getSamples();
+    std::vector<double> leftSamples;
+    std::vector<double> rightSamples;
+
+    for (size_t i = 0; i < original.size() - 1; i = i + 2)
+    {
+        double left = original[i];
+        double right = original[i + 1];
+
+        leftSamples.push_back(left);
+        rightSamples.push_back(right);
+    }
+
+    left.setSamples(leftSamples);
+    right.setSamples(rightSamples);
+}
+
 void Tools::gain(WavFile &wave, double gain)
 {
     std::vector<double> newSamples;

@@ -42,6 +42,11 @@ wavlab swap-channels <input> [output]
         parameters:
                 input: path to wave file
                 output: path to output file. Optional, if not specified input will be overwritten
+				
+wavlab split-stereo <input>
+        description: splits a stereo wave file to two mono files, {original}_l.wav and {original}_r.wav
+        parameters:
+                input: path to wave file
 
 wavlab get-peak-db <input>
         description: shows the peak dB level of a wave file

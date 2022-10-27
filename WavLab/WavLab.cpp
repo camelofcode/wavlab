@@ -1,5 +1,6 @@
 #include <iostream>
 #include "TryParse.h"
+#include "StringReplace.h"
 #include "WavFile.h"
 #include "Generators.h"
 #include "Tools.h"
@@ -13,6 +14,9 @@ int main(int argc, char* argv[])
         std::cout << "No command specified. To see available commands run 'wavlab help'" << std::endl;
         return 1;
     }
+
+    //TODO: Really need a NICE way to handle this humongous if/else if list.
+    //Espeically now we have a compiler warning: Function uses '17960' bytes of stack. Consider moving some data to heap.
 
     std::string command = static_cast<std::string>(argv[1]);
 
@@ -51,6 +55,11 @@ int main(int argc, char* argv[])
         std::cout << "\tparameters:" << std::endl;
         std::cout << "\t\tinput: path to wave file" << std::endl;
         std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl << std::endl;
+
+        std::cout << "split-stereo <input>" << std::endl;
+        std::cout << "\tdescription: splits a stereo wave file to two mono files, {original}_l.wav and {original}_r.wav" << std::endl;
+        std::cout << "\tparameters:" << std::endl;
+        std::cout << "\t\tinput: path to wave file" << std::endl;
 
         std::cout << "get-peak-db <input>" << std::endl;
         std::cout << "\tdescription: shows the peak dB level of a wave file" << std::endl;
@@ -223,6 +232,33 @@ int main(int argc, char* argv[])
         WavFile wav(input, true);
         Tools::swapChannels(wav);
         wav.save(output);
+        return 0;
+    }
+    else if (command == "split-stereo")
+    {
+        if (argc != 3)
+        {
+            std::cout << "Incorrect number of arguments for command 'split-stereo'. To see available commands run 'wavlab help'" << std::endl;
+            return 1;
+        }
+        std::string input = static_cast<std::string>(argv[2]);
+
+        WavFile stereo(input, true);
+
+        if (stereo.getNumberOfChannels() != 2)
+        {
+            std::cout << "Input file is not stereo." << std::endl;
+            return 1;
+        }
+
+        WavFile left(1, stereo.getSampleRate(), stereo.getBitsPerSample());
+        WavFile right(1, stereo.getSampleRate(), stereo.getBitsPerSample());
+
+        Tools::splitStereo(stereo, left, right);
+
+        left.save(stringReplace(input, ".wav", "_l.wav"));
+        right.save(stringReplace(input, ".wav", "_r.wav"));
+
         return 0;
     }
     else if (command == "get-peak-db")
