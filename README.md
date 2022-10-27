@@ -47,6 +47,11 @@ wavlab get-peak-db <input>
         description: shows the peak dB level of a wave file
         parameters:
                 input: path to wave file
+				
+wavlab get-rms-db <input>
+        description: shows the RMS dB level of a wave file
+        parameters:
+                input: path to wave file
 
 wavlab gain <input> <gain> [output]
         description: applies gain to a wave file

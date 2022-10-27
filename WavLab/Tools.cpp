@@ -119,3 +119,19 @@ double Tools::getPeakDecibels(WavFile& wave)
 
     return 20.0 * log10(fabs(highValue));
 }
+
+double Tools::getRMSDecibels(WavFile& wave)
+{
+    std::vector<double> samples = wave.getSamples();
+    double sumOfSquares = 0;
+
+    for (auto& sample : samples)
+    {
+        sumOfSquares += pow(sample, 2.0);
+    }
+
+    double mean = sumOfSquares / samples.size();
+    double rms = sqrt(mean);
+
+    return 20.0 * log10(rms);
+}

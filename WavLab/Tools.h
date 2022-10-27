@@ -7,7 +7,7 @@ namespace Tools
 	/// Normalises a wave file to maximum
 	/// </summary>
 	/// <param name="wave">The wave file to normalise</param>
-	void normalise(WavFile &wave);
+	void normalise(WavFile& wave);
 
 	/// <summary>
 	/// Reverses a wave file
@@ -32,17 +32,22 @@ namespace Tools
 	/// </summary>
 	/// <param name="wave">The wave file to apply gain to</param>
 	/// <param name="gain">The gain multiplier to apply</param>
-	void gain(WavFile &wave, double gain);
+	void gain(WavFile& wave, double gain);
 
 	/// <summary>
 	/// Applies a gain in dB to the wave file
 	/// </summary>
 	/// <param name="wave">The wave file to apply gain to</param>
 	/// <param name="dB">The gain in dB to apply</param>
-	void decibelGain(WavFile &wave, double dB);
+	void decibelGain(WavFile& wave, double dB);
 
 	/// <summary>
 	/// Returns the peak dB value of the wave file
 	/// </summary>
 	double getPeakDecibels(WavFile& wave);
+
+	/// <summary>
+	/// Returns the RMS dB value of the wave file
+	/// </summary>
+	double getRMSDecibels(WavFile& wave);
 }

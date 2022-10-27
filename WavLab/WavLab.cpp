@@ -57,6 +57,11 @@ int main(int argc, char* argv[])
         std::cout << "\tparameters:" << std::endl;
         std::cout << "\t\tinput: path to wave file" << std::endl << std::endl;
 
+        std::cout << "get-rms-db <input>" << std::endl;
+        std::cout << "\tdescription: shows the RMS dB level of a wave file" << std::endl;
+        std::cout << "\tparameters:" << std::endl;
+        std::cout << "\t\tinput: path to wave file" << std::endl << std::endl;
+
         std::cout << "gain <input> <gain> [output]" << std::endl;
         std::cout << "\tdescription: applies gain to a wave file" << std::endl;
         std::cout << "\tparameters:" << std::endl;
@@ -231,6 +236,19 @@ int main(int argc, char* argv[])
 
         WavFile wav(input, true);
         std::cout << Tools::getPeakDecibels(wav) << "dB";
+        return 0;
+    }
+    else if (command == "get-rms-db")
+    {
+        if (argc != 3)
+        {
+            std::cout << "Incorrect number of arguments for command 'get-rms-db'. To see available commands run 'wavlab help'" << std::endl;
+            return 1;
+        }
+        std::string input = static_cast<std::string>(argv[2]);
+
+        WavFile wav(input, true);
+        std::cout << Tools::getRMSDecibels(wav) << "dB";
         return 0;
     }
     else if (command == "gain")
