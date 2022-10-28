@@ -321,7 +321,8 @@ int Commands::combineLeftRightCommand(std::string command, int argc, char* argv[
         return 1;
     }
 
-    unsigned short maxSampleRate = left.getBitsPerSample() >= right.getBitsPerSample() ? left.getBitsPerSample() : right.getBitsPerSample();
+    auto allSampleRates = std::vector<unsigned short>({ left.getBitsPerSample(), right.getBitsPerSample() });
+    unsigned short maxSampleRate = *std::max_element(allSampleRates.begin(), allSampleRates.end());
 
     WavFile stereo(2, left.getSampleRate(), maxSampleRate);
 
@@ -338,7 +339,8 @@ void Tools::combineLeftRight(WavFile& left, WavFile& right, WavFile& out)
     std::vector<double> rightSamples = right.getSamples();
     std::vector<double> stereoSamples;
 
-    size_t maxNumberOfSamples = leftSamples.size() >= rightSamples.size() ? leftSamples.size() : rightSamples.size();
+    auto allNumberOfSamples = std::vector<size_t>({ leftSamples.size(), rightSamples.size()});
+    size_t maxNumberOfSamples = *std::max_element(allNumberOfSamples.begin(), allNumberOfSamples.end());
 
     for (size_t i = 0; i < maxNumberOfSamples - 1; i = i++)
     {
@@ -455,7 +457,8 @@ int Commands::combineMidSideCommand(std::string command, int argc, char* argv[])
         return 1;
     }
 
-    unsigned short maxSampleRate = side.getBitsPerSample() >= mid.getBitsPerSample() ? side.getBitsPerSample() : mid.getBitsPerSample();
+    auto allSampleRates = std::vector<unsigned short>({ mid.getBitsPerSample(), side.getBitsPerSample() });
+    unsigned short maxSampleRate = *std::max_element(allSampleRates.begin(), allSampleRates.end());
 
     WavFile stereo(2, side.getSampleRate(), maxSampleRate);
 
@@ -474,7 +477,8 @@ void Tools::combineMidSide(WavFile& mid, WavFile& side, WavFile& out)
     std::vector<double> sideSamples = side.getSamples();
     std::vector<double> stereoSamples;
 
-    size_t maxNumberOfSamples = midSamples.size() >= sideSamples.size() ? midSamples.size() : sideSamples.size();
+    auto allNumberOfSamples = std::vector<size_t>({ midSamples.size(), sideSamples.size() });
+    size_t maxNumberOfSamples = *std::max_element(allNumberOfSamples.begin(), allNumberOfSamples.end());
 
     for (size_t i = 0; i < maxNumberOfSamples - 1; i = i++)
     {
@@ -655,4 +659,127 @@ double Tools::getRMSDecibels(WavFile& wave)
     double rms = sqrt(mean);
 
     return 20.0 * log10(rms);
+}
+
+/* mix command */
+void Commands::mixHelp()
+{
+    std::cout << "mix <output> <input...>" << std::endl;
+    std::cout << "\tdescription: mixes multiple wave files into one. Will attenuate and renormalise to ensure lack of clipping. Currently will start all files at zero." << std::endl;
+    std::cout << "\tparameters:" << std::endl;
+    std::cout << "\t\toutput: path to mixed wave file" << std::endl;
+    std::cout << "\t\tinput: arbitrary number of input files (minimum 2)" << std::endl;
+}
+
+int Commands::mixCommand(std::string command, int argc, char* argv[])
+{
+    if (argc < 5)
+    {
+        std::cout << "Incorrect number of arguments for command 'mix'. To see available commands run 'wavlab help'" << std::endl;
+        return 1;
+    }
+    std::string output = static_cast<std::string>(argv[2]);
+
+    std::vector<WavFile> inputWavs;
+    std::vector<unsigned short> allBitDepths;
+    std::vector<unsigned short> allNumberOfChannels;
+    uint32_t sampleRate = 0;
+
+    for (int i = 3; i < argc; i++)
+    {
+        std::string input = static_cast<std::string>(argv[i]);
+        WavFile inputWav(input, true);
+
+        if (sampleRate != 0)
+        {
+            if (sampleRate != inputWav.getSampleRate())
+            {
+                std::cout << "Not all input files are the same sample rate." << std::endl;
+                return 1;
+            }
+        }
+        sampleRate = inputWav.getSampleRate();
+
+        allBitDepths.push_back(inputWav.getBitsPerSample());
+        allNumberOfChannels.push_back(inputWav.getNumberOfChannels());
+        inputWavs.push_back(inputWav);
+
+    }
+
+    unsigned short maxBitDepth = *std::max_element(allBitDepths.begin(), allBitDepths.end());
+    unsigned short maxNumberOfChannels = *std::max_element(allNumberOfChannels.begin(), allNumberOfChannels.end());
+
+    WavFile outputWav(maxNumberOfChannels, sampleRate, maxBitDepth);
+
+    Tools::mix(inputWavs, outputWav);
+    outputWav.save(output);
+
+    return 0;
+}
+
+
+void Tools::mix(std::vector<WavFile>& inputs, WavFile& output)
+{
+    
+    std::vector<size_t> allNumberOfSamples;
+    std::vector<std::vector<double>> allSamples;
+    for (auto& input : inputs)
+    {
+        std::vector<double> samples;
+        if (input.getNumberOfChannels() == 2)
+        {
+            samples = input.getSamples();
+        }
+        if (input.getNumberOfChannels() == 1)
+        {
+            //Convert mono samples into stereo.
+            for (auto& sample : input.getSamples())
+            {
+                samples.push_back(sample);
+                samples.push_back(sample);
+            }
+        }
+        allNumberOfSamples.push_back(samples.size());
+        allSamples.push_back(samples);
+    }
+
+    size_t numberOfInputs = inputs.size();
+    size_t maxSamples = *std::max_element(allNumberOfSamples.begin(), allNumberOfSamples.end());
+
+    std::vector<double> newSamples;
+
+    if (output.getNumberOfChannels() == 1)
+    {
+        for (int i = 0; i < maxSamples; i++)
+        {
+            double addedSamples = 0.0;
+            for (auto& samples : allSamples)
+            {
+                double sample = samples.size() <= maxSamples ? samples[i] : 0.0;
+                addedSamples += sample / static_cast<double>(numberOfInputs);
+            }
+            newSamples.push_back(addedSamples);
+        }
+    }
+    else if (output.getNumberOfChannels() == 2)
+    {
+        for (size_t i = 0; i < maxSamples - 1; i = i + 2)
+        {
+            double addedSamplesLeft = 0.0;
+            double addedSamplesRight = 0.0;
+            for (auto& samples : allSamples)
+            {
+                double sampleLeft = samples.size() <= maxSamples ? samples[i] : 0.0;
+                double sampleRight = samples.size() <= maxSamples ? samples[i + 1] : 0.0;
+                addedSamplesLeft += sampleLeft / static_cast<double>(numberOfInputs);
+                addedSamplesRight += sampleRight / static_cast<double>(numberOfInputs);
+            }
+            newSamples.push_back(addedSamplesLeft);
+            newSamples.push_back(addedSamplesRight);
+        }
+    }
+
+    output.setSamples(newSamples);
+    Tools::normalise(output);
+    
 }

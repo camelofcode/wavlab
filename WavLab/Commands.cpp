@@ -16,6 +16,7 @@ CommandsContainer::CommandsContainer()
 	registerCommand("get-rms-db", &Commands::getRMSDbHelp, &Commands::getRMSDbCommand);
 	registerCommand("gain", &Commands::gainHelp, &Commands::gainCommand);
 	registerCommand("gain-db", &Commands::gainDbHelp, &Commands::gainDbCommand);
+	registerCommand("mix", &Commands::mixHelp, &Commands::mixCommand);
 
 	//EQ
 	registerCommand("eq-peak", &Commands::eqPeakHelp, &Commands::eqWithGainCommand);

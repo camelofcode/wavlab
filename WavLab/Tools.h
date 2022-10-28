@@ -82,4 +82,11 @@ namespace Tools
 	/// Returns the RMS dB value of the wave file
 	/// </summary>
 	double getRMSDecibels(WavFile& wave);
+
+	/// <summary>
+	/// Mixes an arbitrary number of wave files to a single wave file. Will attenuate and renormalise to ensure lack of clipping. Currently will start all files at zero. In future could use BWAV chunk to determine position
+	/// </summary>
+	/// <param name="inputs">The wave files to mix</param>
+	/// <param name="dB">The output wave</param>
+	void mix(std::vector<WavFile>& inputs, WavFile& output);
 }

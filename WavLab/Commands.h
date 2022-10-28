@@ -66,6 +66,9 @@ namespace Commands
 	void gainDbHelp();
 	int gainDbCommand(std::string command, int argc, char* argv[]);
 
+	void mixHelp();
+	int mixCommand(std::string command, int argc, char* argv[]);
+
 	/* EQ */
 
 	void eqPeakHelp();

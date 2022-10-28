@@ -73,8 +73,6 @@ public:
 	void setSamples(std::vector<double> newSamples);
 
 private:
-	std::ifstream infile;
-	std::ofstream outfile;
 	size_t lengthInBytes;
 	
 	//File

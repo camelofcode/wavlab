@@ -8,6 +8,7 @@
 
 WavFile::WavFile(std::string path, bool loadSamples)
 {
+	std::ifstream infile;
 	infile.open(path, std::ofstream::binary);
 
 	if (infile.good() != 1)
@@ -101,6 +102,7 @@ WavFile::WavFile(std::string path, bool loadSamples)
 			for (size_t i = 0; i < numberOfSamples; i++)
 			{
 				samples[i] = ConversionHelpers::twentyfourBitToDouble(BinaryHelpers::readInt24(infile));
+				int x = 1;
 			}
 		}
 		else if (bitsPerSample == 32)
@@ -258,6 +260,7 @@ void WavFile::save(std::string path)
 
 	validate();
 
+	std::ofstream outfile;
 	outfile.open(path, std::ofstream::binary);
 
 	if (outfile.good() != 1)
