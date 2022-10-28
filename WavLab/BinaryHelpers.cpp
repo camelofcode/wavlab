@@ -10,6 +10,13 @@ std::string BinaryHelpers::readString(std::ifstream& file, int length)
 	return header;
 }
 
+char BinaryHelpers::readInt8(std::ifstream& file)
+{
+	char b0;
+	file.read((char*)&b0, 1);
+	return b0;
+}
+
 short BinaryHelpers::readInt16(std::ifstream& file)
 {
 	union uni
@@ -77,6 +84,11 @@ void BinaryHelpers::writeString(std::ofstream& file, std::string value)
 void BinaryHelpers::writeString(std::ofstream& file, std::string value, size_t size)
 {
 	file.write(value.c_str(), size);
+}
+
+void BinaryHelpers::writeInt8(std::ofstream& file, char value)
+{
+	file.write(&value, 1);
 }
 
 void BinaryHelpers::writeInt16(std::ofstream& file, short value)

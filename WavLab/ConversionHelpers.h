@@ -3,6 +3,8 @@
 
 namespace ConversionHelpers
 {
+	double eightBitToDouble (char input);
+	char doubleToEightBit(double input);
 	double sixteenBitToDouble(short input);
 	short doubleToSixteenBit(double input);
 	double twentyfourBitToDouble(int input);

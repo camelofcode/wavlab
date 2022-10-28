@@ -2,7 +2,7 @@
 wavlab is a command line utility for processing wave format audio files written in C++.
 It has been made to re-familiarise myself with C++ after over a decade without using it. At the moment it is probably very production unready.
 
-It currently supports PCM wave files, with or without bext/broadcast wave extensions at 16, 24 and 32 bit depths.
+It currently supports PCM wave files, with or without bext/broadcast wave extensions at 8, 16, 24 and 32 bit depths.
 
 What C++ versions is it compatible with? I don't know. 20 for sure, 17 almost certainly, 14 and 11 probably.
 
@@ -183,7 +183,6 @@ swap-channels <input> [output]
 * Fades and ADSR
 * Dynamic processing (gate/compression)
 * Adding broadcast chunks to existing waves
-* 8 bit support for extra crunchyness
 * Proper onscreen feedback for what is happening
 
 ## Known issues

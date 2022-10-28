@@ -1,10 +1,37 @@
 #include "ConversionHelpers.h"
 #include <string>
 
+double ConversionHelpers::eightBitToDouble(char input)
+{
+	double min = 128.0;
+	double max = 127.0;
+	double sample = 0.0;
+
+	if (input > 0)
+	{
+		sample = static_cast<double>(input) / max;
+	}
+	else
+	{
+		sample = static_cast<double>(input) / min;
+	}
+
+	return sample;
+}
+
+char ConversionHelpers::doubleToEightBit(double input)
+{
+	double min = 128.0;
+	double max = 127.0;
+
+	double sample = safeScaleDouble(input, max, min);
+	return static_cast<char>(sample);
+}
+
 double ConversionHelpers::sixteenBitToDouble(short input)
 {
-	double min = 32767.0;
-	double max = 32768.0;
+	double min = 32768.0;
+	double max = 32767.0;
 	double sample = 0.0;
 
 	if (input > 0)
@@ -21,8 +48,8 @@ double ConversionHelpers::sixteenBitToDouble(short input)
 
 short ConversionHelpers::doubleToSixteenBit(double input)
 {
-	double max = 32767.0;
 	double min = 32768.0;
+	double max = 32767.0;
 
 	double sample = safeScaleDouble(input, max, min);
 	return static_cast<short>(sample);

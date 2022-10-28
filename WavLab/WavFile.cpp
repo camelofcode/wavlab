@@ -90,6 +90,13 @@ WavFile::WavFile(std::string path, bool loadSamples)
 		numberOfSamples = dataChunkSize / blockAlign * numberOfChannels;
 		samples.resize(numberOfSamples);
 
+		if (bitsPerSample == 8)
+		{
+			for (size_t i = 0; i < numberOfSamples; i++)
+			{
+				samples[i] = ConversionHelpers::eightBitToDouble(BinaryHelpers::readInt8(infile));
+			}
+		}
 		if (bitsPerSample == 16)
 		{
 			for (size_t i = 0; i < numberOfSamples; i++)
@@ -178,9 +185,9 @@ void WavFile::validate()
 		exit(1);
 	}
 
-	if (bitsPerSample != 16 && bitsPerSample != 24 && bitsPerSample != 32)
+	if (bitsPerSample != 8 && bitsPerSample != 16 && bitsPerSample != 24 && bitsPerSample != 32)
 	{
-		std::cout << "File is not 16, 24 or 32 bit and is not supported" << std::endl;
+		std::cout << "File is not 8, 16, 24 or 32 bit and is not supported" << std::endl;
 		exit(1);
 	}
 }
@@ -310,6 +317,13 @@ void WavFile::save(std::string path)
 	BinaryHelpers::writeString(outfile, dataChunkId);
 	BinaryHelpers::writeInt32(outfile, dataChunkSize);
 
+	if (bitsPerSample == 8)
+	{
+		for (size_t i = 0; i < numberOfSamples; i++)
+		{
+			BinaryHelpers::writeInt8(outfile, ConversionHelpers::doubleToEightBit(samples[i]));
+		}
+	}
 	if (bitsPerSample == 16)
 	{
 		for (size_t i = 0; i < numberOfSamples; i++)
