@@ -118,6 +118,12 @@ mid-side-to-stereo <midInput> <sideInput> <output>
                 midInput: path to mid wave file
                 sideInput: path to side wave file
                 output: path to combined output file
+				
+mix <output> <input...>
+        description: mixes multiple wave files into one. Will attenuate and renormalise to ensure lack of clipping. Currently will start all files at zero.
+        parameters:
+                output: path to mixed wave file
+                input: arbitrary number of input files (minimum 2)
 
 normalise <input> [output]
         description: normalises a wave file
@@ -171,7 +177,6 @@ swap-channels <input> [output]
 
 ## Upcoming features
 * Generating square, sawtooth, triangle wave, white/pink noise
-* Mixing wave files
 * Joining and splitting wave files
 * Delay, reverb, chorus, phaser, flanger and many more FX
 * Sample rate and bit rate (with dithering) conversion
@@ -179,6 +184,7 @@ swap-channels <input> [output]
 * Dynamic processing (gate/compression)
 * Adding broadcast chunks to existing waves
 * 8 bit support for extra crunchyness
+* Proper onscreen feedback for what is happening
 
 ## Known issues
 * JUNK chunks are not written which may have as yet un-understood impact
