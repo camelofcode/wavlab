@@ -30,24 +30,21 @@ short BinaryHelpers::readInt16(std::ifstream& file)
 
 int32_t BinaryHelpers::readInt24(std::ifstream& file)
 {
-	union uni
+	char b0, b1, b2;
+	file.read((char*)&b0, 1);
+	file.read((char*)&b1, 1);
+	file.read((char*)&b2, 1);
+
+	int32_t sampleAsInt = 0;
+	sampleAsInt = ((b2 & 0xFF) << 16) | ((b1 & 0xFF) << 8) | (b0 & 0xFF);
+
+	//Convert sign of 24 bit number to sign of 32 bit number;
+	if (sampleAsInt & 0x800000)
 	{
-		int32_t i;
-		struct bytes
-		{
-			char b0;
-			char b1;
-			char b2;
-			char b3;
-		} b;
-	} conversionUnion;
+		sampleAsInt = sampleAsInt | ~0xFFFFFF;
+	}
 
-	file.read((char*)&conversionUnion.b.b0, 1);
-	file.read((char*)&conversionUnion.b.b1, 1);
-	file.read((char*)&conversionUnion.b.b2, 1);
-	conversionUnion.b.b3 = 0;
-
-	return conversionUnion.i;
+	return sampleAsInt;
 }
 
 int32_t BinaryHelpers::readInt32(std::ifstream& file)
@@ -89,7 +86,14 @@ void BinaryHelpers::writeInt16(std::ofstream& file, short value)
 
 void BinaryHelpers::writeInt24(std::ofstream& file, int32_t value)
 {
-	file.write((char*)&value, 3);
+	uint8_t bytes[3];
+	bytes[2] = (uint8_t)(value >> 16) & 0xFF;
+	bytes[1] = (uint8_t)(value >> 8) & 0xFF;
+	bytes[0] = (uint8_t)value & 0xFF;
+
+	file.write((char*)&bytes[0], 1);
+	file.write((char*)&bytes[1], 1);
+	file.write((char*)&bytes[2], 1);
 }
 
 void BinaryHelpers::writeInt32(std::ofstream& file, int32_t value)
