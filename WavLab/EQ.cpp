@@ -2,12 +2,9 @@
 //See https://webaudio.github.io/Audio-EQ-Cookbook/Audio-EQ-Cookbook.txt , https://webaudio.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html
 //My implementation is however taken mostly from https://www.musicdsp.org/en/latest/Filters/128-c-class-implementation-of-rbj-filters.html
 
-#define _USE_MATH_DEFINES
 #include "EQ.h"
 #include "Commands.h"
-#include <cmath>
-
-const double tau = M_PI * 2.0;
+#include "Constants.h"
 
 EQInstance::EQInstance(FilterType type, double gainDecibels, double centreFrequency, double q, int sampleRate)
 {
@@ -15,7 +12,7 @@ EQInstance::EQInstance(FilterType type, double gainDecibels, double centreFreque
 
 	bool qIsBandwidth = type == FilterType::Peak || type == FilterType::BandPass || type == FilterType::AllPass;
 
-	double const omega = tau * centreFrequency / sampleRate;
+	double const omega = Constants::TAU * centreFrequency / sampleRate;
 	double const sinOmega = sin(omega);
 	double const cosOmega = cos(omega);
 
@@ -160,7 +157,7 @@ void Commands::eqPeakHelp()
 	std::cout << "\t\tfrequency: frequency in Hz of the cut/boost" << std::endl;
 	std::cout << "\t\tgain: gain in dB to cut/boost" << std::endl;
 	std::cout << "\t\tq: q factor of the filter" << std::endl;
-	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl << std::endl;
+	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
 }
 void Commands::eqLowShelfHelp()
 {
@@ -171,7 +168,7 @@ void Commands::eqLowShelfHelp()
 	std::cout << "\t\tfrequency: frequency in Hz of the start of the shelf" << std::endl;
 	std::cout << "\t\tgain: gain in dB to cut/boost" << std::endl;
 	std::cout << "\t\tq: q factor of the filter" << std::endl;
-	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl << std::endl;
+	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
 }
 
 void Commands::eqHighShelfHelp()
@@ -183,7 +180,7 @@ void Commands::eqHighShelfHelp()
 	std::cout << "\t\tfrequency: frequency in Hz of the start of the shelf" << std::endl;
 	std::cout << "\t\tgain: gain in dB to cut/boost" << std::endl;
 	std::cout << "\t\tq: q factor of the filter" << std::endl;
-	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl << std::endl;
+	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
 }
 
 int Commands::eqWithGainCommand(std::string command, int argc, char* argv[])
@@ -239,7 +236,7 @@ void Commands::eqAllPassHelp()
 	std::cout << "\t\tinput: path to wave file" << std::endl;
 	std::cout << "\t\tfrequency: centre frequency of the filter in Hz" << std::endl;
 	std::cout << "\t\tq: q factor of the filter" << std::endl;
-	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl << std::endl;
+	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
 }
 
 void Commands::eqBandPassHelp()
@@ -250,7 +247,7 @@ void Commands::eqBandPassHelp()
 	std::cout << "\t\tinput: path to wave file" << std::endl;
 	std::cout << "\t\tfrequency: centre frequency of the filter in Hz" << std::endl;
 	std::cout << "\t\tq: q factor of the filter" << std::endl;
-	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl << std::endl;
+	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
 }
 
 void Commands::eqLowPassHelp()
@@ -261,7 +258,7 @@ void Commands::eqLowPassHelp()
 	std::cout << "\t\tinput: path to wave file" << std::endl;
 	std::cout << "\t\tfrequency: centre frequency of the filter in Hz" << std::endl;
 	std::cout << "\t\tq: q factor of the filter" << std::endl;
-	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl << std::endl;
+	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
 }
 
 void Commands::eqHighPassHelp()
@@ -272,7 +269,7 @@ void Commands::eqHighPassHelp()
 	std::cout << "\t\tinput: path to wave file" << std::endl;
 	std::cout << "\t\tfrequency: centre frequency of the filter in Hz" << std::endl;
 	std::cout << "\t\tq: q factor of the filter" << std::endl;
-	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl << std::endl;
+	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
 }
 
 int Commands::eqPassCommand(std::string command, int argc, char* argv[])

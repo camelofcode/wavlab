@@ -105,6 +105,20 @@ get-rms-db <input>
         parameters:
                 input: path to wave file
 
+left-right-to-stereo <leftInput> <rightInput> <output>
+        description: converts two left/right mono wave files to a combined stereo wave file
+        parameters:
+                leftInput: path to left wave file
+                rightInput: path to right wave file
+                output: path to combined output file
+
+mid-side-to-stereo <midInput> <sideInput> <output>
+        description: converts two mid/side mono wave files to a combined stereo wave file
+        parameters:
+                midInput: path to mid wave file
+                sideInput: path to side wave file
+                output: path to combined output file
+
 normalise <input> [output]
         description: normalises a wave file
         parameters:
@@ -133,10 +147,16 @@ sine-wave <output> <frequency> <sampleRate> <bitDepth> <length>
                 bitDepth: bit depth of the output wave file
                 length: length of the output file in milliseconds
 
+split-mid-side <input>
+        description: splits a stereo wave file to mid and side components, {original}_mid.wav and {original}_side.wav
+        parameters:
+                input: path to wave file
+
 split-stereo <input>
         description: splits a stereo wave file to two mono files, {original}_l.wav and {original}_r.wav
         parameters:
                 input: path to wave file
+
 stat <input>
         description: show stats of a wave file
         parameters:

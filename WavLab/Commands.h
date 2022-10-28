@@ -45,6 +45,15 @@ namespace Commands
 	void splitStereoHelp();
 	int splitStereoCommand(std::string command, int argc, char* argv[]);
 
+	void combineLeftRightHelp();
+	int combineLeftRightCommand(std::string command, int argc, char* argv[]);
+
+	void splitStereoMidSideHelp();
+	int splitStereoMidSideCommand(std::string command, int argc, char* argv[]);
+
+	void combineMidSideHelp();
+	int combineMidSideCommand(std::string command, int argc, char* argv[]);
+
 	void getPeakDbHelp();
 	int getPeakDbCommand(std::string command, int argc, char* argv[]);
 

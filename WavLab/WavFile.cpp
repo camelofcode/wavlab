@@ -185,11 +185,11 @@ void WavFile::validate()
 
 void WavFile::printDetailsDebug()
 {
-	std::cout << "lengthInBytes: " << lengthInBytes << std::endl << std::endl;
+	std::cout << "lengthInBytes: " << lengthInBytes << std::endl;
 
 	std::cout << "fileChunkId: " << fileChunkId << std::endl;
 	std::cout << "fileChunkSize: " << fileChunkSize << std::endl;
-	std::cout << "format: " << format << std::endl << std::endl;
+	std::cout << "format: " << format << std::endl;
 
 	std::cout << "formatChunkId: " << formatChunkId << std::endl;
 	std::cout << "formatChunkSize: " << formatChunkSize << std::endl;
@@ -198,10 +198,10 @@ void WavFile::printDetailsDebug()
 	std::cout << "sampleRate: " << sampleRate << std::endl;
 	std::cout << "byteRate: " << byteRate << std::endl;
 	std::cout << "blockAlign: " << blockAlign << std::endl;
-	std::cout << "bitsPerSample: " << bitsPerSample << std::endl << std::endl;
+	std::cout << "bitsPerSample: " << bitsPerSample << std::endl;
 
 	std::cout << "dataChunkId: " << dataChunkId << std::endl;
-	std::cout << "dataChunkSize: " << dataChunkSize << std::endl << std::endl;
+	std::cout << "dataChunkSize: " << dataChunkSize << std::endl;
 
 	if (isBroadcastWav)
 	{
@@ -222,7 +222,7 @@ void WavFile::printDetails()
 {
 	std::cout << "Number Of Channels: " << numberOfChannels << std::endl;
 	std::cout << "Sample Rate: " << sampleRate << std::endl;
-	std::cout << "Bit Depth: " << bitsPerSample << std::endl << std::endl;
+	std::cout << "Bit Depth: " << bitsPerSample << std::endl;
 
 	if (isBroadcastWav)
 	{

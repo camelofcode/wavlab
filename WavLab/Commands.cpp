@@ -9,6 +9,9 @@ CommandsContainer::CommandsContainer()
 	registerCommand("flip-phase", &Commands::flipPhaseHelp, &Commands::flipPhaseCommand);
 	registerCommand("swap-channels", &Commands::swapChannelsHelp, &Commands::swapChannelsCommand);
 	registerCommand("split-stereo", &Commands::splitStereoHelp, &Commands::splitStereoCommand);
+	registerCommand("left-right-to-stereo", &Commands::combineLeftRightHelp, &Commands::combineLeftRightCommand);
+	registerCommand("split-mid-side", &Commands::splitStereoMidSideHelp, &Commands::splitStereoMidSideCommand);
+	registerCommand("mid-side-to-stereo", &Commands::combineMidSideHelp, &Commands::combineMidSideCommand);
 	registerCommand("get-peak-db", &Commands::getPeakDbHelp, &Commands::getPeakDbCommand);
 	registerCommand("get-rms-db", &Commands::getRMSDbHelp, &Commands::getRMSDbCommand);
 	registerCommand("gain", &Commands::gainHelp, &Commands::gainCommand);
@@ -42,6 +45,7 @@ void CommandsContainer::showAllHelp()
 	for (auto const& help : helpMap)
 	{
 		help.second();
+		std::cout << std::endl;
 	}
 }
 
@@ -54,7 +58,8 @@ void CommandsContainer::help(std::string command)
 	}
 	else
 	{
-		item->second();
+		item->second();		
+		std::cout << std::endl;
 	}
 }
 

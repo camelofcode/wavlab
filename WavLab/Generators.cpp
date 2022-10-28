@@ -1,9 +1,6 @@
-#define _USE_MATH_DEFINES
 #include "Generators.h"
 #include "Commands.h"
-#include <cmath>
-
-const double tau = M_PI * 2.0;
+#include "Constants.h"
 
 /* sine-wave command */
 
@@ -16,7 +13,7 @@ void Commands::sineWaveHelp()
 	std::cout << "\t\tfrequency: frequency in Hz of the sine wave" << std::endl;
 	std::cout << "\t\tsampleRate: sample rate of the output wave file" << std::endl;
 	std::cout << "\t\tbitDepth: bit depth of the output wave file" << std::endl;
-	std::cout << "\t\tlength: length of the output file in milliseconds" << std::endl << std::endl;
+	std::cout << "\t\tlength: length of the output file in milliseconds" << std::endl;
 }
 
 int Commands::sineWaveCommand(std::string command, int argc, char* argv[])
@@ -69,7 +66,7 @@ void Generators::sineWave(WavFile& wave, int lengthMs, double frequency)
 	uint32_t numberOfSamples = wave.getSampleRate() * (lengthMs / 1000);
 	for (size_t i = 0; i < numberOfSamples; i++)
 	{
-		double value = sin(tau * i * (frequency / static_cast<double>(wave.getSampleRate())));
+		double value = sin(Constants::TAU * i * (frequency / static_cast<double>(wave.getSampleRate())));
 		for (size_t i = 0; i < wave.getNumberOfChannels(); i++)
 		{
 			samples.push_back(value);

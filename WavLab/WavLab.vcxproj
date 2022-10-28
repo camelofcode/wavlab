@@ -141,6 +141,7 @@
   <ItemGroup>
     <ClInclude Include="BinaryHelpers.h" />
     <ClInclude Include="Commands.h" />
+    <ClInclude Include="Constants.h" />
     <ClInclude Include="ConversionHelpers.h" />
     <ClInclude Include="EQ.h" />
     <ClInclude Include="FX.h" />

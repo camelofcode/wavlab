@@ -30,8 +30,34 @@ namespace Tools
 	/// <summary>
 	/// Splits a stero wav into left and right mono files
 	/// </summary>
-	/// <param name="wave">The wave file to split</param>
+	/// <param name="stereo">The wave file to split</param>
+	/// <param name="left">The wave file to write left channel to</param>
+	/// <param name="right">The wave file to write right channel to</param>
 	void splitStereo(WavFile& stereo, WavFile& left, WavFile& right);
+
+	/// <summary>
+	/// Splits a stero wav into left and right mono files
+	/// </summary>
+	/// <param name="left">The left channel wave file</param>
+	/// <param name="right">The right channel wave file</param>
+	/// <param name="out">The wave file to write combined samples to</param>
+	void combineLeftRight(WavFile& left, WavFile& right, WavFile& out);
+
+	/// <summary>
+	/// Splits a stero wav into mid and side mono files
+	/// </summary>
+	/// <param name="wave">The wave file to split</param>
+	/// <param name="mid">The wave file to write mid channel to</param>
+	/// <param name="side">The wave file to write side channel to</param>
+	void splitStereoMidSide(WavFile& stereo, WavFile& mid, WavFile& side);
+
+	/// <summary>
+	/// Joins mid and side mono wavs into a single stereo file
+	/// </summary>
+	/// <param name="mid">The mid channel wave file</param>
+	/// <param name="side">The side channel wave file</param>
+	/// <param name="out">The wave file to write combined samples to</param>
+	void combineMidSide(WavFile& mid, WavFile& side, WavFile& out);
 
 	/// <summary>
 	/// Applies a gain multiplier to the wave file

@@ -11,7 +11,7 @@ void Commands::saturateHelp()
     std::cout << "\tparameters:" << std::endl;
     std::cout << "\t\tinput: path to wave file" << std::endl;
     std::cout << "\t\tdrive: increase for dirtier sound" << std::endl;
-    std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl << std::endl;
+    std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
 }
 
 int Commands::saturateCommand(std::string command, int argc, char* argv[])
