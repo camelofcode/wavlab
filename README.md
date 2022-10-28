@@ -183,5 +183,5 @@ swap-channels <input> [output]
 ## Known issues
 * JUNK chunks are not written which may have as yet un-understood impact
 * If chunks are in some weird random order that doesn't match spec bad stuff will happen
-* Probably related to previous 2 points but I tried some files from REAPER (stems from a mix) and everything was screwed up - could still hear the audio but through tons of noise, and every value was above 0. :(
+* 24 bit stuff is very broken (again) - doesn't have negative values. Needs that 0x80 mask I think.
 
