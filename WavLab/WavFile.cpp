@@ -87,7 +87,7 @@ WavFile::WavFile(std::string path, bool loadSamples)
 	{
 		infile.seekg(dataChunkStart);
 
-		numberOfSamples = dataChunkSize / blockAlign * numberOfChannels;
+		numberOfSamples = dataChunkSize / blockAlign;
 		samples.resize(numberOfSamples);
 
 		if (bitsPerSample == 8)
