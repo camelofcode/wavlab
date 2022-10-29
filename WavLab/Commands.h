@@ -69,6 +69,12 @@ namespace Commands
 	void mixHelp();
 	int mixCommand(std::string command, int argc, char* argv[]);
 
+	void splitHelp();
+	int splitCommand(std::string command, int argc, char* argv[]);
+
+	void joinHelp();
+	int joinCommand(std::string command, int argc, char* argv[]);
+
 	/* EQ */
 
 	void eqPeakHelp();

@@ -103,6 +103,12 @@ get-rms-db <input>
         parameters:
                 input: path to wave file
 
+join <output> <input...>
+        description: joins multiple wave files into one.
+        parameters:
+                output: path to mixed wave file
+                input: arbitrary number of input files (minimum 2)
+
 left-right-to-stereo <leftInput> <rightInput> <output>
         description: converts two left/right mono wave files to a combined stereo wave file
         parameters:
@@ -116,7 +122,7 @@ mid-side-to-stereo <midInput> <sideInput> <output>
                 midInput: path to mid wave file
                 sideInput: path to side wave file
                 output: path to combined output file
-				
+
 mix <output> <input...>
         description: mixes multiple wave files into one. Will attenuate and renormalise to ensure lack of clipping. Currently will start all files at zero.
         parameters:
@@ -151,6 +157,12 @@ sine-wave <output> <frequency> <sampleRate> <bitDepth> <length>
                 bitDepth: bit depth of the output wave file
                 length: length of the output file in milliseconds
 
+split <input> <splitTimeMs...>
+        description: splits a wave file at the specified times in milliseconds
+        parameters:
+                input: path to wave file to split
+                splitTimeMs: arbitrary number of split times in milliseconds
+
 split-mid-side <input>
         description: splits a stereo wave file to mid and side components, {original}_mid.wav and {original}_side.wav
         parameters:
@@ -175,7 +187,6 @@ swap-channels <input> [output]
 
 ## Upcoming features
 * Generating square, sawtooth, triangle wave, white/pink noise
-* Joining and splitting wave files
 * Delay, reverb, chorus, phaser, flanger and many more FX
 * Sample rate and bit rate (with dithering) conversion
 * Fades and ADSR

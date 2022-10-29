@@ -17,6 +17,8 @@ CommandsContainer::CommandsContainer()
 	registerCommand("gain", &Commands::gainHelp, &Commands::gainCommand);
 	registerCommand("gain-db", &Commands::gainDbHelp, &Commands::gainDbCommand);
 	registerCommand("mix", &Commands::mixHelp, &Commands::mixCommand);
+	registerCommand("split", &Commands::splitHelp, &Commands::splitCommand);
+	registerCommand("join", &Commands::joinHelp, &Commands::joinCommand);
 
 	//EQ
 	registerCommand("eq-peak", &Commands::eqPeakHelp, &Commands::eqWithGainCommand);

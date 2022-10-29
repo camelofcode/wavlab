@@ -87,6 +87,21 @@ namespace Tools
 	/// Mixes an arbitrary number of wave files to a single wave file. Will attenuate and renormalise to ensure lack of clipping. Currently will start all files at zero. In future could use BWAV chunk to determine position
 	/// </summary>
 	/// <param name="inputs">The wave files to mix</param>
-	/// <param name="dB">The output wave</param>
+	/// <param name="output">The output wave</param>
 	void mix(std::vector<WavFile>& inputs, WavFile& output);
+
+	/// <summary>
+	/// Splits a wave file at specified times in milliseconds
+	/// </summary>
+	/// <param name="input">The wave file to split</param>
+	/// <param name="outputs">The separate output wave files</param>
+	/// <param name="splitTimesMs">The times to split at in milliseconds</param>
+	void split(WavFile& input, std::vector<WavFile>& outputs, std::vector<uint32_t> splitTimesMs);
+
+	/// <summary>
+	/// Joins an arbitrary number of wave files to a single wave file.
+	/// </summary>
+	/// <param name="inputs">The wave files to join</param>
+	/// <param name="output">The output wave</param>
+	void join(std::vector<WavFile>& inputs, WavFile& output);
 }

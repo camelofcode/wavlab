@@ -252,7 +252,7 @@ void WavFile::save(std::string path)
 {
 	//Set chunk sizes. I *think* this is correct.
 	formatChunkSize = 16; //Could calculate this doing sizeof but I already did that manually so why bother, it's always the same!
-	dataChunkSize = static_cast<uint32_t>(samples.size() * bitsPerSample / 8);
+	dataChunkSize = static_cast<uint32_t>(samples.size() * blockAlign);
 	bextChunkSize = isBroadcastWav ? 602 : 0; //Could calculate this doing sizeof but I already did that manually so why bother, it's always the same!
 	fileChunkSize = formatChunkSize
 		+ 4 //format chunk id - should be counted?
