@@ -4,9 +4,7 @@ It has been made to re-familiarise myself with C++ after over a decade without u
 
 It currently supports PCM wave files, with or without bext/broadcast wave extensions at 8, 16, 24 and 32 bit depths.
 
-What C++ versions is it compatible with? I don't know. 20 for sure, 17 almost certainly, 14 and 11 probably.
-
-It currently compiles in Visual Studio 2022. CMake version coming soon.
+Currently using C++14 and up and currently compiles in Visual Studio 2022 (tested - other C++14 compatible VS probably work). CMake version coming soon.
 Only compiled and tested on windows so far but the aim from the start has been cross platform.
 
 ## Usage
