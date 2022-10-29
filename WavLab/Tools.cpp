@@ -786,7 +786,7 @@ void Tools::mix(std::vector<WavFile>& inputs, WavFile& output)
 void Commands::splitHelp()
 {
     std::cout << "split <input> <splitTimeMs...>" << std::endl;
-    std::cout << "\tdescription: splits a wave file at the specified times in milliseconds" << std::endl;
+    std::cout << "\tdescription: splits a wave file at the specified times in milliseconds. Output files will be named {original}_1.wav, {original}_2.wav etc" << std::endl;
     std::cout << "\tparameters:" << std::endl;
     std::cout << "\t\tinput: path to wave file to split" << std::endl;
     std::cout << "\t\tsplitTimeMs: arbitrary number of split times in milliseconds" << std::endl;

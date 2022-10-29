@@ -158,7 +158,7 @@ sine-wave <output> <frequency> <sampleRate> <bitDepth> <length>
                 length: length of the output file in milliseconds
 
 split <input> <splitTimeMs...>
-        description: splits a wave file at the specified times in milliseconds
+        description: splits a wave file at the specified times in milliseconds. Output files will be named {original}_1.wav, {original}_2.wav etc
         parameters:
                 input: path to wave file to split
                 splitTimeMs: arbitrary number of split times in milliseconds
