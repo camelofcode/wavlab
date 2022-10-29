@@ -186,6 +186,7 @@ swap-channels <input> [output]
 ```
 
 ## Upcoming features
+* Mac and Linux support
 * Generating square, sawtooth, triangle wave, white/pink noise
 * Delay, reverb, chorus, phaser, flanger and many more FX
 * Sample rate and bit rate (with dithering) conversion
