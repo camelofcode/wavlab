@@ -214,7 +214,7 @@ int Commands::squareWaveAdditiveCommand(std::string command, int argc, char* arg
     {
         if (!tryParse(argv[7], harmonics))
         {
-            std::cout << "Parameter 'harmonics' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
+            std::cout << "Parameter 'harmonics' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
             return 1;
         }
     }
@@ -391,7 +391,7 @@ int Commands::triangleWaveAdditiveCommand(std::string command, int argc, char* a
     {
         if (!tryParse(argv[7], harmonics))
         {
-            std::cout << "Parameter 'harmonics' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
+            std::cout << "Parameter 'harmonics' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
             return 1;
         }
     }
@@ -567,7 +567,7 @@ int Commands::sawtoothWaveAdditiveCommand(std::string command, int argc, char* a
     {
         if (!tryParse(argv[7], harmonics))
         {
-            std::cout << "Parameter 'harmonics' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
+            std::cout << "Parameter 'harmonics' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
             return 1;
         }
     }
@@ -598,6 +598,153 @@ void Generators::sawtoothWaveAdditive(WavFile& wave, int lengthMs, double freque
             samples.push_back(sample);
         }
 
+    }
+    wave.setSamples(samples);
+    Tools::normalise(wave);
+}
+
+/* white-noise command */
+
+void Commands::whiteNoiseHelp()
+{
+    std::cout << "white-noise <output> <sampleRate> <bitDepth> <length>" << std::endl;
+    std::cout << "\tdescription: writes generated white noise to specified output file" << std::endl;
+    std::cout << "\tparameters:" << std::endl;
+    std::cout << "\t\toutput: path to output wave file" << std::endl;
+    std::cout << "\t\tsampleRate: sample rate of the output wave file" << std::endl;
+    std::cout << "\t\tbitDepth: bit depth of the output wave file" << std::endl;
+    std::cout << "\t\tlength: length of the output file in milliseconds" << std::endl;
+}
+
+int Commands::whiteNoiseCommand(std::string command, int argc, char* argv[])
+{
+    if (argc != 6)
+    {
+        std::cout << "Incorrect number of arguments for command 'white-noise'. To see available commands run 'wavlab help'" << std::endl;
+        return 1;
+    }
+    std::string output = static_cast<std::string>(argv[2]);
+
+
+    uint32_t sampleRate = 44100;
+    if (!tryParse(argv[3], sampleRate))
+    {
+        std::cout << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+        return 1;
+    }
+
+    unsigned short bitDepth = 16;
+    if (!tryParse(argv[4], bitDepth))
+    {
+        std::cout << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
+        return 1;
+    }
+
+    int lengthMs = 1000;
+    if (!tryParse(argv[5], lengthMs))
+    {
+        std::cout << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
+        return 1;
+    }
+
+    WavFile wav(1, sampleRate, bitDepth);
+    Generators::whiteNoise(wav, lengthMs);
+    wav.save(output);
+
+    return 0;
+}
+
+void Generators::whiteNoise(WavFile& wave, int lengthMs)
+{
+    std::vector<double> samples;
+    uint32_t numberOfSamples = wave.getSampleRate() * (lengthMs / 1000);
+    for (size_t i = 0; i < numberOfSamples; i++)
+    {
+        double sample = (rand() / (RAND_MAX / 2.0)) - 1.0;
+        for (size_t j = 0; j < wave.getNumberOfChannels(); j++)
+        {
+            samples.push_back(sample);
+        }
+    }
+    wave.setSamples(samples);
+}
+
+/* pink-noise command */
+
+void Commands::pinkNoiseHelp()
+{
+    std::cout << "pink-noise <output> <sampleRate> <bitDepth> <length>" << std::endl;
+    std::cout << "\tdescription: writes generated pink noise to specified output file" << std::endl;
+    std::cout << "\tparameters:" << std::endl;
+    std::cout << "\t\toutput: path to output wave file" << std::endl;
+    std::cout << "\t\tsampleRate: sample rate of the output wave file" << std::endl;
+    std::cout << "\t\tbitDepth: bit depth of the output wave file" << std::endl;
+    std::cout << "\t\tlength: length of the output file in milliseconds" << std::endl;
+}
+
+int Commands::pinkNoiseCommand(std::string command, int argc, char* argv[])
+{
+    if (argc != 6)
+    {
+        std::cout << "Incorrect number of arguments for command 'pink-noise'. To see available commands run 'wavlab help'" << std::endl;
+        return 1;
+    }
+    std::string output = static_cast<std::string>(argv[2]);
+
+
+    uint32_t sampleRate = 44100;
+    if (!tryParse(argv[3], sampleRate))
+    {
+        std::cout << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+        return 1;
+    }
+
+    unsigned short bitDepth = 16;
+    if (!tryParse(argv[4], bitDepth))
+    {
+        std::cout << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
+        return 1;
+    }
+
+    int lengthMs = 1000;
+    if (!tryParse(argv[5], lengthMs))
+    {
+        std::cout << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
+        return 1;
+    }
+
+    WavFile wav(1, sampleRate, bitDepth);
+    Generators::pinkNoise(wav, lengthMs);
+    wav.save(output);
+
+    return 0;
+}
+
+void Generators::pinkNoise(WavFile& wave, int lengthMs)
+{
+    //https://www.firstpr.com.au/dsp/pink-noise/
+
+    double buf0, buf1, buf2, buf3, buf4, buf5, buf6;
+    buf0 = buf1 = buf2 = buf3 = buf4 = buf5 = buf6 = 0.0;
+    double amplitude = 0.129;
+    std::vector<double> samples;
+    uint32_t numberOfSamples = wave.getSampleRate() * (lengthMs / 1000);
+    for (size_t i = 0; i < numberOfSamples; i++)
+    {
+        double white = (rand() / (RAND_MAX / 2.0)) - 1.0;
+        buf0 = 0.99886f * buf0 + 0.0555179f * white;
+        buf1 = 0.99332f * buf1 + 0.0750759f * white;
+        buf2 = 0.96900f * buf2 + 0.1538520f * white;
+        buf3 = 0.86650f * buf3 + 0.3104856f * white;
+        buf4 = 0.55000f * buf4 + 0.5329522f * white;
+        buf5 = -0.7616f * buf5 - 0.0168980f * white;
+        double sample = amplitude * (buf0 + buf1 + buf2 + buf3 + buf4 + buf5 + buf6 + white * 0.5362);
+        buf6 = white * 0.115926;
+
+        for (size_t j = 0; j < wave.getNumberOfChannels(); j++)
+        {
+            samples.push_back(sample);
+        }
     }
     wave.setSamples(samples);
     Tools::normalise(wave);

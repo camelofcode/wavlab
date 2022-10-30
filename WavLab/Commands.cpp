@@ -24,7 +24,6 @@ CommandsContainer::CommandsContainer()
 	registerCommand("eq-peak", &Commands::eqPeakHelp, &Commands::eqWithGainCommand);
 	registerCommand("eq-lowshelf", &Commands::eqLowShelfHelp, &Commands::eqWithGainCommand);
 	registerCommand("eq-highshelf", &Commands::eqHighShelfHelp, &Commands::eqWithGainCommand);
-
 	registerCommand("eq-allpass", &Commands::eqAllPassHelp, &Commands::eqPassCommand);
 	registerCommand("eq-bandpass", &Commands::eqBandPassHelp, &Commands::eqPassCommand);
 	registerCommand("eq-lowpass", &Commands::eqLowPassHelp, &Commands::eqPassCommand);
@@ -41,6 +40,8 @@ CommandsContainer::CommandsContainer()
 	registerCommand("triangle-wave-additive", &Commands::triangleWaveAdditiveHelp, &Commands::triangleWaveAdditiveCommand);
 	registerCommand("sawtooth-wave", &Commands::sawtoothWaveHelp, &Commands::sawtoothWaveCommand);
 	registerCommand("sawtooth-wave-additive", &Commands::sawtoothWaveAdditiveHelp, &Commands::sawtoothWaveAdditiveCommand);
+	registerCommand("white-noise", &Commands::whiteNoiseHelp, &Commands::whiteNoiseCommand);
+	registerCommand("pink-noise", &Commands::pinkNoiseHelp, &Commands::pinkNoiseCommand);
 };
 
 void CommandsContainer::registerCommand(std::string command, std::function<void()> help, std::function<int(std::string command, int argc, char* argv[])> action)

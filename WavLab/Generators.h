@@ -61,4 +61,18 @@ namespace Generators
 	/// <param name="frequency">The frequency in Hz of the sawtooth wav</param>
 	/// <param name="harmonics">The number of harmonics to use</param>
 	void sawtoothWaveAdditive(WavFile& wave, int lengthMs, double frequency, int harmonics);
+
+	/// <summary>
+	/// Generates white noise
+	/// </summary>
+	/// <param name="wave">The wave file to write to</param>
+	/// <param name="lengthMs">The length in ms of the generated wave</param>
+	void whiteNoise(WavFile& wave, int lengthMs);
+
+	/// <summary>
+	/// Generates pink noise
+	/// </summary>
+	/// <param name="wave">The wave file to write to</param>
+	/// <param name="lengthMs">The length in ms of the generated wave</param>
+	void pinkNoise(WavFile& wave, int lengthMs);
 };

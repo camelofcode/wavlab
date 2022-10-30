@@ -7,6 +7,27 @@ It currently supports PCM wave files, with or without bext/broadcast wave extens
 Currently using C++14 and up and currently compiles in Visual Studio 2022 (tested - other C++14 compatible VS probably work). CMake version coming soon.
 Only compiled and tested on windows so far but the aim from the start has been cross platform.
 
+## Features
+* Supports standard format PCM Wave files at all sample rates and 8, 16, 24 and 32 bit resolutions
+* Reading of BWAV/bext chunks
+* A variety of useful wave file tools including
+    * Normalisation
+	* Reversing
+	* Phase Flipping
+	* Stereo channel swapping
+	* Splitting stereo files to left/right and mid/side components, and recombining them
+    * Applying gain
+	* Calculating peak and RMS dB values
+	* Mixing multiple files together
+	* Joining and splitting wave files
+* Generation of
+	* Pure Sine/Square/Triangle and Sawtooth waves
+	* "Analogue" additive synthesised Square/Triangle and Sawtooth waves
+	* White/pink noise
+* Various signal processing functions including
+	* Peaking, shelving and all/band/low/pass filters/EQs
+	* Tape saturation effect
+
 ## Usage
 run `wavlab [command]` using one of the following commands:
 
@@ -135,6 +156,14 @@ normalise <input> [output]
                 input: path to wave file
                 output: path to output file. Optional, if not specified input will be overwritten
 
+pink-noise <output> <sampleRate> <bitDepth> <length>
+        description: writes generated pink noise to specified output file
+        parameters:
+                output: path to output wave file
+                sampleRate: sample rate of the output wave file
+                bitDepth: bit depth of the output wave file
+                length: length of the output file in milliseconds
+
 reverse <input> [output]
         description: reverses a wave file
         parameters:
@@ -240,16 +269,24 @@ triangle-wave-additive <output> <frequency> <sampleRate> <bitDepth> <length> [nu
                 bitDepth: bit depth of the output wave file
                 length: length of the output file in milliseconds
                 numberOfHarmonics: the number of odd harmonics to use. Optional, defaults to 1000
+
+white-noise <output> <sampleRate> <bitDepth> <length>
+        description: writes generated white noise to specified output file
+        parameters:
+                output: path to output wave file
+                sampleRate: sample rate of the output wave file
+                bitDepth: bit depth of the output wave file
+                length: length of the output file in milliseconds
 ```
 
 ## Upcoming features
 * Mac and Linux support
-* Generating white/pink noise
 * Delay, reverb, chorus, phaser, flanger and many more FX
 * Sample rate and bit rate (with dithering) conversion
 * Fades and ADSR
 * Dynamic processing (gate/compression)
 * Adding broadcast chunks to existing waves
+* Broadcast wav v1 and v2
 * Proper onscreen feedback for what is happening
 
 ## Known issues

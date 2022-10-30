@@ -114,4 +114,10 @@ namespace Commands
 
 	void sawtoothWaveAdditiveHelp();
 	int sawtoothWaveAdditiveCommand(std::string command, int argc, char* argv[]);
+
+	void whiteNoiseHelp();
+	int whiteNoiseCommand(std::string command, int argc, char* argv[]);
+
+	void pinkNoiseHelp();
+	int pinkNoiseCommand(std::string command, int argc, char* argv[]);
 }
