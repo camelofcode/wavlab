@@ -96,4 +96,7 @@ namespace Commands
 
 	void sineWaveHelp();
 	int sineWaveCommand(std::string command, int argc, char* argv[]);
+
+	void squareWaveHelp();
+	int squareWaveCommand(std::string command, int argc, char* argv[]);
 }

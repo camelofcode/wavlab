@@ -172,6 +172,15 @@ split-stereo <input>
         description: splits a stereo wave file to two mono files, {original}_l.wav and {original}_r.wav
         parameters:
                 input: path to wave file
+				
+square-wave <output> <frequency> <sampleRate> <bitDepth> <length>
+        description: writes a sine wave to the specified output file
+        parameters:
+                output: path to output wave file
+                frequency: frequency in Hz of the square wave
+                sampleRate: sample rate of the output wave file
+                bitDepth: bit depth of the output wave file
+                length: length of the output file in milliseconds
 
 stat <input>
         description: show stats of a wave file
@@ -187,7 +196,7 @@ swap-channels <input> [output]
 
 ## Upcoming features
 * Mac and Linux support
-* Generating square, sawtooth, triangle wave, white/pink noise
+* Generating sawtooth, triangle wave, white/pink noise
 * Delay, reverb, chorus, phaser, flanger and many more FX
 * Sample rate and bit rate (with dithering) conversion
 * Fades and ADSR

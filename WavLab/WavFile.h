@@ -19,7 +19,7 @@ public:
 	/// </summary>
 	/// <param name="numberOfChannels">Number of channels, ie. Mono = 1, Stereo = 2</param>
 	/// <param name="sampleRate">The sample rate in Hz</param>
-	/// <param name="bitsPerSample">The number of bits per sample: 16/24/32</param>
+	/// <param name="bitsPerSample">The number of bits per sample: 8/16/24/32</param>
 	WavFile(unsigned short numberOfChannels, uint32_t sampleRate, unsigned short bitsPerSample);
 	
 	///Destructor
@@ -63,7 +63,7 @@ public:
 	uint16_t getSampleRate();
 
 	/// <summary>
-	/// Gets the bits per sample: 16/24/32
+	/// Gets the bits per sample: 8/16/24/32
 	/// </summary>
 	unsigned short getBitsPerSample();
 
