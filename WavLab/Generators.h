@@ -18,4 +18,20 @@ namespace Generators
 	/// <param name="lengthMs">The length in ms of the generated wave</param>
 	/// <param name="frequency">The frequency in Hz of the square wav</param>
 	void squareWave(WavFile& wave, int lengthMs, double frequency);
+
+	/// <summary>
+	/// Generate a pure triangle wave and write it to a wave file.
+	/// </summary>
+	/// <param name="wave">The wave file to write to</param>
+	/// <param name="lengthMs">The length in ms of the generated wave</param>
+	/// <param name="frequency">The frequency in Hz of the triangle wav</param>
+	void triangleWave(WavFile& wave, int lengthMs, double frequency);
+
+	/// <summary>
+	/// Generate a pure sawtooth wave and write it to a wave file.
+	/// </summary>
+	/// <param name="wave">The wave file to write to</param>
+	/// <param name="lengthMs">The length in ms of the generated wave</param>
+	/// <param name="frequency">The frequency in Hz of the sawtooth wav</param>
+	void sawtoothWave(WavFile& wave, int lengthMs, double frequency);
 };

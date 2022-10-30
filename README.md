@@ -148,6 +148,15 @@ saturate <input> <drive> [output]
                 drive: increase for dirtier sound
                 output: path to output file. Optional, if not specified input will be overwritten
 
+sawtooth-wave <output> <frequency> <sampleRate> <bitDepth> <length>
+        description: writes a sawtooth wave to the specified output file
+        parameters:
+                output: path to output wave file
+                frequency: frequency in Hz of the sawtooth wave
+                sampleRate: sample rate of the output wave file
+                bitDepth: bit depth of the output wave file
+                length: length of the output file in milliseconds
+
 sine-wave <output> <frequency> <sampleRate> <bitDepth> <length>
         description: writes a sine wave to the specified output file
         parameters:
@@ -172,9 +181,9 @@ split-stereo <input>
         description: splits a stereo wave file to two mono files, {original}_l.wav and {original}_r.wav
         parameters:
                 input: path to wave file
-				
+
 square-wave <output> <frequency> <sampleRate> <bitDepth> <length>
-        description: writes a sine wave to the specified output file
+        description: writes a square wave to the specified output file
         parameters:
                 output: path to output wave file
                 frequency: frequency in Hz of the square wave
@@ -192,11 +201,20 @@ swap-channels <input> [output]
         parameters:
                 input: path to wave file
                 output: path to output file. Optional, if not specified input will be overwritten
+
+triangle-wave <output> <frequency> <sampleRate> <bitDepth> <length>
+        description: writes a triangle wave to the specified output file
+        parameters:
+                output: path to output wave file
+                frequency: frequency in Hz of the triangle wave
+                sampleRate: sample rate of the output wave file
+                bitDepth: bit depth of the output wave file
+                length: length of the output file in milliseconds
 ```
 
 ## Upcoming features
 * Mac and Linux support
-* Generating sawtooth, triangle wave, white/pink noise
+* Generating white/pink noise, square/triangle/sawtooth via additive synthesis in addition to existing pure waves
 * Delay, reverb, chorus, phaser, flanger and many more FX
 * Sample rate and bit rate (with dithering) conversion
 * Fades and ADSR
