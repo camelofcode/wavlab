@@ -289,6 +289,15 @@ white-noise <output> <sampleRate> <bitDepth> <length>
 * Broadcast wav v1 and v2
 * Proper onscreen feedback for what is happening
 
+## FAQ
+**Do you know that various C++ libraries exist for handling wave and many other audio formats?**
+
+Yes. If I'd used them I wouldn't have learnt anything about importing and exporting wave files.
+
+**Why would I want to process files on the command line when Audacity/Sound Forge/Any number of DAWs exist?**
+
+Why do command line utilities exist for anything a GUI exists for?
+
 ## Known issues
 * JUNK chunks are not written which may have as yet un-understood impact
 * If chunks are in some weird random order that doesn't match spec bad stuff will happen
