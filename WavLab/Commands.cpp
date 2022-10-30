@@ -36,8 +36,11 @@ CommandsContainer::CommandsContainer()
 	//Generators
 	registerCommand("sine-wave", &Commands::sineWaveHelp, &Commands::sineWaveCommand);
 	registerCommand("square-wave", &Commands::squareWaveHelp, &Commands::squareWaveCommand);
+	registerCommand("square-wave-additive", &Commands::squareWaveAdditiveHelp, &Commands::squareWaveAdditiveCommand);
 	registerCommand("triangle-wave", &Commands::triangleWaveHelp, &Commands::triangleWaveCommand);
+	registerCommand("triangle-wave-additive", &Commands::triangleWaveAdditiveHelp, &Commands::triangleWaveAdditiveCommand);
 	registerCommand("sawtooth-wave", &Commands::sawtoothWaveHelp, &Commands::sawtoothWaveCommand);
+	registerCommand("sawtooth-wave-additive", &Commands::sawtoothWaveAdditiveHelp, &Commands::sawtoothWaveAdditiveCommand);
 };
 
 void CommandsContainer::registerCommand(std::string command, std::function<void()> help, std::function<int(std::string command, int argc, char* argv[])> action)

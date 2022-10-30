@@ -100,9 +100,18 @@ namespace Commands
 	void squareWaveHelp();
 	int squareWaveCommand(std::string command, int argc, char* argv[]);
 
+	void squareWaveAdditiveHelp();
+	int squareWaveAdditiveCommand(std::string command, int argc, char* argv[]);
+
 	void triangleWaveHelp();
 	int triangleWaveCommand(std::string command, int argc, char* argv[]);
 
+	void triangleWaveAdditiveHelp();
+	int triangleWaveAdditiveCommand(std::string command, int argc, char* argv[]);
+
 	void sawtoothWaveHelp();
 	int sawtoothWaveCommand(std::string command, int argc, char* argv[]);
+
+	void sawtoothWaveAdditiveHelp();
+	int sawtoothWaveAdditiveCommand(std::string command, int argc, char* argv[]);
 }
