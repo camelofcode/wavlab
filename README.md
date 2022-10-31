@@ -281,7 +281,7 @@ white-noise <output> <sampleRate> <bitDepth> <length>
 ```
 
 ## Upcoming features
-* Mac and Linux support
+* Test Mac support
 * Delay, reverb, chorus, phaser, flanger and many more FX
 * Sample rate and bit rate (with dithering) conversion
 * Fades and ADSR
