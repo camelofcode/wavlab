@@ -7,9 +7,9 @@
 #include "Constants.h"
 #include <cmath>
 
-EQInstance::EQInstance(FilterType type, double gainDecibels, double centreFrequency, double q, int sampleRate)
+EQInstance::EQInstance(FilterType type, double gainDecibels, double centreFrequency, double q, uint32_t sampleRate)
 {
-	double alpha = 0.0, a0 = 0.0, a1 = 0.0, a2 = 0.0, b0 = 0.0, b1 = 0.0, b2 = 0.0;
+	double alpha, a0 = 0.0, a1 = 0.0, a2 = 0.0, b0 = 0.0, b1 = 0.0, b2 = 0.0;
 
 	bool qIsBandwidth = type == FilterType::Peak || type == FilterType::BandPass || type == FilterType::AllPass;
 
@@ -184,11 +184,11 @@ void Commands::eqHighShelfHelp()
 	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
 }
 
-int Commands::eqWithGainCommand(std::string command, int argc, char* argv[])
+int Commands::eqWithGainCommand(const std::string& command, int argc, char* argv[])
 {
 	if (argc != 6 && argc != 7)
 	{
-		std::cout << "Incorrect number of arguments for command '" << command << "'.To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
 		return 1;
 	}
 
@@ -273,11 +273,11 @@ void Commands::eqHighPassHelp()
 	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
 }
 
-int Commands::eqPassCommand(std::string command, int argc, char* argv[])
+int Commands::eqPassCommand(const std::string& command, int argc, char* argv[])
 {
 	if (argc != 5 && argc != 6)
 	{
-		std::cout << "Incorrect number of arguments for command '" << command << "'.To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
 		return 1;
 	}
 

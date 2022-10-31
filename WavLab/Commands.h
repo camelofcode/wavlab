@@ -11,10 +11,10 @@ class CommandsContainer
 public:
 	CommandsContainer();
 
-	void registerCommand(std::string command, std::function<void()> help, std::function<int(std::string command, int argc, char* argv[])> action);
+	void registerCommand(const std::string& command, const std::function<void()>& help, const std::function<int(const std::string& command, int argc, char* argv[])>& action);
 	void showAllHelp();
-	void help(std::string command);
-	int command(std::string command, int argc, char* argv[]);
+	void help(const std::string& command);
+	int command(const std::string& command, int argc, char* argv[]);
 
 private:
 	std::map <std::string, std::function<void()>> helpMap;
@@ -23,101 +23,103 @@ private:
 
 namespace Commands
 {
+    void printIncorrectArgumentsWarning(const std::string& command);
+
 	//Command help and command line parsing functions are defined here, but implemented in their respective files
 
 	//Tools
 
 	void statHelp();
-	int statCommand(std::string command, int argc, char* argv[]);
+	int statCommand(const std::string& command, int argc, char* argv[]);
 
 	void normaliseHelp();
-	int normaliseCommand(std::string command, int argc, char* argv[]);
+	int normaliseCommand(const std::string& command, int argc, char* argv[]);
 
 	void reverseHelp();
-	int reverseCommand(std::string command, int argc, char* argv[]);
+	int reverseCommand(const std::string& command, int argc, char* argv[]);
 
 	void flipPhaseHelp();
-	int flipPhaseCommand(std::string command, int argc, char* argv[]);
+	int flipPhaseCommand(const std::string& command, int argc, char* argv[]);
 
 	void swapChannelsHelp();
-	int swapChannelsCommand(std::string command, int argc, char* argv[]);
+	int swapChannelsCommand(const std::string& command, int argc, char* argv[]);
 
 	void splitStereoHelp();
-	int splitStereoCommand(std::string command, int argc, char* argv[]);
+	int splitStereoCommand(const std::string& command, int argc, char* argv[]);
 
 	void combineLeftRightHelp();
-	int combineLeftRightCommand(std::string command, int argc, char* argv[]);
+	int combineLeftRightCommand(const std::string& command, int argc, char* argv[]);
 
 	void splitStereoMidSideHelp();
-	int splitStereoMidSideCommand(std::string command, int argc, char* argv[]);
+	int splitStereoMidSideCommand(const std::string& command, int argc, char* argv[]);
 
 	void combineMidSideHelp();
-	int combineMidSideCommand(std::string command, int argc, char* argv[]);
+	int combineMidSideCommand(const std::string& command, int argc, char* argv[]);
 
 	void getPeakDbHelp();
-	int getPeakDbCommand(std::string command, int argc, char* argv[]);
+	int getPeakDbCommand(const std::string& command, int argc, char* argv[]);
 
 	void getRMSDbHelp();
-	int getRMSDbCommand(std::string command, int argc, char* argv[]);
+	int getRMSDbCommand(const std::string& command, int argc, char* argv[]);
 
 	void gainHelp();
-	int gainCommand(std::string command, int argc, char* argv[]);
+	int gainCommand(const std::string& command, int argc, char* argv[]);
 
 	void gainDbHelp();
-	int gainDbCommand(std::string command, int argc, char* argv[]);
+	int gainDbCommand(const std::string& command, int argc, char* argv[]);
 
 	void mixHelp();
-	int mixCommand(std::string command, int argc, char* argv[]);
+	int mixCommand(const std::string& command, int argc, char* argv[]);
 
 	void splitHelp();
-	int splitCommand(std::string command, int argc, char* argv[]);
+	int splitCommand(const std::string& command, int argc, char* argv[]);
 
 	void joinHelp();
-	int joinCommand(std::string command, int argc, char* argv[]);
+	int joinCommand(const std::string& command, int argc, char* argv[]);
 
 	/* EQ */
 
 	void eqPeakHelp();
 	void eqLowShelfHelp();
 	void eqHighShelfHelp();
-	int eqWithGainCommand(std::string command, int argc, char* argv[]);
+	int eqWithGainCommand(const std::string& command, int argc, char* argv[]);
 
 	void eqAllPassHelp();
 	void eqBandPassHelp();
 	void eqLowPassHelp();
 	void eqHighPassHelp();
-	int eqPassCommand(std::string command, int argc, char* argv[]);
+	int eqPassCommand(const std::string& command, int argc, char* argv[]);
 
 	/* FX */
 	void saturateHelp();
-	int saturateCommand(std::string command, int argc, char* argv[]);
+	int saturateCommand(const std::string& command, int argc, char* argv[]);
 
 	/* Generators */
 
 	void sineWaveHelp();
-	int sineWaveCommand(std::string command, int argc, char* argv[]);
+	int sineWaveCommand(const std::string& command, int argc, char* argv[]);
 
 	void squareWaveHelp();
-	int squareWaveCommand(std::string command, int argc, char* argv[]);
+	int squareWaveCommand(const std::string& command, int argc, char* argv[]);
 
 	void squareWaveAdditiveHelp();
-	int squareWaveAdditiveCommand(std::string command, int argc, char* argv[]);
+	int squareWaveAdditiveCommand(const std::string& command, int argc, char* argv[]);
 
 	void triangleWaveHelp();
-	int triangleWaveCommand(std::string command, int argc, char* argv[]);
+	int triangleWaveCommand(const std::string& command, int argc, char* argv[]);
 
 	void triangleWaveAdditiveHelp();
-	int triangleWaveAdditiveCommand(std::string command, int argc, char* argv[]);
+	int triangleWaveAdditiveCommand(const std::string& command, int argc, char* argv[]);
 
 	void sawtoothWaveHelp();
-	int sawtoothWaveCommand(std::string command, int argc, char* argv[]);
+	int sawtoothWaveCommand(const std::string& command, int argc, char* argv[]);
 
 	void sawtoothWaveAdditiveHelp();
-	int sawtoothWaveAdditiveCommand(std::string command, int argc, char* argv[]);
+	int sawtoothWaveAdditiveCommand(const std::string& command, int argc, char* argv[]);
 
 	void whiteNoiseHelp();
-	int whiteNoiseCommand(std::string command, int argc, char* argv[]);
+	int whiteNoiseCommand(const std::string& command, int argc, char* argv[]);
 
 	void pinkNoiseHelp();
-	int pinkNoiseCommand(std::string command, int argc, char* argv[]);
+	int pinkNoiseCommand(const std::string& command, int argc, char* argv[]);
 }

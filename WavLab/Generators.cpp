@@ -18,11 +18,11 @@ void Commands::sineWaveHelp()
 	std::cout << "\t\tlength: length of the output file in milliseconds" << std::endl;
 }
 
-int Commands::sineWaveCommand(std::string command, int argc, char* argv[])
+int Commands::sineWaveCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc != 7)
     {
-        std::cout << "Incorrect number of arguments for command 'sine-wave'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string output = static_cast<std::string>(argv[2]);
@@ -66,7 +66,7 @@ void Generators::sineWave(WavFile& wave, int lengthMs, double frequency)
 {
 	std::vector<double> samples;
 	uint32_t numberOfSamples = wave.getSampleRate() * (lengthMs / 1000);
-	for (size_t i = 0; i < numberOfSamples; i++)
+	for (uint32_t i = 0; i < numberOfSamples; i++)
 	{
 		double value = sin(Constants::TAU * i * (frequency / static_cast<double>(wave.getSampleRate())));
 		for (size_t j = 0; j < wave.getNumberOfChannels(); j++)
@@ -91,11 +91,11 @@ void Commands::squareWaveHelp()
     std::cout << "\t\tlength: length of the output file in milliseconds" << std::endl;
 }
 
-int Commands::squareWaveCommand(std::string command, int argc, char* argv[])
+int Commands::squareWaveCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc != 7)
     {
-        std::cout << "Incorrect number of arguments for command 'square-wave'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string output = static_cast<std::string>(argv[2]);
@@ -173,11 +173,11 @@ void Commands::squareWaveAdditiveHelp()
     std::cout << "\t\tnumberOfHarmonics: the number of odd harmonics to use. Optional, defaults to 1000" << std::endl;
 }
 
-int Commands::squareWaveAdditiveCommand(std::string command, int argc, char* argv[])
+int Commands::squareWaveAdditiveCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc != 7 && argc != 8)
     {
-        std::cout << "Incorrect number of arguments for command 'square-wave-additive'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string output = static_cast<std::string>(argv[2]);
@@ -231,7 +231,7 @@ void Generators::squareWaveAdditive(WavFile& wave, int lengthMs, double frequenc
 {
     std::vector<double> samples;
     uint32_t numberOfSamples = wave.getSampleRate() * (lengthMs / 1000);
-    for (size_t i = 0; i < numberOfSamples; i++)
+    for (uint32_t i = 0; i < numberOfSamples; i++)
     {
         double sample = 0.0;
         for (int j = 1; j < (harmonics * 2 + 2); j = j + 2)
@@ -265,11 +265,11 @@ void Commands::triangleWaveHelp()
     std::cout << "\t\tlength: length of the output file in milliseconds" << std::endl;
 }
 
-int Commands::triangleWaveCommand(std::string command, int argc, char* argv[])
+int Commands::triangleWaveCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc != 7)
     {
-        std::cout << "Incorrect number of arguments for command 'triangle-wave'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string output = static_cast<std::string>(argv[2]);
@@ -356,11 +356,11 @@ void Commands::triangleWaveAdditiveHelp()
     std::cout << "\t\tnumberOfHarmonics: the number of odd harmonics to use. Optional, defaults to 1000" << std::endl;
 }
 
-int Commands::triangleWaveAdditiveCommand(std::string command, int argc, char* argv[])
+int Commands::triangleWaveAdditiveCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc != 7 && argc != 8)
     {
-        std::cout << "Incorrect number of arguments for command 'triangle-wave-additive'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string output = static_cast<std::string>(argv[2]);
@@ -414,7 +414,7 @@ void Generators::triangleWaveAdditive(WavFile& wave, int lengthMs, double freque
 {
     std::vector<double> samples;
     uint32_t numberOfSamples = wave.getSampleRate() * (lengthMs / 1000);
-    for (size_t i = 0; i < numberOfSamples; i++)
+    for (uint32_t i = 0; i < numberOfSamples; i++)
     {
         double sample = 0.0;
         for (int j = 1; j < (harmonics * 2 + 2); j = j + 2)
@@ -448,11 +448,11 @@ void Commands::sawtoothWaveHelp()
     std::cout << "\t\tlength: length of the output file in milliseconds" << std::endl;
 }
 
-int Commands::sawtoothWaveCommand(std::string command, int argc, char* argv[])
+int Commands::sawtoothWaveCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc != 7)
     {
-        std::cout << "Incorrect number of arguments for command 'sawtooth-wave'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string output = static_cast<std::string>(argv[2]);
@@ -532,11 +532,11 @@ void Commands::sawtoothWaveAdditiveHelp()
     std::cout << "\t\tnumberOfHarmonics: the number of harmonics to use. Optional, defaults to 1000" << std::endl;
 }
 
-int Commands::sawtoothWaveAdditiveCommand(std::string command, int argc, char* argv[])
+int Commands::sawtoothWaveAdditiveCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc != 7 && argc != 8)
     {
-        std::cout << "Incorrect number of arguments for command 'square-wave-additive'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string output = static_cast<std::string>(argv[2]);
@@ -590,7 +590,7 @@ void Generators::sawtoothWaveAdditive(WavFile& wave, int lengthMs, double freque
 {
     std::vector<double> samples;
     uint32_t numberOfSamples = wave.getSampleRate() * (lengthMs / 1000);
-    for (size_t i = 0; i < numberOfSamples; i++)
+    for (uint32_t i = 0; i < numberOfSamples; i++)
     {
         double sample = 0.0;
         for (int j = 1; j < harmonics + 1; j++)
@@ -623,11 +623,11 @@ void Commands::whiteNoiseHelp()
     std::cout << "\t\tlength: length of the output file in milliseconds" << std::endl;
 }
 
-int Commands::whiteNoiseCommand(std::string command, int argc, char* argv[])
+int Commands::whiteNoiseCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc != 6)
     {
-        std::cout << "Incorrect number of arguments for command 'white-noise'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string output = static_cast<std::string>(argv[2]);
@@ -667,7 +667,7 @@ void Generators::whiteNoise(WavFile& wave, int lengthMs)
     uint32_t numberOfSamples = wave.getSampleRate() * (lengthMs / 1000);
     for (size_t i = 0; i < numberOfSamples; i++)
     {
-        double sample = (rand() / (RAND_MAX / 2.0)) - 1.0;
+        double sample = (rand() / (RAND_MAX / 2.0)) - 1.0; // NOLINT(cert-msc50-cpp) - It's random enough for purpose
         for (size_t j = 0; j < wave.getNumberOfChannels(); j++)
         {
             samples.push_back(sample);
@@ -689,11 +689,11 @@ void Commands::pinkNoiseHelp()
     std::cout << "\t\tlength: length of the output file in milliseconds" << std::endl;
 }
 
-int Commands::pinkNoiseCommand(std::string command, int argc, char* argv[])
+int Commands::pinkNoiseCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc != 6)
     {
-        std::cout << "Incorrect number of arguments for command 'pink-noise'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string output = static_cast<std::string>(argv[2]);
@@ -738,7 +738,7 @@ void Generators::pinkNoise(WavFile& wave, int lengthMs)
     uint32_t numberOfSamples = wave.getSampleRate() * (lengthMs / 1000);
     for (size_t i = 0; i < numberOfSamples; i++)
     {
-        double white = (rand() / (RAND_MAX / 2.0)) - 1.0;
+        double white = (rand() / (RAND_MAX / 2.0)) - 1.0; // NOLINT(cert-msc50-cpp) - It's random enough for purpose
         buf0 = 0.99886f * buf0 + 0.0555179f * white;
         buf1 = 0.99332f * buf1 + 0.0750759f * white;
         buf2 = 0.96900f * buf2 + 0.1538520f * white;

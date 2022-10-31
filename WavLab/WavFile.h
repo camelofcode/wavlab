@@ -12,7 +12,7 @@ public:
 	/// </summary>
 	/// <param name="path">The path of the file to open</param>
 	/// <param name="loadSamples">Whether sample data should be loaded. This can take a while for large files, so can be set to false if only header information is required</param>
-	WavFile(std::string path, bool loadSamples);
+	WavFile(const std::string& path, bool loadSamples);
 
 	/// <summary>
 	/// Constructor for creating a new WAV file.
@@ -23,7 +23,7 @@ public:
 	WavFile(unsigned short numberOfChannels, uint32_t sampleRate, unsigned short bitsPerSample);
 	
 	///Destructor
-	~WavFile();
+	~WavFile() = default;
 
 	/// <summary>
 	/// Checks that the file is a valid WAV, exits if not.
@@ -33,7 +33,7 @@ public:
 	/// <summary>
 	/// Prints full details of the WAV file to stdout, including things only useful to developers
 	/// </summary>
-	void printDetailsDebug();
+    __attribute__((unused)) void printDetailsDebug();
 
 	/// <summary>
 	/// Prints the details of the WAV file to stdout.
@@ -44,7 +44,7 @@ public:
 	/// Writes the file to disk.
 	/// </summary>
 	/// <param name="path">The path to write the file to</param>
-	void save(std::string path);
+	void save(const std::string& path);
 
 	/// <summary>
 	/// Gets the sample data of the file
@@ -55,40 +55,40 @@ public:
 	/// <summary>
 	/// Gets the number of audio channels ie. Mono = 1, Stereo = 2
 	/// </summary>
-	uint16_t getNumberOfChannels();
+	uint16_t getNumberOfChannels() const;
 
 	/// <summary>
 	/// Gets the sample rate in Hz
 	/// </summary>
-	uint32_t getSampleRate();
+	uint32_t getSampleRate() const;
 
 	/// <summary>
 	/// Gets the bits per sample: 8/16/24/32
 	/// </summary>
-	uint16_t getBitsPerSample();
+	uint16_t getBitsPerSample() const;
 
 	/// <summary>
 	/// Sets the samples of the wav file
 	/// </summary>
-	void setSamples(std::vector<double> newSamples);
+	void setSamples(std::vector<double>& newSamples);
 
 private:
-	size_t lengthInBytes;
+	size_t lengthInBytes{};
 	
 	//File
 
 	std::string fileChunkId;
-	uint32_t fileChunkSize;
+	uint32_t fileChunkSize{};
 	std::string format;
 
 	//Format
 
 	std::string formatChunkId;
-	uint32_t formatChunkSize;
+	uint32_t formatChunkSize{};
 	uint16_t audioFormat;
 	uint16_t numberOfChannels;
 	uint32_t sampleRate;
-	uint32_t byteRate;
+	uint32_t byteRate{};
 	uint16_t blockAlign;
 	uint16_t bitsPerSample;
 
@@ -101,25 +101,25 @@ private:
 	//BWAV v0 fields
 
 	std::string bextChunkId;
-	uint32_t bextChunkSize;
-	std::string description; /* 256 bytes - ASCII : «Description of the sound sequence»*/
-	std::string originator; /* 32 Bytes - ASCII : «Name of the originator» */
-	std::string originatorReference; /* 32 Bytes - ASCII : «Reference of the originator» */
-	std::string originationDate;  /* 10 Bytes - ASCII : «yyyy:mm:dd» */
-	std::string originationTime; /* 8 Bytes - ASCII : «hh:mm:ss» */
-	uint32_t timeReferenceLow; /* First sample count since midnight, low word*/ 
-	uint32_t timeReferenceHigh; /* First sample count since midnight, high word*/ 
-	uint16_t version; /* Version of the BWF; unsigned binary number */
+	uint32_t bextChunkSize{};
+	std::string description; /* 256 bytes - ASCII : ï¿½Description of the sound sequenceï¿½*/
+	std::string originator; /* 32 Bytes - ASCII : ï¿½Name of the originatorï¿½ */
+	std::string originatorReference; /* 32 Bytes - ASCII : ï¿½Reference of the originatorï¿½ */
+	std::string originationDate;  /* 10 Bytes - ASCII : ï¿½yyyy:mm:ddï¿½ */
+	std::string originationTime; /* 8 Bytes - ASCII : ï¿½hh:mm:ssï¿½ */
+	uint32_t timeReferenceLow{}; /* First sample count since midnight, low word*/
+	uint32_t timeReferenceHigh{}; /* First sample count since midnight, high word*/
+	uint16_t version{}; /* Version of the BWF; unsigned binary number */
 
 	//Data
 
 	std::string dataChunkId;
-	uint32_t dataChunkSize;
-	std::streamoff dataChunkStart;
+	uint32_t dataChunkSize{};
+	std::streamoff dataChunkStart{};
 
 	//Samples
 
-	size_t numberOfSamples;
+	size_t numberOfSamples{};
 	std::vector<double> samples;
 };
 

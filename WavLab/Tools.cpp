@@ -14,11 +14,11 @@ void Commands::statHelp()
     std::cout << "\t\tinput: path to wave file" << std::endl;
 }
 
-int Commands::statCommand(std::string command, int argc, char* argv[])
+int Commands::statCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc != 3)
     {
-        std::cout << "Incorrect number of arguments for command 'stat'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string path = static_cast<std::string>(argv[2]);
@@ -38,11 +38,11 @@ void Commands::normaliseHelp()
     std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
 }
 
-int Commands::normaliseCommand(std::string command, int argc, char* argv[])
+int Commands::normaliseCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc != 3 && argc != 4)
     {
-        std::cout << "Incorrect number of arguments for command 'normalise'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string input = static_cast<std::string>(argv[2]);
@@ -93,11 +93,11 @@ void Commands::reverseHelp()
     std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
 }
 
-int Commands::reverseCommand(std::string command, int argc, char* argv[])
+int Commands::reverseCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc != 3 && argc != 4)
     {
-        std::cout << "Incorrect number of arguments for command 'reverse'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string input = static_cast<std::string>(argv[2]);
@@ -144,11 +144,11 @@ void Commands::flipPhaseHelp()
     std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
 }
 
-int Commands::flipPhaseCommand(std::string command, int argc, char* argv[])
+int Commands::flipPhaseCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc != 3 && argc != 4)
     {
-        std::cout << "Incorrect number of arguments for command 'flip-phase'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string input = static_cast<std::string>(argv[2]);
@@ -182,11 +182,11 @@ void Commands::swapChannelsHelp()
     std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
 }
 
-int Commands::swapChannelsCommand(std::string command, int argc, char* argv[])
+int Commands::swapChannelsCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc != 3 && argc != 4)
     {
-        std::cout << "Incorrect number of arguments for command 'swap-channels'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string input = static_cast<std::string>(argv[2]);
@@ -231,11 +231,11 @@ void Commands::splitStereoHelp()
     std::cout << "\t\tinput: path to wave file" << std::endl;
 }
 
-int Commands::splitStereoCommand(std::string command, int argc, char* argv[])
+int Commands::splitStereoCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc != 3)
     {
-        std::cout << "Incorrect number of arguments for command 'split-stereo'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string input = static_cast<std::string>(argv[2]);
@@ -290,11 +290,11 @@ void Commands::combineLeftRightHelp()
     std::cout << "\t\toutput: path to combined output file" << std::endl;
 }
 
-int Commands::combineLeftRightCommand(std::string command, int argc, char* argv[])
+int Commands::combineLeftRightCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc != 5)
     {
-        std::cout << "Incorrect number of arguments for command 'left-right-to-stereo'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string leftInput = static_cast<std::string>(argv[2]);
@@ -365,11 +365,11 @@ void Commands::splitStereoMidSideHelp()
     std::cout << "\t\tinput: path to wave file" << std::endl;
 }
 
-int Commands::splitStereoMidSideCommand(std::string command, int argc, char* argv[])
+int Commands::splitStereoMidSideCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc != 3)
     {
-        std::cout << "Incorrect number of arguments for command 'split-mid-side'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string input = static_cast<std::string>(argv[2]);
@@ -426,11 +426,11 @@ void Commands::combineMidSideHelp()
     std::cout << "\t\toutput: path to combined output file" << std::endl;
 }
 
-int Commands::combineMidSideCommand(std::string command, int argc, char* argv[])
+int Commands::combineMidSideCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc != 5)
     {
-        std::cout << "Incorrect number of arguments for command 'mid-side-to-stereo'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string midInput = static_cast<std::string>(argv[2]);
@@ -505,11 +505,11 @@ void Commands::gainHelp()
     std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
 }
 
-int Commands::gainCommand(std::string command, int argc, char* argv[])
+int Commands::gainCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc != 4 && argc != 5)
     {
-        std::cout << "Incorrect number of arguments for command 'gain'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string input = static_cast<std::string>(argv[2]);
@@ -553,11 +553,11 @@ void Commands::gainDbHelp()
     std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
 }
 
-int Commands::gainDbCommand(std::string command, int argc, char* argv[])
+int Commands::gainDbCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc != 4 && argc != 5)
     {
-        std::cout << "Incorrect number of arguments for command 'gain-db'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string input = static_cast<std::string>(argv[2]);
@@ -592,11 +592,11 @@ void Commands::getPeakDbHelp()
     std::cout << "\t\tinput: path to wave file" << std::endl;
 }
 
-int Commands::getPeakDbCommand(std::string command, int argc, char* argv[])
+int Commands::getPeakDbCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc != 3)
     {
-        std::cout << "Incorrect number of arguments for command 'get-peak-db'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string input = static_cast<std::string>(argv[2]);
@@ -632,11 +632,11 @@ void Commands::getRMSDbHelp()
     std::cout << "\t\tinput: path to wave file" << std::endl;
 }
 
-int Commands::getRMSDbCommand(std::string command, int argc, char* argv[])
+int Commands::getRMSDbCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc != 3)
     {
-        std::cout << "Incorrect number of arguments for command 'get-rms-db'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string input = static_cast<std::string>(argv[2]);
@@ -656,7 +656,7 @@ double Tools::getRMSDecibels(WavFile& wave)
         sumOfSquares += pow(sample, 2.0);
     }
 
-    double mean = sumOfSquares / samples.size();
+    double mean = sumOfSquares / static_cast<double>(samples.size());
     double rms = sqrt(mean);
 
     return 20.0 * log10(rms);
@@ -666,17 +666,17 @@ double Tools::getRMSDecibels(WavFile& wave)
 void Commands::mixHelp()
 {
     std::cout << "mix <output> <input...>" << std::endl;
-    std::cout << "\tdescription: mixes multiple wave files into one. Will attenuate and renormalise to ensure lack of clipping. Currently will start all files at zero." << std::endl;
+    std::cout << "\tdescription: mixes multiple wave files into one. Will attenuate and re-normalise to ensure lack of clipping. Currently will start all files at zero." << std::endl;
     std::cout << "\tparameters:" << std::endl;
     std::cout << "\t\toutput: path to mixed wave file" << std::endl;
     std::cout << "\t\tinput: arbitrary number of input files (minimum 2)" << std::endl;
 }
 
-int Commands::mixCommand(std::string command, int argc, char* argv[])
+int Commands::mixCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc < 5)
     {
-        std::cout << "Incorrect number of arguments for command 'mix'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string output = static_cast<std::string>(argv[2]);
@@ -793,11 +793,11 @@ void Commands::splitHelp()
     std::cout << "\t\tsplitTimeMs: arbitrary number of split times in milliseconds" << std::endl;
 }
 
-int Commands::splitCommand(std::string command, int argc, char* argv[])
+int Commands::splitCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc < 4)
     {
-        std::cout << "Incorrect number of arguments for command 'split'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string input = static_cast<std::string>(argv[2]);
@@ -837,19 +837,19 @@ int Commands::splitCommand(std::string command, int argc, char* argv[])
     return 0;
 }
 
-void Tools::split(WavFile& input, std::vector<WavFile>& outputs, std::vector<uint32_t> splitTimesMs)
+void Tools::split(WavFile& input, std::vector<WavFile>& outputs, const std::vector<uint32_t>& splitTimesMs)
 {
-    std::vector<int32_t> splitSamplePositions;
+    std::vector<uint32_t> splitSamplePositions;
     uint32_t sampleRateMultiplier = input.getSampleRate() / 1000;
 
-    for (uint32_t& ms : splitTimesMs)
+    for (const uint32_t& ms : splitTimesMs)
     {
         splitSamplePositions.push_back(ms * sampleRateMultiplier * input.getNumberOfChannels());
     }
 
     unsigned int splitPosition = 0;
     uint32_t nextSplit = splitSamplePositions[splitPosition];
-    std::vector<double>* currentSamples = new std::vector<double>();
+    auto currentSamples = new std::vector<double>();
 
     auto originalSamples = input.getSamples();
 
@@ -902,11 +902,11 @@ void Commands::joinHelp()
     std::cout << "\t\tinput: arbitrary number of input files (minimum 2)" << std::endl;
 }
 
-int Commands::joinCommand(std::string command, int argc, char* argv[])
+int Commands::joinCommand(const std::string&command, int argc, char* argv[])
 {
     if (argc < 5)
     {
-        std::cout << "Incorrect number of arguments for command 'join'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string output = static_cast<std::string>(argv[2]);

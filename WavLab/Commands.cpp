@@ -44,7 +44,7 @@ CommandsContainer::CommandsContainer()
 	registerCommand("pink-noise", &Commands::pinkNoiseHelp, &Commands::pinkNoiseCommand);
 };
 
-void CommandsContainer::registerCommand(std::string command, std::function<void()> help, std::function<int(std::string command, int argc, char* argv[])> action)
+void CommandsContainer::registerCommand(const std::string& command, const std::function<void()>& help, const std::function<int(const std::string& command, int argc, char* argv[])>& action)
 {
 	helpMap.insert({ command, help });
 	commandMap.insert({ command, action });
@@ -59,7 +59,7 @@ void CommandsContainer::showAllHelp()
 	}
 }
 
-void CommandsContainer::help(std::string command)
+void CommandsContainer::help(const std::string& command)
 {
 	auto item = helpMap.find(command);
 	if (item == helpMap.end())
@@ -73,7 +73,7 @@ void CommandsContainer::help(std::string command)
 	}
 }
 
-int CommandsContainer::command(std::string command, int argc, char* argv[])
+int CommandsContainer::command(const std::string& command, int argc, char* argv[])
 {
 	auto item = commandMap.find(command);
 	if (item == commandMap.end())
@@ -85,4 +85,9 @@ int CommandsContainer::command(std::string command, int argc, char* argv[])
 	{
 		return item->second(command, argc, argv);
 	}
+}
+
+void Commands::printIncorrectArgumentsWarning(const std::string& command)
+{
+    std::cout << "Incorrect number of arguments for command '" << command << "'. To see available commands run 'wavlab help'" << std::endl;
 }

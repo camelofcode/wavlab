@@ -1,7 +1,7 @@
 #include <vector>
 #include "BinaryHelpers.h"
 
-std::string BinaryHelpers::readString(std::ifstream& file, int length)
+std::string BinaryHelpers::readString(std::ifstream& file, int16_t length)
 {
 	std::vector<char> buffer;
 	buffer.resize(length);
@@ -27,7 +27,7 @@ short BinaryHelpers::readInt16(std::ifstream& file)
 			char b0;
 			char b1;
 		} b;
-	} conversionUnion;
+	} conversionUnion{};
 
 	file.read((char*)&conversionUnion.b.b0, 1);
 	file.read((char*)&conversionUnion.b.b1, 1);
@@ -42,10 +42,9 @@ int32_t BinaryHelpers::readInt24(std::ifstream& file)
 	file.read((char*)&b1, 1);
 	file.read((char*)&b2, 1);
 
-	int32_t sampleAsInt = 0;
-	sampleAsInt = ((b2 & 0xFF) << 16) | ((b1 & 0xFF) << 8) | (b0 & 0xFF);
+    int32_t sampleAsInt = ((b2 & 0xFF) << 16) | ((b1 & 0xFF) << 8) | (b0 & 0xFF);
 
-	//Convert sign of 24 bit number to sign of 32 bit number;
+	//Convert sign of 24-bit number to sign of 32-bit number;
 	if (sampleAsInt & 0x800000)
 	{
 		sampleAsInt = sampleAsInt | ~0xFFFFFF;
@@ -66,7 +65,7 @@ int32_t BinaryHelpers::readInt32(std::ifstream& file)
 			char b2;
 			char b3;
 		} b;
-	} conversionUnion;
+	} conversionUnion{};
 
 	file.read((char*)&conversionUnion.b.b0, 1);
 	file.read((char*)&conversionUnion.b.b1, 1);
@@ -76,22 +75,22 @@ int32_t BinaryHelpers::readInt32(std::ifstream& file)
 	return conversionUnion.i;
 }
 
-void BinaryHelpers::writeString(std::ofstream& file, std::string value)
+void BinaryHelpers::writeString(std::ofstream& file, const std::string& value)
 {
-	file.write(value.c_str(), value.size());
+	file.write(value.c_str(), value.size()); // NOLINT(cppcoreguidelines-narrowing-conversions)
 }
 
-void BinaryHelpers::writeString(std::ofstream& file, std::string value, size_t size)
+void BinaryHelpers::writeString(std::ofstream& file, const std::string& value, size_t size)
 {
-	file.write(value.c_str(), size);
+	file.write(value.c_str(), size); // NOLINT(cppcoreguidelines-narrowing-conversions)
 }
 
-void BinaryHelpers::writeInt8(std::ofstream& file, char value)
+void BinaryHelpers::writeInt8(std::ofstream& file, int8_t value)
 {
-	file.write(&value, 1);
+	file.write((char*)&value, 1);
 }
 
-void BinaryHelpers::writeInt16(std::ofstream& file, short value)
+void BinaryHelpers::writeInt16(std::ofstream& file, int16_t value)
 {
 	file.write((char*)&value, 2);
 }

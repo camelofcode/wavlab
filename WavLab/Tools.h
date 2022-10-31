@@ -28,7 +28,7 @@ namespace Tools
 	void swapChannels(WavFile& wave);
 
 	/// <summary>
-	/// Splits a stero wav into left and right mono files
+	/// Splits a stereo wav into left and right mono files
 	/// </summary>
 	/// <param name="stereo">The wave file to split</param>
 	/// <param name="left">The wave file to write left channel to</param>
@@ -36,7 +36,7 @@ namespace Tools
 	void splitStereo(WavFile& stereo, WavFile& left, WavFile& right);
 
 	/// <summary>
-	/// Splits a stero wav into left and right mono files
+	/// Splits a stereo wav into left and right mono files
 	/// </summary>
 	/// <param name="left">The left channel wave file</param>
 	/// <param name="right">The right channel wave file</param>
@@ -44,7 +44,7 @@ namespace Tools
 	void combineLeftRight(WavFile& left, WavFile& right, WavFile& out);
 
 	/// <summary>
-	/// Splits a stero wav into mid and side mono files
+	/// Splits a stereo wav into mid and side mono files
 	/// </summary>
 	/// <param name="wave">The wave file to split</param>
 	/// <param name="mid">The wave file to write mid channel to</param>
@@ -84,7 +84,7 @@ namespace Tools
 	double getRMSDecibels(WavFile& wave);
 
 	/// <summary>
-	/// Mixes an arbitrary number of wave files to a single wave file. Will attenuate and renormalise to ensure lack of clipping. Currently will start all files at zero. In future could use BWAV chunk to determine position
+	/// Mixes an arbitrary number of wave files to a single wave file. Will attenuate and re-normalise to ensure lack of clipping. Currently will start all files at zero. In future could use BWAV chunk to determine position
 	/// </summary>
 	/// <param name="inputs">The wave files to mix</param>
 	/// <param name="output">The output wave</param>
@@ -96,7 +96,7 @@ namespace Tools
 	/// <param name="input">The wave file to split</param>
 	/// <param name="outputs">The separate output wave files</param>
 	/// <param name="splitTimesMs">The times to split at in milliseconds</param>
-	void split(WavFile& input, std::vector<WavFile>& outputs, std::vector<uint32_t> splitTimesMs);
+	void split(WavFile& input, std::vector<WavFile>& outputs, const std::vector<uint32_t>& splitTimesMs);
 
 	/// <summary>
 	/// Joins an arbitrary number of wave files to a single wave file.

@@ -9,4 +9,4 @@ namespace FX
 	/// <param name="wave">The wave file to apply saturation to</param>
 	/// <param name="drive">The gain multiplier to apply</param>
 	void saturate(WavFile& wave, double drive);
-};
+}

@@ -1,4 +1,3 @@
-#define _USE_MATH_DEFINES
 #include "FX.h"
 #include "Commands.h"
 #include <cmath>
@@ -14,11 +13,11 @@ void Commands::saturateHelp()
     std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
 }
 
-int Commands::saturateCommand(std::string command, int argc, char* argv[])
+int Commands::saturateCommand(const std::string& command, int argc, char* argv[])
 {
     if (argc != 4 && argc != 5)
     {
-        std::cout << "Incorrect number of arguments for command 'saturate'. To see available commands run 'wavlab help'" << std::endl;
+        Commands::printIncorrectArgumentsWarning(command);
         return 1;
     }
     std::string input = static_cast<std::string>(argv[2]);

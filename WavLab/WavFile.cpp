@@ -6,7 +6,7 @@
 #include "ConversionHelpers.h"
 #include "WavFile.h"
 
-WavFile::WavFile(std::string path, bool loadSamples)
+WavFile::WavFile(const std::string& path, bool loadSamples)
 {
 	std::ifstream infile;
 	infile.open(path, std::ofstream::binary);
@@ -71,7 +71,7 @@ WavFile::WavFile(std::string path, bool loadSamples)
 		if (nextChunk == "bext")
 		{
 			//Unsurprisingly some geniuses think it makes sense to put BWAV ***HEADER*** info as a footer. 
-			//Also unsurprisingly those fine folks at AVID seem to think this is a great idea. So I'm supporting it I guess. Jeeeeez.
+			//Also, unsurprisingly those fine folks at AVID seem to think this is a great idea. So I'm supporting it I guess.
 			isBroadcastWav = true;
 			readBextFields(infile, true);
 		}
@@ -108,28 +108,28 @@ WavFile::WavFile(std::string path, bool loadSamples)
 		{
 			for (size_t i = 0; i < numberOfSamples; i++)
 			{
-				samples[i] = ConversionHelpers::twentyfourBitToDouble(BinaryHelpers::readInt24(infile));
+				samples[i] = ConversionHelpers::twentyFourBitToDouble(BinaryHelpers::readInt24(infile));
 			}
 		}
 		else if (bitsPerSample == 32)
 		{
 			for (size_t i = 0; i < numberOfSamples; i++)
 			{
-				samples[i] = ConversionHelpers::thirtytwoBitToDouble(BinaryHelpers::readInt32(infile));
+				samples[i] = ConversionHelpers::thirtyTwoBitToDouble(BinaryHelpers::readInt32(infile));
 			}
 		}
 	}
 }
 
 WavFile::WavFile(unsigned short numberOfChannels, uint32_t sampleRate, unsigned short bitsPerSample) : 
-	numberOfChannels(numberOfChannels),
-	sampleRate(sampleRate),
-	bitsPerSample(bitsPerSample),
 	fileChunkId("RIFF"),
 	format("WAVE"),
 	formatChunkId("fmt "),
-	dataChunkId("data"),
-	audioFormat(1)
+	audioFormat(1),
+	numberOfChannels(numberOfChannels),
+	sampleRate(sampleRate),
+	bitsPerSample(bitsPerSample),
+	dataChunkId("data")
 {
 	setDefaultBextFields();
 
@@ -191,7 +191,7 @@ void WavFile::validate()
 	}
 }
 
-void WavFile::printDetailsDebug()
+__attribute__((unused)) void WavFile::printDetailsDebug()
 {
 	std::cout << "lengthInBytes: " << lengthInBytes << std::endl;
 
@@ -247,12 +247,12 @@ void WavFile::printDetails()
 	}
 }
 
-void WavFile::save(std::string path)
+void WavFile::save(const std::string& path)
 {
 	//Set chunk sizes. I *think* this is correct.
-	formatChunkSize = 16; //Could calculate this doing sizeof but I already did that manually so why bother, it's always the same!
+	formatChunkSize = 16; //Could calculate this doing sizeof, but I already did that manually so why bother, it's always the same!
 	dataChunkSize = static_cast<uint32_t>(samples.size() * blockAlign);
-	bextChunkSize = isBroadcastWav ? 602 : 0; //Could calculate this doing sizeof but I already did that manually so why bother, it's always the same!
+	bextChunkSize = isBroadcastWav ? 602 : 0; //Could calculate this doing sizeof, but I already did that manually so why bother, it's always the same!
 	fileChunkSize = formatChunkSize
 		+ 4 //format chunk id - should be counted?
 		+ 4 //data chunk id - should be counted?
@@ -354,23 +354,23 @@ std::vector<double> WavFile::getSamples()
 	return samples;
 }
 
-uint16_t WavFile::getNumberOfChannels()
+uint16_t WavFile::getNumberOfChannels() const
 {
 	return numberOfChannels;
 }
 
-uint32_t WavFile::getSampleRate()
+uint32_t WavFile::getSampleRate() const
 {
 	return sampleRate;
 }
 
-uint16_t WavFile::getBitsPerSample()
+uint16_t WavFile::getBitsPerSample() const
 {
 	return bitsPerSample;
 }
 
 //Setters
-void WavFile::setSamples(std::vector<double> newSamples)
+void WavFile::setSamples(std::vector<double>& newSamples)
 {
 	samples = newSamples;
 	numberOfSamples = samples.size();
@@ -402,7 +402,7 @@ void WavFile::readBextFields(std::ifstream& file, bool isFooter)
 
 	if (isFooter)
 	{
-		//Might be a JUNK Chunk but we are pretty much done caring at this point.
+		//Might be a JUNK Chunk, but we are pretty much done caring at this point.
 	}
 	else 
 	{
@@ -424,10 +424,4 @@ void WavFile::setDefaultBextFields()
 	timeReferenceLow = 0;
 	timeReferenceHigh = 0;
 	version = 0;
-}
-
-//Destructor
-WavFile::~WavFile()
-{
-	//TODO: Implement destructor
 }

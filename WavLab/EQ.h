@@ -16,12 +16,12 @@ enum class FilterType
 namespace EQ
 {
 	void process(WavFile& wave, FilterType type, double gainDecibels, double centreFrequency, double q);
-};
+}
 
 class EQInstance
 {
 public:
-	EQInstance(FilterType type, double gainDecibels, double centreFrequency, double q, int sampleRate);
+	EQInstance(FilterType type, double gainDecibels, double centreFrequency, double q, uint32_t sampleRate);
 
 	double processSample(double in);
 

@@ -16,4 +16,4 @@ bool tryParse(std::string input, T& var)
 	std::stringstream buffer(input);
 
 	return buffer >> var && buffer.eof();
-};
+}
