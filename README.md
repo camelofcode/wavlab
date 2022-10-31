@@ -1,11 +1,11 @@
 # wavlab #
 wavlab is a command line utility for processing wave format audio files written in C++.
-It has been made to re-familiarise myself with C++ after over a decade without using it. At the moment it is probably very production unready.
+It has been made to re-familiarise myself with C++ after over a decade without using it.
 
 It currently supports PCM wave files, with or without bext/broadcast wave extensions at 8, 16, 24 and 32 bit depths.
 
-Currently using C++14 and up and currently compiles in Visual Studio 2022 (tested - other C++14 compatible VS probably work). CMake version coming soon.
-Only compiled and tested on windows so far but the aim from the start has been cross platform.
+Uses C++14 and has been confirmed to compile in Visual Studio 2022 and CLion.
+Only compiled and tested on Windows so far but will be doing Linux soon.
 
 ## Features
 * Supports standard format PCM Wave files at all sample rates and 8, 16, 24 and 32 bit resolutions
