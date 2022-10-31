@@ -3,9 +3,9 @@ wavlab is a command line utility for processing wave format audio files written 
 
 It has been made to re-familiarise myself with C++ after over a decade without using it, as such I'm sure I've reinvented the wheel several times, but I've learnt a lot. 🙂 
 
-It currently supports PCM wave files, with or without bext/broadcast wave extensions at 8, 16, 24 and 32 bit depths.
+It currently supports PCM wave files, with or without bext/broadcast wave extensions (v0 only currently) at 8, 16, 24 and 32 bit depths.
 
-Uses C++14 and has compiles in Visual Studio 2022 and CLion (with CMake).
+Uses C++14 and compiles in Visual Studio 2022 and CLion (with CMake).
 It has been tested on Windows 10 and 11, as well as Ubuntu 20.04. Next step is to find a Mac owning friend to give it a bash...
 
 ## Features
@@ -281,7 +281,7 @@ white-noise <output> <sampleRate> <bitDepth> <length>
 ```
 
 ## Upcoming features
-* Mac and Linux support
+* Test Mac support
 * Delay, reverb, chorus, phaser, flanger and many more FX
 * Sample rate and bit rate (with dithering) conversion
 * Fades and ADSR
