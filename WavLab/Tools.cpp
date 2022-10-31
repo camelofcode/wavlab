@@ -267,11 +267,11 @@ void Tools::splitStereo(WavFile& stereo, WavFile& left, WavFile& right)
 
     for (size_t i = 0; i < original.size() - 1; i = i + 2)
     {
-        double left = original[i];
-        double right = original[i + 1];
+        double leftSample = original[i];
+        double rightSample = original[i + 1];
 
-        leftSamples.push_back(left);
-        rightSamples.push_back(right);
+        leftSamples.push_back(leftSample);
+        rightSamples.push_back(rightSample);
     }
 
     left.setSamples(leftSamples);
@@ -345,11 +345,11 @@ void Tools::combineLeftRight(WavFile& left, WavFile& right, WavFile& out)
 
     for (size_t i = 0; i < maxNumberOfSamples - 1; i = i++)
     {
-        double left = i < leftSamples.size() - 1 ? leftSamples[i] : 0.0;
-        double right = i < rightSamples.size() - 1 ? rightSamples[i] : 0.0;
+        double leftSample = i < leftSamples.size() - 1 ? leftSamples[i] : 0.0;
+        double rightSample = i < rightSamples.size() - 1 ? rightSamples[i] : 0.0;
 
-        stereoSamples.push_back(left);
-        stereoSamples.push_back(right);
+        stereoSamples.push_back(leftSample);
+        stereoSamples.push_back(rightSample);
     }
 
     out.setSamples(stereoSamples);
@@ -483,11 +483,11 @@ void Tools::combineMidSide(WavFile& mid, WavFile& side, WavFile& out)
 
     for (size_t i = 0; i < maxNumberOfSamples - 1; i = i++)
     {
-        double mid = i < midSamples.size() - 1 ? midSamples[i] : 0.0;
-        double side = i < sideSamples.size() - 1 ? sideSamples[i] : 0.0;
+        double midSample = i < midSamples.size() - 1 ? midSamples[i] : 0.0;
+        double sideSample = i < sideSamples.size() - 1 ? sideSamples[i] : 0.0;
 
-        stereoSamples.push_back((mid + side) * Constants::MINUS_THREE_DB);
-        stereoSamples.push_back((mid - side) * Constants::MINUS_THREE_DB);
+        stereoSamples.push_back((midSample + sideSample) * Constants::MINUS_THREE_DB);
+        stereoSamples.push_back((midSample - sideSample) * Constants::MINUS_THREE_DB);
     }
 
     out.setSamples(stereoSamples);
@@ -840,7 +840,7 @@ int Commands::splitCommand(std::string command, int argc, char* argv[])
 void Tools::split(WavFile& input, std::vector<WavFile>& outputs, std::vector<uint32_t> splitTimesMs)
 {
     std::vector<int32_t> splitSamplePositions;
-    uint16_t sampleRateMultiplier = input.getSampleRate() / 1000;
+    uint32_t sampleRateMultiplier = input.getSampleRate() / 1000;
 
     for (uint32_t& ms : splitTimesMs)
     {

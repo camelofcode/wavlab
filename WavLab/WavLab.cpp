@@ -37,7 +37,4 @@ int main(int argc, char* argv[])
     {
         return commands.command(command, argc, argv);
     }
-
-    std::cout << "Unrecognised command specified. To see available commands run 'wavlab help'" << std::endl;
-    return 1;
 }

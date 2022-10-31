@@ -69,7 +69,7 @@ void Generators::sineWave(WavFile& wave, int lengthMs, double frequency)
 	for (size_t i = 0; i < numberOfSamples; i++)
 	{
 		double value = sin(Constants::TAU * i * (frequency / static_cast<double>(wave.getSampleRate())));
-		for (size_t i = 0; i < wave.getNumberOfChannels(); i++)
+		for (size_t j = 0; j < wave.getNumberOfChannels(); j++)
 		{
 			samples.push_back(value);
 		}

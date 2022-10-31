@@ -63,11 +63,11 @@ WavFile::WavFile(std::string path, bool loadSamples)
 		dataChunkStart = infile.tellg();
 	}
 
-	if ((dataChunkStart + dataChunkSize) != lengthInBytes)
+	if ((dataChunkStart + dataChunkSize) != static_cast<int64_t>(lengthInBytes))
 	{
 		//There is a footer...
 		infile.seekg(dataChunkStart + dataChunkSize + 1);
-		auto nextChunk = BinaryHelpers::readString(infile, 4);
+		nextChunk = BinaryHelpers::readString(infile, 4);
 		if (nextChunk == "bext")
 		{
 			//Unsurprisingly some geniuses think it makes sense to put BWAV ***HEADER*** info as a footer. 
@@ -109,7 +109,6 @@ WavFile::WavFile(std::string path, bool loadSamples)
 			for (size_t i = 0; i < numberOfSamples; i++)
 			{
 				samples[i] = ConversionHelpers::twentyfourBitToDouble(BinaryHelpers::readInt24(infile));
-				int x = 1;
 			}
 		}
 		else if (bitsPerSample == 32)
@@ -355,17 +354,17 @@ std::vector<double> WavFile::getSamples()
 	return samples;
 }
 
-unsigned short WavFile::getNumberOfChannels()
+uint16_t WavFile::getNumberOfChannels()
 {
 	return numberOfChannels;
 }
 
-uint16_t WavFile::getSampleRate()
+uint32_t WavFile::getSampleRate()
 {
 	return sampleRate;
 }
 
-unsigned short WavFile::getBitsPerSample()
+uint16_t WavFile::getBitsPerSample()
 {
 	return bitsPerSample;
 }
@@ -374,7 +373,7 @@ unsigned short WavFile::getBitsPerSample()
 void WavFile::setSamples(std::vector<double> newSamples)
 {
 	samples = newSamples;
-	numberOfSamples = static_cast<int>(samples.size());
+	numberOfSamples = samples.size();
 }
 
 //Private functions

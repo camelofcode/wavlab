@@ -55,17 +55,17 @@ public:
 	/// <summary>
 	/// Gets the number of audio channels ie. Mono = 1, Stereo = 2
 	/// </summary>
-	unsigned short getNumberOfChannels();
+	uint16_t getNumberOfChannels();
 
 	/// <summary>
 	/// Gets the sample rate in Hz
 	/// </summary>
-	uint16_t getSampleRate();
+	uint32_t getSampleRate();
 
 	/// <summary>
 	/// Gets the bits per sample: 8/16/24/32
 	/// </summary>
-	unsigned short getBitsPerSample();
+	uint16_t getBitsPerSample();
 
 	/// <summary>
 	/// Sets the samples of the wav file
@@ -85,12 +85,12 @@ private:
 
 	std::string formatChunkId;
 	uint32_t formatChunkSize;
-	unsigned short audioFormat;
-	unsigned short numberOfChannels;
+	uint16_t audioFormat;
+	uint16_t numberOfChannels;
 	uint32_t sampleRate;
 	uint32_t byteRate;
-	unsigned short blockAlign;
-	unsigned short bitsPerSample;
+	uint16_t blockAlign;
+	uint16_t bitsPerSample;
 
 	//BWAV Chunks - https://tech.ebu.ch/docs/tech/tech3285.pdf
 
@@ -109,7 +109,7 @@ private:
 	std::string originationTime; /* 8 Bytes - ASCII : «hh:mm:ss» */
 	uint32_t timeReferenceLow; /* First sample count since midnight, low word*/ 
 	uint32_t timeReferenceHigh; /* First sample count since midnight, high word*/ 
-	unsigned short version; /* Version of the BWF; unsigned binary number */
+	uint16_t version; /* Version of the BWF; unsigned binary number */
 
 	//Data
 
@@ -119,7 +119,7 @@ private:
 
 	//Samples
 
-	int numberOfSamples;
+	size_t numberOfSamples;
 	std::vector<double> samples;
 };
 
