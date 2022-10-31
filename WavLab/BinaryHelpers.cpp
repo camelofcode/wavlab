@@ -10,14 +10,14 @@ std::string BinaryHelpers::readString(std::ifstream& file, int16_t length)
 	return header;
 }
 
-char BinaryHelpers::readInt8(std::ifstream& file)
+int8_t BinaryHelpers::readInt8(std::ifstream& file)
 {
 	char b0;
 	file.read((char*)&b0, 1);
 	return b0;
 }
 
-short BinaryHelpers::readInt16(std::ifstream& file)
+int16_t BinaryHelpers::readInt16(std::ifstream& file)
 {
 	union uni
 	{

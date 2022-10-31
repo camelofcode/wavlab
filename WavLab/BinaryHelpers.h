@@ -5,8 +5,8 @@
 namespace BinaryHelpers
 {
 	std::string readString(std::ifstream& file, int16_t length);
-	char readInt8(std::ifstream& file);
-	short readInt16(std::ifstream& file);
+    int8_t readInt8(std::ifstream& file);
+    int16_t readInt16(std::ifstream& file);
 	int32_t readInt24(std::ifstream& file);
 	int32_t readInt32(std::ifstream& file);
 
