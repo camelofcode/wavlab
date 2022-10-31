@@ -2,6 +2,7 @@
 #include "Commands.h"
 #include "Constants.h"
 #include "Tools.h"
+#include <cmath>
 
 /* sine-wave command */
 

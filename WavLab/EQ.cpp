@@ -5,6 +5,7 @@
 #include "EQ.h"
 #include "Commands.h"
 #include "Constants.h"
+#include <cmath>
 
 EQInstance::EQInstance(FilterType type, double gainDecibels, double centreFrequency, double q, int sampleRate)
 {

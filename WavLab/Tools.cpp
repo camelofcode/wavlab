@@ -2,6 +2,7 @@
 #include <algorithm>
 #include "Commands.h"
 #include "Constants.h"
+#include <cmath>
 
 /* stat command */
 
