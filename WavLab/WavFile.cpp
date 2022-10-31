@@ -191,7 +191,7 @@ void WavFile::validate()
 	}
 }
 
-__attribute__((unused)) void WavFile::printDetailsDebug()
+void WavFile::printDetailsDebug()
 {
 	std::cout << "lengthInBytes: " << lengthInBytes << std::endl;
 

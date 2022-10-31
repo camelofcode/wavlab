@@ -1,5 +1,6 @@
 #include "FX.h"
 #include "Commands.h"
+#include "Constants.h";
 #include <cmath>
 
 /* saturate command */
@@ -48,7 +49,7 @@ void FX::saturate(WavFile& wave, double drive)
     for (auto& sample : wave.getSamples())
     {
         double preSaturation = sample * gainFactor;
-        double saturated = 2 / (1 + (pow(M_E, (-5.0 * preSaturation)))) - 1;
+        double saturated = 2 / (1 + (pow(Constants::E, (-5.0 * preSaturation)))) - 1;
         newSamples.push_back(saturated);
     }
     wave.setSamples(newSamples);

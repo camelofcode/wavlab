@@ -33,7 +33,7 @@ public:
 	/// <summary>
 	/// Prints full details of the WAV file to stdout, including things only useful to developers
 	/// </summary>
-    __attribute__((unused)) void printDetailsDebug();
+    void printDetailsDebug();
 
 	/// <summary>
 	/// Prints the details of the WAV file to stdout.
