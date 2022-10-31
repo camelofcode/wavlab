@@ -343,7 +343,7 @@ void Tools::combineLeftRight(WavFile& left, WavFile& right, WavFile& out)
     auto allNumberOfSamples = std::vector<size_t>({ leftSamples.size(), rightSamples.size()});
     size_t maxNumberOfSamples = *std::max_element(allNumberOfSamples.begin(), allNumberOfSamples.end());
 
-    for (size_t i = 0; i < maxNumberOfSamples - 1; i = i++)
+    for (size_t i = 0; i < maxNumberOfSamples - 1; i++)
     {
         double leftSample = i < leftSamples.size() - 1 ? leftSamples[i] : 0.0;
         double rightSample = i < rightSamples.size() - 1 ? rightSamples[i] : 0.0;
@@ -481,7 +481,7 @@ void Tools::combineMidSide(WavFile& mid, WavFile& side, WavFile& out)
     auto allNumberOfSamples = std::vector<size_t>({ midSamples.size(), sideSamples.size() });
     size_t maxNumberOfSamples = *std::max_element(allNumberOfSamples.begin(), allNumberOfSamples.end());
 
-    for (size_t i = 0; i < maxNumberOfSamples - 1; i = i++)
+    for (size_t i = 0; i < maxNumberOfSamples - 1; i++)
     {
         double midSample = i < midSamples.size() - 1 ? midSamples[i] : 0.0;
         double sideSample = i < sideSamples.size() - 1 ? sideSamples[i] : 0.0;
@@ -749,7 +749,7 @@ void Tools::mix(std::vector<WavFile>& inputs, WavFile& output)
 
     if (output.getNumberOfChannels() == 1)
     {
-        for (int i = 0; i < maxSamples; i++)
+        for (size_t i = 0; i < maxSamples; i++)
         {
             double addedSamples = 0.0;
             for (auto& samples : allSamples)
@@ -847,8 +847,8 @@ void Tools::split(WavFile& input, std::vector<WavFile>& outputs, std::vector<uin
         splitSamplePositions.push_back(ms * sampleRateMultiplier * input.getNumberOfChannels());
     }
 
-    int splitPosition = 0;
-    int32_t nextSplit = splitSamplePositions[splitPosition];
+    unsigned int splitPosition = 0;
+    uint32_t nextSplit = splitSamplePositions[splitPosition];
     std::vector<double>* currentSamples = new std::vector<double>();
 
     auto originalSamples = input.getSamples();

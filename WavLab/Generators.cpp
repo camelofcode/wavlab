@@ -234,14 +234,14 @@ void Generators::squareWaveAdditive(WavFile& wave, int lengthMs, double frequenc
     for (size_t i = 0; i < numberOfSamples; i++)
     {
         double sample = 0.0;
-        for (size_t j = 1; j < (harmonics * 2 + 2); j = j + 2)
+        for (int j = 1; j < (harmonics * 2 + 2); j = j + 2)
         {
             double harmonicFrequency = frequency * j;
             double harmonicAmplitude = 1.0 / j;
             sample += sin(Constants::TAU * i * (harmonicFrequency / static_cast<double>(wave.getSampleRate()))) * harmonicAmplitude;
 
         }
-        for (size_t k = 0; k < wave.getNumberOfChannels(); k++)
+        for (uint16_t k = 0; k < wave.getNumberOfChannels(); k++)
         {
             samples.push_back(sample);
         }
@@ -325,7 +325,13 @@ void Generators::triangleWave(WavFile& wave, int lengthMs, double frequency)
             samples.push_back(sample);
         }
 
-        sample = positive ? sample += increment : sample -= increment;
+        if(positive)
+        {
+            sample += increment;
+        } else
+        {
+            sample -= increment;
+        }
 
         if (fabs(sample) >= 1.0) 
         {
@@ -411,14 +417,14 @@ void Generators::triangleWaveAdditive(WavFile& wave, int lengthMs, double freque
     for (size_t i = 0; i < numberOfSamples; i++)
     {
         double sample = 0.0;
-        for (size_t j = 1; j < (harmonics * 2 + 2); j = j + 2)
+        for (int j = 1; j < (harmonics * 2 + 2); j = j + 2)
         {
             double harmonicFrequency = frequency * j;
             double harmonicAmplitude = 1.0 / (j * j);
             sample += sin(Constants::TAU * i * (harmonicFrequency / static_cast<double>(wave.getSampleRate()))) * harmonicAmplitude;
 
         }
-        for (size_t k = 0; k < wave.getNumberOfChannels(); k++)
+        for (uint16_t k = 0; k < wave.getNumberOfChannels(); k++)
         {
             samples.push_back(sample);
         }
@@ -587,14 +593,14 @@ void Generators::sawtoothWaveAdditive(WavFile& wave, int lengthMs, double freque
     for (size_t i = 0; i < numberOfSamples; i++)
     {
         double sample = 0.0;
-        for (size_t j = 1; j < harmonics + 1; j++)
+        for (int j = 1; j < harmonics + 1; j++)
         {
             double harmonicFrequency = frequency * j;
             double harmonicAmplitude = 1.0 / j;
             sample += sin(Constants::TAU * i * (harmonicFrequency / static_cast<double>(wave.getSampleRate()))) * harmonicAmplitude;
 
         }
-        for (size_t k = 0; k < wave.getNumberOfChannels(); k++)
+        for (uint16_t k = 0; k < wave.getNumberOfChannels(); k++)
         {
             samples.push_back(sample);
         }
