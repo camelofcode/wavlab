@@ -7,6 +7,7 @@ Delay::Delay(uint32_t maxMilliseconds, uint32_t initialMilliseconds, uint32_t sa
 {
 	numberOfSamples = static_cast<uint32_t>(sampleRate * (maxMilliseconds / 1000.0));
 	delayBuffer.resize(numberOfSamples);
+    delaySamples = static_cast<uint32_t>(sampleRate * (initialMilliseconds / 1000.0));
 	setDelayTime(initialMilliseconds);
 }
 

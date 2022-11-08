@@ -157,7 +157,7 @@ void FX::delay(WavFile& wave, bool stereo, uint32_t delayMsL, double feedbackL, 
     double scaledFeedbackR = feedbackR / 100.0;
     double scaledMix = mix / 100.0;
     std::vector<double> originalSamples = wave.getSamples();
-    uint32_t maxNumberOfSamples = static_cast<uint32_t>(maxFileLengthMs == 0 ? (originalSamples.size() / wave.getNumberOfChannels()) : wave.getSampleRate() * (maxFileLengthMs / 1000.0));
+    auto maxNumberOfSamples = static_cast<uint32_t>(maxFileLengthMs == 0 ? (originalSamples.size() / wave.getNumberOfChannels()) : wave.getSampleRate() * (maxFileLengthMs / 1000.0)); // NOLINT(cppcoreguidelines-narrowing-conversions,bugprone-integer-division)
     uint32_t currentNumberOfSamples = 0;
     double maxSample = 0.0;
 
