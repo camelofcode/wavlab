@@ -48,7 +48,7 @@ public:
 	/// <param name="lfo">Lfo offset</param>
 	/// <param name="mix">Mix</param>
 	/// <returns></returns>
-	double next(double sample, int lfo, double mix);
+	double next(double sample, uint32_t lfo, double mix);
 
 private:
 	uint32_t sampleRate;

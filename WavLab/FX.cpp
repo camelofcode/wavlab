@@ -68,7 +68,7 @@ void Commands::digitalDelayMonoHelp()
     std::cout << "\t\tfeedback: feedback of the delay effect, from 0-100%" << std::endl;
     std::cout << "\t\tmix: mix of the delay effect vs dry signal, from 0-100%" << std::endl;
     std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
-    std::cout << "\t\maxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail" << std::endl;
+    std::cout << "\t\tmaxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail" << std::endl;
 }
 
 int Commands::digitalDelayMonoCommand(const std::string& command, int argc, char* argv[])
@@ -143,7 +143,6 @@ void FX::digitalDelayMono(WavFile& wave, uint32_t delayMs, double feedback, doub
     if (wave.getNumberOfChannels() == 1)
     {
         Delay delay(delayMs * 2, delayMs, wave.getSampleRate());
-        double delayedSample = 0.0;
         for (auto& sample : originalSamples)
         {
             if (sample > maxSample)

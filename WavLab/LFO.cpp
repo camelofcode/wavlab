@@ -3,15 +3,15 @@
 #include "Constants.h"
 
 LFO::LFO(uint32_t sampleRate) :
-	sampleRate(sampleRate),
-	count(0)
+    count(0),
+    sampleRate(sampleRate)
 {
 
 }
 
 double LFO::next(double input)
 {
-	double frequency = input / (sampleRate / 2);
+	double frequency = input / (sampleRate / 2.0);
 	double output = fabs(sin(Constants::TAU * count * frequency));
 
 	count++;

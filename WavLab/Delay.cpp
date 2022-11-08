@@ -64,9 +64,9 @@ double Delay::next(double sample, double feedback, const std::function<double(do
 	return (output * mix) + (sample * inverseMix);
 }
 
-double Delay::next(double sample, int lfo, double mix)
+double Delay::next(double sample, uint32_t lfo, double mix)
 {
-	int outputPositionLfo = outputPosition + lfo;
+    uint32_t outputPositionLfo = outputPosition + lfo;
 	if (outputPositionLfo >= numberOfSamples)
 	{
 		outputPositionLfo = outputPositionLfo - numberOfSamples;
