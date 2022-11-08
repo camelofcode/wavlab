@@ -36,6 +36,16 @@ run `wavlab [command]` using one of the following commands:
 help
         description: shows the command list
 
+digital-delay-mono <input> <delayMilliseconds> <feedback> <mix> [output] [maxOutputLengthMs]
+        description: applies a mono digital delay to the specified wave file
+        parameters:
+                input: path to wave file
+                delayMilliseconds: delay time in milliseconds
+                feedback: feedback of the delay effect, from 0-100%
+                mix: mix of the delay effect vs dry signal, from 0-100%
+                output: path to output file. Optional, if not specified input will be overwritten
+                maxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail
+
 eq-allpass <input> <frequency> <q> [output]
         description: applies an all pass filter to a wave file
         parameters:
@@ -146,7 +156,7 @@ mid-side-to-stereo <midInput> <sideInput> <output>
                 output: path to combined output file
 
 mix <output> <input...>
-        description: mixes multiple wave files into one. Will attenuate and renormalise to ensure lack of clipping. Currently will start all files at zero.
+        description: mixes multiple wave files into one. Will attenuate and re-normalise to ensure lack of clipping. Currently will start all files at zero.
         parameters:
                 output: path to mixed wave file
                 input: arbitrary number of input files (minimum 2)
