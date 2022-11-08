@@ -15,4 +15,4 @@ if ( MSVC )
 endif()
 
 
-add_executable(wavlab WavLab/WavLab.cpp WavLab/WavFile.cpp WavLab/Tools.cpp WavLab/StringHelpers.cpp WavLab/Generators.cpp WavLab/FX.cpp WavLab/EQ.cpp WavLab/ConversionHelpers.cpp WavLab/Commands.cpp WavLab/BinaryHelpers.cpp)
+add_executable(wavlab WavLab/WavLab.cpp WavLab/WavFile.cpp WavLab/Tools.cpp WavLab/StringHelpers.cpp WavLab/Generators.cpp WavLab/FX.cpp WavLab/EQ.cpp WavLab/ConversionHelpers.cpp WavLab/Commands.cpp WavLab/BinaryHelpers.cpp WavLab/Delay.cpp WavLab/LFO.cpp)

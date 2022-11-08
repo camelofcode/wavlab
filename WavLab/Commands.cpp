@@ -31,6 +31,7 @@ CommandsContainer::CommandsContainer()
 
 	//FX
 	registerCommand("saturate", &Commands::saturateHelp, &Commands::saturateCommand);
+	registerCommand("digital-delay-mono", &Commands::digitalDelayMonoHelp, &Commands::digitalDelayMonoCommand);
 
 	//Generators
 	registerCommand("sine-wave", &Commands::sineWaveHelp, &Commands::sineWaveCommand);

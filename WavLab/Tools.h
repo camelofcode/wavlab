@@ -10,6 +10,13 @@ namespace Tools
 	void normalise(WavFile& wave);
 
 	/// <summary>
+	/// Normalises a wave file to maximum
+	/// </summary>
+	/// <param name="wave">The wave file to normalise</param>
+	/// <param name="normaliseTo">Level to normalise to</param>
+	void normalise(WavFile& wave, double normaliseTo);
+
+	/// <summary>
 	/// Reverses a wave file
 	/// </summary>
 	/// <param name="wave">The wave file to reverse</param>

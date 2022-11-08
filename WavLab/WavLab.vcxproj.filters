@@ -57,6 +57,12 @@
     <ClCompile Include="StringHelpers.cpp">
       <Filter>Source Files\Helpers</Filter>
     </ClCompile>
+    <ClCompile Include="Delay.cpp">
+      <Filter>Source Files\Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="LFO.cpp">
+      <Filter>Source Files\Processing</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WavFile.h">
@@ -91,6 +97,12 @@
     </ClInclude>
     <ClInclude Include="Constants.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Delay.h">
+      <Filter>Header Files\Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="LFO.h">
+      <Filter>Header Files\Processing</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

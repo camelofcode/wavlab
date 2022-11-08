@@ -34,6 +34,20 @@ WavFile::WavFile(const std::string& path, bool loadSamples)
 	blockAlign = BinaryHelpers::readInt16(infile);
 	bitsPerSample = BinaryHelpers::readInt16(infile);
 
+	//Correct block align if it is incorrect.
+	switch (bitsPerSample)
+	{
+		case 8: blockAlign = 1;
+			break;
+		case 16: blockAlign = 2;
+			break;
+		case 24: blockAlign = 3;
+			break;
+		case 32: blockAlign = 4;
+			break;
+		default: blockAlign = 0;
+	}
+
 	auto nextChunk = BinaryHelpers::readString(infile, 4);
 
 	if(nextChunk == "bext")
@@ -135,6 +149,8 @@ WavFile::WavFile(unsigned short numberOfChannels, uint32_t sampleRate, unsigned 
 
 	switch (bitsPerSample) 
 	{
+		case 8: blockAlign = 1;
+			break;
 		case 16: blockAlign = 2;
 			break;
 		case 24: blockAlign = 3;

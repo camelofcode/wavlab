@@ -94,6 +94,9 @@ namespace Commands
 	void saturateHelp();
 	int saturateCommand(const std::string& command, int argc, char* argv[]);
 
+	void digitalDelayMonoHelp();
+	int digitalDelayMonoCommand(const std::string& command, int argc, char* argv[]);
+
 	/* Generators */
 
 	void sineWaveHelp();

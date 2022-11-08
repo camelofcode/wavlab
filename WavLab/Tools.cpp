@@ -82,6 +82,18 @@ void Tools::normalise(WavFile &wave)
     wave.setSamples(newSamples);
 }
 
+void Tools::normalise(WavFile& wave, double normaliseTo)
+{
+    Tools::normalise(wave);
+
+    std::vector<double> newSamples;
+    for (auto& sample : wave.getSamples())
+    {
+        newSamples.push_back(sample * normaliseTo);
+    }
+    wave.setSamples(newSamples);
+}
+
 /* reverse command */
 
 void Commands::reverseHelp()

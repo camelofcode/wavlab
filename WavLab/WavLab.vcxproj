@@ -130,9 +130,11 @@
     <ClCompile Include="BinaryHelpers.cpp" />
     <ClCompile Include="Commands.cpp" />
     <ClCompile Include="ConversionHelpers.cpp" />
+    <ClCompile Include="Delay.cpp" />
     <ClCompile Include="EQ.cpp" />
     <ClCompile Include="FX.cpp" />
     <ClCompile Include="Generators.cpp" />
+    <ClCompile Include="LFO.cpp" />
     <ClCompile Include="StringHelpers.cpp" />
     <ClCompile Include="Tools.cpp" />
     <ClCompile Include="WavFile.cpp" />
@@ -143,9 +145,11 @@
     <ClInclude Include="Commands.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="ConversionHelpers.h" />
+    <ClInclude Include="Delay.h" />
     <ClInclude Include="EQ.h" />
     <ClInclude Include="FX.h" />
     <ClInclude Include="Generators.h" />
+    <ClInclude Include="LFO.h" />
     <ClInclude Include="StringHelpers.h" />
     <ClInclude Include="Tools.h" />
     <ClInclude Include="TryParse.h" />
