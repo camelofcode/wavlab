@@ -1,5 +1,6 @@
 #pragma once
 #include "WavFile.h"
+#include <functional>
 
 namespace FX
 {
@@ -17,5 +18,20 @@ namespace FX
 	/// <param name="delayMs">Delay time in milliseconds</param>
 	/// <param name="mix">Feedback of the delay effect, from 0-100%</param>
 	/// <param name="mix">Mix of the delay effect, from 0-100%</param>
-	void digitalDelayMono(WavFile& wave, uint32_t delayMs, double feedback, double mix, uint32_t maxFileLength);
+	void delay(WavFile& wave, uint32_t delayMs, double feedback, double mix, uint32_t maxFileLengthMs);
+
+	/// <summary>
+	/// Applies a stereo digital delay to the specified wave file
+	/// </summary>
+	void delay(WavFile& wave, uint32_t delayMsL, double feedbackL, uint32_t delayMsR, double feedbackR, double mix, uint32_t maxFileLengthMs);
+
+	/// <summary>
+	/// Applies a mono digital delay to the specified wave file with feedback processing
+	/// </summary>
+	void delay(WavFile& wave, uint32_t delayMs, double feedback, double mix, uint32_t maxFileLengthMs, const std::function<double(double input)>& feedbackProcessor);
+
+	/// <summary>
+	/// Applies a stereo digital delay to the specified wave file with feedback processing
+	/// </summary>
+	void delay(WavFile& wave, bool stereo, uint32_t delayMsL, double feedbackL, uint32_t delayMsR, double feedbackR, double mix, uint32_t maxFileLengthMs, const std::function<double(double input)>& feedbackProcessor);
 }

@@ -124,17 +124,40 @@ int Commands::digitalDelayMonoCommand(const std::string& command, int argc, char
     }
 
     WavFile wav(input, true);
-    FX::digitalDelayMono(wav, delayMilliseconds, feedback, mix, maxFileLengthMs);
+    FX::delay(wav, delayMilliseconds, feedback, mix, maxFileLengthMs);
     wav.save(output);
     return 0;
 }
 
-void FX::digitalDelayMono(WavFile& wave, uint32_t delayMs, double feedback, double mix, uint32_t maxFileLengthMs)
+/* various delay overloads */
+
+void FX::delay(WavFile& wave, uint32_t delayMs, double feedback, double mix, uint32_t maxFileLengthMs)
 {
-    double scaledFeedback = feedback / 100.0;
+    //Passes to mono overload with passthrough feedback processor.
+    delay(wave, delayMs, feedback, mix, maxFileLengthMs, [](double in) { return in; });
+}
+
+void FX::delay(WavFile& wave, uint32_t delayMsL, double feedbackL, uint32_t delayMsR, double feedbackR, double mix, uint32_t maxFileLengthMs)
+{
+    //Passes to stereo overload with passthrough feedback processor.
+    delay(wave, true, delayMsL, feedbackL, delayMsR, feedbackR, mix, maxFileLengthMs, [](double in) { return in; });
+}
+
+void FX::delay(WavFile& wave, uint32_t delayMs, double feedback, double mix, uint32_t maxFileLengthMs, const std::function<double(double input)>& feedbackProcessor)
+{
+    //Passes to stereo overload with specified feedback processor.
+    delay(wave, false, delayMs, feedback, delayMs, feedback, mix, maxFileLengthMs, feedbackProcessor);
+}
+
+/* full delay implementation that will work for all possible types */
+
+void FX::delay(WavFile& wave, bool stereo, uint32_t delayMsL, double feedbackL, uint32_t delayMsR, double feedbackR, double mix, uint32_t maxFileLengthMs, const std::function<double(double input)>& feedbackProcessor)
+{
+    double scaledFeedbackL = feedbackL / 100.0;
+    double scaledFeedbackR = feedbackR / 100.0;
     double scaledMix = mix / 100.0;
     std::vector<double> originalSamples = wave.getSamples();
-    uint32_t maxNumberOfSamples = maxFileLengthMs == 0 ? (originalSamples.size() / wave.getNumberOfChannels()) : wave.getSampleRate() * (maxFileLengthMs / 1000.0);
+    uint32_t maxNumberOfSamples = static_cast<uint32_t>(maxFileLengthMs == 0 ? (originalSamples.size() / wave.getNumberOfChannels()) : wave.getSampleRate() * (maxFileLengthMs / 1000.0));
     uint32_t currentNumberOfSamples = 0;
     double maxSample = 0.0;
 
@@ -142,27 +165,54 @@ void FX::digitalDelayMono(WavFile& wave, uint32_t delayMs, double feedback, doub
 
     if (wave.getNumberOfChannels() == 1)
     {
-        Delay delay(delayMs * 2, delayMs, wave.getSampleRate());
-        for (auto& sample : originalSamples)
+        if (stereo)
         {
-            if (sample > maxSample)
+            Delay delayL(delayMsL * 2, delayMsL, wave.getSampleRate());
+            Delay delayR(delayMsR * 2, delayMsR, wave.getSampleRate());
+
+            for (auto& sample : originalSamples)
             {
-                maxSample = sample;
+                if (sample > maxSample)
+                {
+                    maxSample = sample;
+                }
+                newSamples.push_back(delayL.next(sample, scaledFeedbackL, feedbackProcessor, scaledMix));
+                newSamples.push_back(delayR.next(sample, scaledFeedbackR, feedbackProcessor, scaledMix));
+                currentNumberOfSamples++;
             }
-            newSamples.push_back(delay.next(sample, scaledFeedback, scaledMix));
-            currentNumberOfSamples++;
+            //Lengthen sample for delay tail, up to max value provided
+            while (currentNumberOfSamples < maxNumberOfSamples)
+            {
+                newSamples.push_back(delayL.next(0, scaledFeedbackL, feedbackProcessor, scaledMix));
+                newSamples.push_back(delayR.next(0, scaledFeedbackR, feedbackProcessor, scaledMix));
+                currentNumberOfSamples++;
+            }
         }
-        //Lengthen sample for delay tail, up to max value provided
-        while(currentNumberOfSamples < maxNumberOfSamples)
+        else 
         {
-            newSamples.push_back(delay.next(0, scaledFeedback, scaledMix));
-            currentNumberOfSamples++;
+            Delay delay(delayMsL * 2, delayMsL, wave.getSampleRate());
+            for (auto& sample : originalSamples)
+            {
+                if (sample > maxSample)
+                {
+                    maxSample = sample;
+                }
+                newSamples.push_back(delay.next(sample, scaledFeedbackL, feedbackProcessor, scaledMix));
+                currentNumberOfSamples++;
+            }
+            //Lengthen sample for delay tail, up to max value provided
+            while (currentNumberOfSamples < maxNumberOfSamples)
+            {
+                newSamples.push_back(delay.next(0, scaledFeedbackL, feedbackProcessor, scaledMix));
+                currentNumberOfSamples++;
+            }
         }
+
     }
     else if(wave.getNumberOfChannels() == 2)
     {
-        Delay delayL(delayMs * 2, delayMs, wave.getSampleRate());
-        Delay delayR(delayMs * 2, delayMs, wave.getSampleRate());
+        Delay delayL(delayMsL * 2, delayMsL, wave.getSampleRate());
+        Delay delayR(delayMsR * 2, delayMsR, wave.getSampleRate());
 
         for (size_t i = 0; i < originalSamples.size() - 1; i = i + 2)
         {
@@ -178,19 +228,23 @@ void FX::digitalDelayMono(WavFile& wave, uint32_t delayMs, double feedback, doub
                 maxSample = right;
             }
 
-            newSamples.push_back(delayL.next(left, scaledFeedback, scaledMix));
-            newSamples.push_back(delayR.next(right, scaledFeedback, scaledMix));
+            newSamples.push_back(delayL.next(left, scaledFeedbackL, feedbackProcessor, scaledMix));
+            newSamples.push_back(delayR.next(right, scaledFeedbackR, feedbackProcessor, scaledMix));
             currentNumberOfSamples++;
         }
         //Lengthen sample for delay tail, up to max value provided
         while (currentNumberOfSamples < maxNumberOfSamples)
         {
-            newSamples.push_back(delayL.next(0, scaledFeedback, scaledMix));
-            newSamples.push_back(delayR.next(0, scaledFeedback, scaledMix));
+            newSamples.push_back(delayL.next(0, scaledFeedbackL, feedbackProcessor, scaledMix));
+            newSamples.push_back(delayR.next(0, scaledFeedbackR, feedbackProcessor,scaledMix));
             currentNumberOfSamples++;
         }
     }
+    //Makes sure a mono input file becomes stereo if stereo delay applied
+    wave.setNumberOfChannels(stereo || wave.getNumberOfChannels() == 2 ? 2 : 1);
 
     wave.setSamples(newSamples);
+
+    //Ensures input and output are the same level when mix = 50%
     Tools::normalise(wave, maxSample);
 }

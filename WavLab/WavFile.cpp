@@ -386,6 +386,17 @@ uint16_t WavFile::getBitsPerSample() const
 }
 
 //Setters
+void WavFile::setNumberOfChannels(uint16_t number)
+{
+	if (number > 2)
+	{
+		std::cout << "Attempted to set number of channels to a value greater than 2. Aborting." << std::endl;
+		exit(1);
+	}
+
+	numberOfChannels = number;
+}
+
 void WavFile::setSamples(std::vector<double>& newSamples)
 {
 	samples = newSamples;

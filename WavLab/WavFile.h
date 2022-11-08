@@ -68,6 +68,12 @@ public:
 	uint16_t getBitsPerSample() const;
 
 	/// <summary>
+	/// Sets the number of channels
+	/// </summary>
+	/// <param name="number">value</param>
+	void setNumberOfChannels(uint16_t number);
+
+	/// <summary>
 	/// Sets the samples of the wav file
 	/// </summary>
 	void setSamples(std::vector<double>& newSamples);

@@ -23,15 +23,6 @@ public:
 	void setDelayTime(uint32_t milliseconds);
 
 	/// <summary>
-	/// Get delayed sample, with feedback
-	/// </summary>
-	/// <param name="sample">Input sample</param>
-	/// <param name="feedback">Feedback</param>
-    /// <param name="mix">Mix</param>
-	/// <returns>Output sample</returns>
-	double next(double sample, double feedback, double mix);
-
-	/// <summary>
 	/// Get delayed sample, with feedback that is run through a separate processor
 	/// </summary>
 	/// <param name="sample">Input sample</param>

@@ -5,14 +5,14 @@ Delay::Delay(uint32_t maxMilliseconds, uint32_t initialMilliseconds, uint32_t sa
 	inputPosition(1),
 	outputPosition(0)
 {
-	numberOfSamples = sampleRate * (maxMilliseconds / 1000.0);
+	numberOfSamples = static_cast<uint32_t>(sampleRate * (maxMilliseconds / 1000.0));
 	delayBuffer.resize(numberOfSamples);
 	setDelayTime(initialMilliseconds);
 }
 
 void Delay::setDelayTime(uint32_t milliseconds)
 {
-	delaySamples = sampleRate * (milliseconds / 1000.0);
+	delaySamples = static_cast<uint32_t>(sampleRate * (milliseconds / 1000.0));
 
 	if (inputPosition > outputPosition)
 	{
@@ -45,19 +45,10 @@ void Delay::setDelayTime(uint32_t milliseconds)
 	}
 }
 
-double Delay::next(double sample, double feedback, double mix)
-{
-	double output = delayBuffer[outputPosition];
-	delayBuffer[inputPosition] = sample + (feedback * output);
-	movePositions();
-	double inverseMix = 1.0 - mix;
-	return (output * mix) + (sample * inverseMix);
-}
-
 double Delay::next(double sample, double feedback, const std::function<double(double input)>& feedbackProcessor, double mix)
 {
 	double output = delayBuffer[outputPosition];
-	delayBuffer[inputPosition] = feedbackProcessor(sample + (feedback * output));
+	delayBuffer[inputPosition] = sample + feedbackProcessor((feedback * output));
 	movePositions();
 
 	double inverseMix = 1.0 - mix;
