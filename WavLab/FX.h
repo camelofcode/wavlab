@@ -12,6 +12,13 @@ namespace FX
 	void saturate(WavFile& wave, double drive);
 
 	/// <summary>
+	/// Drives a single sample into a tape saturation algorithm
+	/// </summary>
+	/// <param name="wave">The sample to apply saturation to</param>
+	/// <param name="drive">The gain multiplier to apply</param>
+	double saturateSample(double in, double gainFactor);
+
+	/// <summary>
 	/// Applies a mono digital delay to the specified wave file
 	/// </summary>
 	/// <param name="wave">The wave file to add delay to</param>

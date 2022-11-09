@@ -31,7 +31,13 @@ CommandsContainer::CommandsContainer()
 
 	//FX
 	registerCommand("saturate", &Commands::saturateHelp, &Commands::saturateCommand);
+
 	registerCommand("digital-delay-mono", &Commands::digitalDelayMonoHelp, &Commands::digitalDelayMonoCommand);
+	registerCommand("digital-delay-stereo", &Commands::digitalDelayStereoHelp, &Commands::digitalDelayStereoCommand);
+	registerCommand("analog-delay-mono", &Commands::analogDelayMonoHelp, &Commands::analogDelayMonoCommand);
+	registerCommand("analog-delay-stereo", &Commands::analogDelayStereoHelp, &Commands::analogDelayStereoCommand);
+	registerCommand("tape-delay-mono", &Commands::tapeDelayMonoHelp, &Commands::tapeDelayMonoCommand);
+	registerCommand("tape-delay-stereo", &Commands::tapeDelayStereoHelp, &Commands::tapeDelayStereoCommand);
 
 	//Generators
 	registerCommand("sine-wave", &Commands::sineWaveHelp, &Commands::sineWaveCommand);

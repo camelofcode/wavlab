@@ -96,6 +96,16 @@ namespace Commands
 
 	void digitalDelayMonoHelp();
 	int digitalDelayMonoCommand(const std::string& command, int argc, char* argv[]);
+	void digitalDelayStereoHelp();
+	int digitalDelayStereoCommand(const std::string& command, int argc, char* argv[]);
+	void analogDelayMonoHelp();
+	int analogDelayMonoCommand(const std::string& command, int argc, char* argv[]);
+	void analogDelayStereoHelp();
+	int analogDelayStereoCommand(const std::string& command, int argc, char* argv[]);
+	void tapeDelayMonoHelp();
+	int tapeDelayMonoCommand(const std::string& command, int argc, char* argv[]);
+	void tapeDelayStereoHelp();
+	int tapeDelayStereoCommand(const std::string& command, int argc, char* argv[]);
 
 	/* Generators */
 

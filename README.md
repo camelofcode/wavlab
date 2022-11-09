@@ -28,6 +28,7 @@ It has been tested on Windows 10 and 11, as well as Ubuntu 20.04. Next step is t
 * Various signal processing functions including
 	* Peaking, shelving and all/band/low/pass filters/EQs
 	* Tape saturation effect
+	* Digital, Analog style and Tape style delays
 
 ## Usage
 run `wavlab [command]` using one of the following commands:
@@ -36,12 +37,46 @@ run `wavlab [command]` using one of the following commands:
 help
         description: shows the command list
 
+analog-delay-mono <input> <delayMilliseconds> <feedback> <mix> [output] [maxOutputLengthMs]
+        description: applies a mono analog style delay to the specified wave file, with frequency rolloff in the feedback loop
+        parameters:
+                input: path to wave file
+                delayMilliseconds: delay time in milliseconds
+                feedback: feedback of the delay effect, from 0-100%
+                mix: mix of the delay effect vs dry signal, from 0-100%
+                output: path to output file. Optional, if not specified input will be overwritten
+                maxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail
+
+analog-delay-stereo <input> <delayMillisecondsLeft> <feedbackLeft> <delayMillisecondsRight> <feedbackRight> <mix> [output] [maxOutputLengthMs]
+        description: applies a stereo analog style delay to the specified wave file, with frequency rolloff in the feedback loop
+        parameters:
+                input: path to wave file
+                delayMillisecondsLeft: delay time in milliseconds for the left channel
+                feedbackLeft: feedback of the delay effect, from 0-100% for the left channel
+                delayMillisecondsRight: delay time in milliseconds for the right channel
+                feedbackRight: feedback of the delay effect, from 0-100% for the right channel
+                mix: mix of the delay effect vs dry signal, from 0-100%
+                output: path to output file. Optional, if not specified input will be overwritten
+                maxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail
+
 digital-delay-mono <input> <delayMilliseconds> <feedback> <mix> [output] [maxOutputLengthMs]
         description: applies a mono digital delay to the specified wave file
         parameters:
                 input: path to wave file
                 delayMilliseconds: delay time in milliseconds
                 feedback: feedback of the delay effect, from 0-100%
+                mix: mix of the delay effect vs dry signal, from 0-100%
+                output: path to output file. Optional, if not specified input will be overwritten
+                maxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail
+
+digital-delay-stereo <input> <delayMillisecondsLeft> <feedbackLeft> <delayMillisecondsRight> <feedbackRight> <mix> [output] [maxOutputLengthMs]
+        description: applies a stereo digital delay to the specified wave file
+        parameters:
+                input: path to wave file
+                delayMillisecondsLeft: delay time in milliseconds for the left channel
+                feedbackLeft: feedback of the delay effect, from 0-100% for the left channel
+                delayMillisecondsRight: delay time in milliseconds for the right channel
+                feedbackRight: feedback of the delay effect, from 0-100% for the right channel
                 mix: mix of the delay effect vs dry signal, from 0-100%
                 output: path to output file. Optional, if not specified input will be overwritten
                 maxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail
@@ -262,6 +297,28 @@ swap-channels <input> [output]
                 input: path to wave file
                 output: path to output file. Optional, if not specified input will be overwritten
 
+tape-delay-mono <input> <delayMilliseconds> <feedback> <mix> [output] [maxOutputLengthMs]
+        description: applies a mono tape style delay to the specified wave file, with frequency rolloff and tape saturation in the feedback loop. Warning: extremely prone to self oscilliation at higher feedbacks :)
+        parameters:
+                input: path to wave file
+                delayMilliseconds: delay time in milliseconds
+                feedback: feedback of the delay effect, from 0-100%
+                mix: mix of the delay effect vs dry signal, from 0-100%
+                output: path to output file. Optional, if not specified input will be overwritten
+                maxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail
+
+tape-delay-stereo <input> <delayMillisecondsLeft> <feedbackLeft> <delayMillisecondsRight> <feedbackRight> <mix> [output] [maxOutputLengthMs]
+        description: applies a stereo tape style delay to the specified wave file, with frequency rolloff and tape saturation in the feedback loop. Warning: extremely prone to self oscilliation at higher feedbacks :)
+        parameters:
+                input: path to wave file
+                delayMillisecondsLeft: delay time in milliseconds for the left channel
+                feedbackLeft: feedback of the delay effect, from 0-100% for the left channel
+                delayMillisecondsRight: delay time in milliseconds for the right channel
+                feedbackRight: feedback of the delay effect, from 0-100% for the right channel
+                mix: mix of the delay effect vs dry signal, from 0-100%
+                output: path to output file. Optional, if not specified input will be overwritten
+                maxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail
+
 triangle-wave <output> <frequency> <sampleRate> <bitDepth> <length>
         description: writes a triangle wave to the specified output file
         parameters:
@@ -292,7 +349,7 @@ white-noise <output> <sampleRate> <bitDepth> <length>
 
 ## Upcoming features
 * Test Mac support
-* Delay, reverb, chorus, phaser, flanger and many more FX
+* Reverb, chorus, phaser, flanger and many more FX
 * Sample rate and bit rate (with dithering) conversion
 * Fades and ADSR
 * Dynamic processing (gate/compression)
