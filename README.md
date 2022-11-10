@@ -29,6 +29,7 @@ It has been tested on Windows 10 and 11, as well as Ubuntu 20.04. Next step is t
 	* Peaking, shelving and all/band/low/pass filters/EQs
 	* Tape saturation effect
 	* Digital, Analog style and Tape style delays
+	* A fairly awful sounding algorithmic reverb
 
 ## Usage
 run `wavlab [command]` using one of the following commands:
@@ -359,7 +360,7 @@ white-noise <output> <sampleRate> <bitDepth> <length>
 
 ## Upcoming features
 * Test Mac support
-* Reverb, chorus, phaser, flanger and many more FX
+* Chorus, phaser, flanger and many more FX
 * Sample rate and bit rate (with dithering) conversion
 * Fades and ADSR
 * Dynamic processing (gate/compression)
