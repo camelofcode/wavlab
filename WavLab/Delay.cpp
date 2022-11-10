@@ -46,6 +46,11 @@ void Delay::setDelayTime(uint32_t milliseconds)
 	}
 }
 
+double Delay::next(double sample, double feedback)
+{
+	return Delay::next(sample, feedback, [](double in) { return in; }, 1.0);
+}
+
 double Delay::next(double sample, double feedback, const std::function<double(double input)>& feedbackProcessor, double mix)
 {
 	double output = delayBuffer[outputPosition];

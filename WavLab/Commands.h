@@ -107,6 +107,9 @@ namespace Commands
 	void tapeDelayStereoHelp();
 	int tapeDelayStereoCommand(const std::string& command, int argc, char* argv[]);
 
+	void reverbHelp();
+	int reverbCommand(const std::string& command, int argc, char* argv[]);
+
 	/* Generators */
 
 	void sineWaveHelp();

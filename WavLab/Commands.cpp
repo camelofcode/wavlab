@@ -39,6 +39,8 @@ CommandsContainer::CommandsContainer()
 	registerCommand("tape-delay-mono", &Commands::tapeDelayMonoHelp, &Commands::tapeDelayMonoCommand);
 	registerCommand("tape-delay-stereo", &Commands::tapeDelayStereoHelp, &Commands::tapeDelayStereoCommand);
 
+	registerCommand("reverb", &Commands::reverbHelp, &Commands::reverbCommand);
+
 	//Generators
 	registerCommand("sine-wave", &Commands::sineWaveHelp, &Commands::sineWaveCommand);
 	registerCommand("square-wave", &Commands::squareWaveHelp, &Commands::squareWaveCommand);

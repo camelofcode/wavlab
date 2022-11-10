@@ -209,6 +209,16 @@ pink-noise <output> <sampleRate> <bitDepth> <length>
                 sampleRate: sample rate of the output wave file
                 bitDepth: bit depth of the output wave file
                 length: length of the output file in milliseconds
+				
+reverb <input> <size> <time> <mix> [output] [maxOutputLengthMs]
+        description: applies a basic algorithmic reverb effect to a wave file
+        parameters:
+                input: path to wave file
+                size: size of the reverb effect, from 0-100%
+                time: time of the reverb effect, from 0-100%
+                mix: mix of the reverb effect, from 0-100%
+                output: path to output file. Optional, if not specified input will be overwritten
+                maxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail
 
 reverse <input> [output]
         description: reverses a wave file

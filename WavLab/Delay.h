@@ -33,6 +33,16 @@ public:
 	double next(double sample, double feedback, const std::function<double(double input)>& feedbackProcessor, double mix);
 
 	/// <summary>
+	/// Get delayed sample, with feedback that is run through a separate processor
+	/// </summary>
+	/// <param name="sample">Input sample</param>
+	/// <param name="feedback">Feedback</param>
+	/// <param name="feedbackProcessor">Feedback processing function</param>
+	/// <param name="mix">Mix</param>
+	/// <returns></returns>
+	double next(double sample, double feedback);
+
+	/// <summary>
 	/// Get delayed sample, with an lfo applied - useful for modulation FX such as chorus
 	/// </summary>
 	/// <param name="sample">Input sample</param>

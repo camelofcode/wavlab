@@ -41,4 +41,9 @@ namespace FX
 	/// Applies a stereo digital delay to the specified wave file with feedback processing
 	/// </summary>
 	void delay(WavFile& wave, bool stereo, uint32_t delayMsL, double feedbackL, uint32_t delayMsR, double feedbackR, double mix, uint32_t maxFileLengthMs, const std::function<double(double input)>& feedbackProcessor);
+
+	/// <summary>
+	/// Applies a basic algorithmic reverb to the specified wave file
+	/// </summary>
+	void reverb(WavFile& wave, double size, double time, double mix, uint32_t maxFileLengthMs);
 }
