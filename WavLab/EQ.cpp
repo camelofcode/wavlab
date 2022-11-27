@@ -197,21 +197,21 @@ int Commands::eqWithGainCommand(const std::string& command, int argc, char* argv
 	double frequency = 1000;
 	if (!tryParse(argv[3], frequency))
 	{
-		std::cout << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+		std::cerr << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	double gain = 6;
 	if (!tryParse(argv[4], gain))
 	{
-		std::cout << "Parameter 'gain' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
+		std::cerr << "Parameter 'gain' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	double q = 1;
 	if (!tryParse(argv[5], q))
 	{
-		std::cout << "Parameter 'q' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
+		std::cerr << "Parameter 'q' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -286,14 +286,14 @@ int Commands::eqPassCommand(const std::string& command, int argc, char* argv[])
 	double frequency = 1000;
 	if (!tryParse(argv[3], frequency))
 	{
-		std::cout << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+		std::cerr << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	double q = 1;
 	if (!tryParse(argv[4], q))
 	{
-		std::cout << "Parameter 'q' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
+		std::cerr << "Parameter 'q' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
 		return EXIT_FAILURE;
 	}
 

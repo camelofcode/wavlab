@@ -30,28 +30,28 @@ int Commands::sineWaveCommand(const std::string& command, int argc, char* argv[]
     double frequency = 44100;
     if (!tryParse(argv[3], frequency))
     {
-        std::cout << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+        std::cerr << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
         return EXIT_FAILURE;
     }
 
     uint32_t sampleRate = 44100;
     if (!tryParse(argv[4], sampleRate))
     {
-        std::cout << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
+        std::cerr << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
         return EXIT_FAILURE;
     }
 
     unsigned short bitDepth = 16;
     if (!tryParse(argv[5], bitDepth))
     {
-        std::cout << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
+        std::cerr << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
         return EXIT_FAILURE;
     }
 
     int lengthMs = 1000;
     if (!tryParse(argv[6], lengthMs))
     {
-        std::cout << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
+        std::cerr << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -103,28 +103,28 @@ int Commands::squareWaveCommand(const std::string& command, int argc, char* argv
     double frequency = 44100;
     if (!tryParse(argv[3], frequency))
     {
-        std::cout << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+        std::cerr << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
         return EXIT_FAILURE;
     }
 
     uint32_t sampleRate = 44100;
     if (!tryParse(argv[4], sampleRate))
     {
-        std::cout << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
+        std::cerr << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
         return EXIT_FAILURE;
     }
 
     unsigned short bitDepth = 16;
     if (!tryParse(argv[5], bitDepth))
     {
-        std::cout << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
+        std::cerr << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
         return EXIT_FAILURE;
     }
 
     int lengthMs = 1000;
     if (!tryParse(argv[6], lengthMs))
     {
-        std::cout << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
+        std::cerr << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -185,28 +185,28 @@ int Commands::squareWaveAdditiveCommand(const std::string& command, int argc, ch
     double frequency = 44100;
     if (!tryParse(argv[3], frequency))
     {
-        std::cout << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+        std::cerr << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
         return EXIT_FAILURE;
     }
 
     uint32_t sampleRate = 44100;
     if (!tryParse(argv[4], sampleRate))
     {
-        std::cout << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
+        std::cerr << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
         return EXIT_FAILURE;
     }
 
     unsigned short bitDepth = 16;
     if (!tryParse(argv[5], bitDepth))
     {
-        std::cout << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
+        std::cerr << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
         return EXIT_FAILURE;
     }
 
     int lengthMs = 1000;
     if (!tryParse(argv[6], lengthMs))
     {
-        std::cout << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
+        std::cerr << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -215,7 +215,7 @@ int Commands::squareWaveAdditiveCommand(const std::string& command, int argc, ch
     {
         if (!tryParse(argv[7], harmonics))
         {
-            std::cout << "Parameter 'harmonics' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
+            std::cerr << "Parameter 'harmonics' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
             return EXIT_FAILURE;
         }
     }
@@ -277,28 +277,28 @@ int Commands::triangleWaveCommand(const std::string& command, int argc, char* ar
     double frequency = 44100;
     if (!tryParse(argv[3], frequency))
     {
-        std::cout << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+        std::cerr << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
         return EXIT_FAILURE;
     }
 
     uint32_t sampleRate = 44100;
     if (!tryParse(argv[4], sampleRate))
     {
-        std::cout << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
+        std::cerr << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
         return EXIT_FAILURE;
     }
 
     unsigned short bitDepth = 16;
     if (!tryParse(argv[5], bitDepth))
     {
-        std::cout << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
+        std::cerr << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
         return EXIT_FAILURE;
     }
 
     int lengthMs = 1000;
     if (!tryParse(argv[6], lengthMs))
     {
-        std::cout << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
+        std::cerr << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -368,28 +368,28 @@ int Commands::triangleWaveAdditiveCommand(const std::string& command, int argc, 
     double frequency = 44100;
     if (!tryParse(argv[3], frequency))
     {
-        std::cout << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+        std::cerr << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
         return EXIT_FAILURE;
     }
 
     uint32_t sampleRate = 44100;
     if (!tryParse(argv[4], sampleRate))
     {
-        std::cout << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
+        std::cerr << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
         return EXIT_FAILURE;
     }
 
     unsigned short bitDepth = 16;
     if (!tryParse(argv[5], bitDepth))
     {
-        std::cout << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
+        std::cerr << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
         return EXIT_FAILURE;
     }
 
     int lengthMs = 1000;
     if (!tryParse(argv[6], lengthMs))
     {
-        std::cout << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
+        std::cerr << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -398,7 +398,7 @@ int Commands::triangleWaveAdditiveCommand(const std::string& command, int argc, 
     {
         if (!tryParse(argv[7], harmonics))
         {
-            std::cout << "Parameter 'harmonics' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
+            std::cerr << "Parameter 'harmonics' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
             return EXIT_FAILURE;
         }
     }
@@ -460,28 +460,28 @@ int Commands::sawtoothWaveCommand(const std::string& command, int argc, char* ar
     double frequency = 44100;
     if (!tryParse(argv[3], frequency))
     {
-        std::cout << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+        std::cerr << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
         return EXIT_FAILURE;
     }
 
     uint32_t sampleRate = 44100;
     if (!tryParse(argv[4], sampleRate))
     {
-        std::cout << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
+        std::cerr << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
         return EXIT_FAILURE;
     }
 
     unsigned short bitDepth = 16;
     if (!tryParse(argv[5], bitDepth))
     {
-        std::cout << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
+        std::cerr << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
         return EXIT_FAILURE;
     }
 
     int lengthMs = 1000;
     if (!tryParse(argv[6], lengthMs))
     {
-        std::cout << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
+        std::cerr << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -544,28 +544,28 @@ int Commands::sawtoothWaveAdditiveCommand(const std::string& command, int argc, 
     double frequency = 44100;
     if (!tryParse(argv[3], frequency))
     {
-        std::cout << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+        std::cerr << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
         return EXIT_FAILURE;
     }
 
     uint32_t sampleRate = 44100;
     if (!tryParse(argv[4], sampleRate))
     {
-        std::cout << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
+        std::cerr << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
         return EXIT_FAILURE;
     }
 
     unsigned short bitDepth = 16;
     if (!tryParse(argv[5], bitDepth))
     {
-        std::cout << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
+        std::cerr << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
         return EXIT_FAILURE;
     }
 
     int lengthMs = 1000;
     if (!tryParse(argv[6], lengthMs))
     {
-        std::cout << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
+        std::cerr << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -574,7 +574,7 @@ int Commands::sawtoothWaveAdditiveCommand(const std::string& command, int argc, 
     {
         if (!tryParse(argv[7], harmonics))
         {
-            std::cout << "Parameter 'harmonics' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
+            std::cerr << "Parameter 'harmonics' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
             return EXIT_FAILURE;
         }
     }
@@ -636,21 +636,21 @@ int Commands::whiteNoiseCommand(const std::string& command, int argc, char* argv
     uint32_t sampleRate = 44100;
     if (!tryParse(argv[3], sampleRate))
     {
-        std::cout << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+        std::cerr << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
         return EXIT_FAILURE;
     }
 
     unsigned short bitDepth = 16;
     if (!tryParse(argv[4], bitDepth))
     {
-        std::cout << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
+        std::cerr << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
         return EXIT_FAILURE;
     }
 
     int lengthMs = 1000;
     if (!tryParse(argv[5], lengthMs))
     {
-        std::cout << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
+        std::cerr << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -702,21 +702,21 @@ int Commands::pinkNoiseCommand(const std::string& command, int argc, char* argv[
     uint32_t sampleRate = 44100;
     if (!tryParse(argv[3], sampleRate))
     {
-        std::cout << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+        std::cerr << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
         return EXIT_FAILURE;
     }
 
     unsigned short bitDepth = 16;
     if (!tryParse(argv[4], bitDepth))
     {
-        std::cout << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
+        std::cerr << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
         return EXIT_FAILURE;
     }
 
     int lengthMs = 1000;
     if (!tryParse(argv[5], lengthMs))
     {
-        std::cout << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
+        std::cerr << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
         return EXIT_FAILURE;
     }
 

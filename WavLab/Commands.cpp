@@ -87,7 +87,7 @@ int CommandsContainer::command(const std::string& command, int argc, char* argv[
 	auto item = commandMap.find(command);
 	if (item == commandMap.end())
 	{
-		std::cout << "Unrecognised command specified. To see available commands run 'wavlab help'" << std::endl;
+		std::cerr << "Unrecognised command specified. To see available commands run 'wavlab help'" << std::endl;
 		return EXIT_FAILURE;
 	}
 	else
@@ -98,5 +98,5 @@ int CommandsContainer::command(const std::string& command, int argc, char* argv[
 
 void Commands::printIncorrectArgumentsWarning(const std::string& command)
 {
-    std::cout << "Incorrect number of arguments for command '" << command << "'. To see available commands run 'wavlab help'" << std::endl;
+    std::cerr << "Incorrect number of arguments for command '" << command << "'. To see available commands run 'wavlab help'" << std::endl;
 }

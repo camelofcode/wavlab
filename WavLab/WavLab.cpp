@@ -5,7 +5,7 @@ int main(int argc, char* argv[])
 {
     if (argc < 2)
     {
-        std::cout << "No command specified. To see available commands run 'wavlab help'" << std::endl;
+        std::cerr << "No command specified. To see available commands run 'wavlab help'" << std::endl;
         return EXIT_FAILURE;
     }
 

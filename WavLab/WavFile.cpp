@@ -13,7 +13,7 @@ WavFile::WavFile(const std::string& path, bool loadSamples)
 
 	if (infile.good() != 1)
 	{
-		std::cout << "File " << path << " does not exist" << std::endl;
+		std::cerr << "File " << path << " does not exist" << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
@@ -166,43 +166,43 @@ void WavFile::validate()
 {
 	if (fileChunkId != "RIFF")
 	{
-		std::cout << "File chunk is not valid for Wav file. Expected: RIFF, Actual: " << fileChunkId << std::endl;
+		std::cerr << "File chunk is not valid for Wav file. Expected: RIFF, Actual: " << fileChunkId << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
 	if (fileChunkSize != lengthInBytes - 8)
 	{
-		std::cout << "File chunk size is not valid. Expected:" << lengthInBytes - 8 << ", Actual: " << fileChunkSize << std::endl;
+		std::cerr << "File chunk size is not valid. Expected:" << lengthInBytes - 8 << ", Actual: " << fileChunkSize << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
 	if (format != "WAVE")
 	{
-		std::cout << "Format is not valid for Wav file. Expected: WAVE, Actual: " << format << std::endl;
+		std::cerr << "Format is not valid for Wav file. Expected: WAVE, Actual: " << format << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
 	if (formatChunkId != "fmt ")
 	{
-		std::cout << "Format chunk is not valid for Wav file. Expected: fmt , Actual: " << formatChunkId << std::endl;
+		std::cerr << "Format chunk is not valid for Wav file. Expected: fmt , Actual: " << formatChunkId << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
 	if (audioFormat != 1)
 	{
-		std::cout << "File is not PCM format and is not currently supported" << std::endl;
+		std::cerr << "File is not PCM format and is not currently supported" << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
 	if (numberOfChannels != 1 && numberOfChannels != 2)
 	{
-		std::cout << "File is not mono or stereo and is not currently supported" << std::endl;
+		std::cerr << "File is not mono or stereo and is not currently supported" << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
 	if (bitsPerSample != 8 && bitsPerSample != 16 && bitsPerSample != 24 && bitsPerSample != 32)
 	{
-		std::cout << "File is not 8, 16, 24 or 32 bit and is not supported" << std::endl;
+		std::cerr << "File is not 8, 16, 24 or 32 bit and is not supported" << std::endl;
 		exit(EXIT_FAILURE);
 	}
 }
@@ -287,7 +287,7 @@ void WavFile::save(const std::string& path)
 
 	if (outfile.good() != 1)
 	{
-		std::cout << "File " << path << " could not be opened for writing, check destination directory" << std::endl;
+		std::cerr << "File " << path << " could not be opened for writing, check destination directory" << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
@@ -390,7 +390,7 @@ void WavFile::setNumberOfChannels(uint16_t number)
 {
 	if (number > 2)
 	{
-		std::cout << "Attempted to set number of channels to a value greater than 2. Aborting." << std::endl;
+		std::cerr << "Attempted to set number of channels to a value greater than 2. Aborting." << std::endl;
 		exit(EXIT_FAILURE);
 	}
 

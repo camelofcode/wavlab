@@ -29,7 +29,7 @@ int Commands::saturateCommand(const std::string& command, int argc, char* argv[]
 	double drive = 0.0;
 	if (!tryParse(argv[3], drive))
 	{
-		std::cout << "Parameter 'drive' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+		std::cerr << "Parameter 'drive' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -88,31 +88,31 @@ int Commands::digitalDelayMonoCommand(const std::string& command, int argc, char
 	uint32_t delayMilliseconds = 0;
 	if (!tryParse(argv[3], delayMilliseconds))
 	{
-		std::cout << "Parameter 'delayMilliseconds' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+		std::cerr << "Parameter 'delayMilliseconds' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	double feedback = 0.0;
 	if (!tryParse(argv[4], feedback))
 	{
-		std::cout << "Parameter 'feedback' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
+		std::cerr << "Parameter 'feedback' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
 	if (feedback < 0 || feedback > 100)
 	{
-		std::cout << "Parameter 'feedback' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
+		std::cerr << "Parameter 'feedback' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	double mix = 0.0;
 	if (!tryParse(argv[5], mix))
 	{
-		std::cout << "Parameter 'mix' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
+		std::cerr << "Parameter 'mix' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
 		return EXIT_FAILURE;
 	}
 	if (mix < 0 || mix > 100)
 	{
-		std::cout << "Parameter 'mix' must be between 0 and 100. Provided value: " << argv[5] << std::endl;
+		std::cerr << "Parameter 'mix' must be between 0 and 100. Provided value: " << argv[5] << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -123,7 +123,7 @@ int Commands::digitalDelayMonoCommand(const std::string& command, int argc, char
 	{
 		if (!tryParse(argv[7], maxFileLengthMs))
 		{
-			std::cout << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
+			std::cerr << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
 			return EXIT_FAILURE;
 		}
 	}
@@ -162,50 +162,50 @@ int Commands::digitalDelayStereoCommand(const std::string& command, int argc, ch
 	uint32_t delayMillisecondsLeft = 0;
 	if (!tryParse(argv[3], delayMillisecondsLeft))
 	{
-		std::cout << "Parameter 'delayMillisecondsLeft' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+		std::cerr << "Parameter 'delayMillisecondsLeft' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	double feedbackLeft = 0.0;
 	if (!tryParse(argv[4], feedbackLeft))
 	{
-		std::cout << "Parameter 'feedbackLeft' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
+		std::cerr << "Parameter 'feedbackLeft' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
 	if (feedbackLeft < 0 || feedbackLeft > 100)
 	{
-		std::cout << "Parameter 'feedbackLeft' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
+		std::cerr << "Parameter 'feedbackLeft' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	uint32_t delayMillisecondsRight = 0;
 	if (!tryParse(argv[5], delayMillisecondsRight))
 	{
-		std::cout << "Parameter 'delayMillisecondsRight' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
+		std::cerr << "Parameter 'delayMillisecondsRight' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	double feedbackRight = 0.0;
 	if (!tryParse(argv[6], feedbackRight))
 	{
-		std::cout << "Parameter 'feedbackRight' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
+		std::cerr << "Parameter 'feedbackRight' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
 		return EXIT_FAILURE;
 	}
 	if (feedbackRight < 0 || feedbackRight > 100)
 	{
-		std::cout << "Parameter 'feedbackRight' must be between 0 and 100. Provided value: " << argv[6] << std::endl;
+		std::cerr << "Parameter 'feedbackRight' must be between 0 and 100. Provided value: " << argv[6] << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	double mix = 0.0;
 	if (!tryParse(argv[7], mix))
 	{
-		std::cout << "Parameter 'mix' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
+		std::cerr << "Parameter 'mix' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
 		return EXIT_FAILURE;
 	}
 	if (mix < 0 || mix > 100)
 	{
-		std::cout << "Parameter 'mix' must be between 0 and 100. Provided value: " << argv[7] << std::endl;
+		std::cerr << "Parameter 'mix' must be between 0 and 100. Provided value: " << argv[7] << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -216,7 +216,7 @@ int Commands::digitalDelayStereoCommand(const std::string& command, int argc, ch
 	{
 		if (!tryParse(argv[9], maxFileLengthMs))
 		{
-			std::cout << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[9] << std::endl;
+			std::cerr << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[9] << std::endl;
 			return EXIT_FAILURE;
 		}
 	}
@@ -253,31 +253,31 @@ int Commands::analogDelayMonoCommand(const std::string& command, int argc, char*
 	uint32_t delayMilliseconds = 0;
 	if (!tryParse(argv[3], delayMilliseconds))
 	{
-		std::cout << "Parameter 'delayMilliseconds' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+		std::cerr << "Parameter 'delayMilliseconds' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	double feedback = 0.0;
 	if (!tryParse(argv[4], feedback))
 	{
-		std::cout << "Parameter 'feedback' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
+		std::cerr << "Parameter 'feedback' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
 	if (feedback < 0 || feedback > 100)
 	{
-		std::cout << "Parameter 'feedback' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
+		std::cerr << "Parameter 'feedback' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	double mix = 0.0;
 	if (!tryParse(argv[5], mix))
 	{
-		std::cout << "Parameter 'mix' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
+		std::cerr << "Parameter 'mix' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
 		return EXIT_FAILURE;
 	}
 	if (mix < 0 || mix > 100)
 	{
-		std::cout << "Parameter 'mix' must be between 0 and 100. Provided value: " << argv[5] << std::endl;
+		std::cerr << "Parameter 'mix' must be between 0 and 100. Provided value: " << argv[5] << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -288,7 +288,7 @@ int Commands::analogDelayMonoCommand(const std::string& command, int argc, char*
 	{
 		if (!tryParse(argv[7], maxFileLengthMs))
 		{
-			std::cout << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
+			std::cerr << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
 			return EXIT_FAILURE;
 		}
 	}
@@ -331,50 +331,50 @@ int Commands::analogDelayStereoCommand(const std::string& command, int argc, cha
 	uint32_t delayMillisecondsLeft = 0;
 	if (!tryParse(argv[3], delayMillisecondsLeft))
 	{
-		std::cout << "Parameter 'delayMillisecondsLeft' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+		std::cerr << "Parameter 'delayMillisecondsLeft' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	double feedbackLeft = 0.0;
 	if (!tryParse(argv[4], feedbackLeft))
 	{
-		std::cout << "Parameter 'feedbackLeft' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
+		std::cerr << "Parameter 'feedbackLeft' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
 	if (feedbackLeft < 0 || feedbackLeft > 100)
 	{
-		std::cout << "Parameter 'feedbackLeft' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
+		std::cerr << "Parameter 'feedbackLeft' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	uint32_t delayMillisecondsRight = 0;
 	if (!tryParse(argv[5], delayMillisecondsRight))
 	{
-		std::cout << "Parameter 'delayMillisecondsRight' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
+		std::cerr << "Parameter 'delayMillisecondsRight' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	double feedbackRight = 0.0;
 	if (!tryParse(argv[6], feedbackRight))
 	{
-		std::cout << "Parameter 'feedbackRight' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
+		std::cerr << "Parameter 'feedbackRight' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
 		return EXIT_FAILURE;
 	}
 	if (feedbackRight < 0 || feedbackRight > 100)
 	{
-		std::cout << "Parameter 'feedbackRight' must be between 0 and 100. Provided value: " << argv[6] << std::endl;
+		std::cerr << "Parameter 'feedbackRight' must be between 0 and 100. Provided value: " << argv[6] << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	double mix = 0.0;
 	if (!tryParse(argv[7], mix))
 	{
-		std::cout << "Parameter 'mix' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
+		std::cerr << "Parameter 'mix' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
 		return EXIT_FAILURE;
 	}
 	if (mix < 0 || mix > 100)
 	{
-		std::cout << "Parameter 'mix' must be between 0 and 100. Provided value: " << argv[7] << std::endl;
+		std::cerr << "Parameter 'mix' must be between 0 and 100. Provided value: " << argv[7] << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -385,7 +385,7 @@ int Commands::analogDelayStereoCommand(const std::string& command, int argc, cha
 	{
 		if (!tryParse(argv[9], maxFileLengthMs))
 		{
-			std::cout << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[9] << std::endl;
+			std::cerr << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[9] << std::endl;
 			return EXIT_FAILURE;
 		}
 	}
@@ -443,31 +443,31 @@ int Commands::tapeDelayMonoCommand(const std::string& command, int argc, char* a
 	uint32_t delayMilliseconds = 0;
 	if (!tryParse(argv[3], delayMilliseconds))
 	{
-		std::cout << "Parameter 'delayMilliseconds' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+		std::cerr << "Parameter 'delayMilliseconds' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	double feedback = 0.0;
 	if (!tryParse(argv[4], feedback))
 	{
-		std::cout << "Parameter 'feedback' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
+		std::cerr << "Parameter 'feedback' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
 	if (feedback < 0 || feedback > 100)
 	{
-		std::cout << "Parameter 'feedback' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
+		std::cerr << "Parameter 'feedback' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	double mix = 0.0;
 	if (!tryParse(argv[5], mix))
 	{
-		std::cout << "Parameter 'mix' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
+		std::cerr << "Parameter 'mix' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
 		return EXIT_FAILURE;
 	}
 	if (mix < 0 || mix > 100)
 	{
-		std::cout << "Parameter 'mix' must be between 0 and 100. Provided value: " << argv[5] << std::endl;
+		std::cerr << "Parameter 'mix' must be between 0 and 100. Provided value: " << argv[5] << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -478,7 +478,7 @@ int Commands::tapeDelayMonoCommand(const std::string& command, int argc, char* a
 	{
 		if (!tryParse(argv[7], maxFileLengthMs))
 		{
-			std::cout << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
+			std::cerr << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
 			return EXIT_FAILURE;
 		}
 	}
@@ -521,50 +521,50 @@ int Commands::tapeDelayStereoCommand(const std::string& command, int argc, char*
 	uint32_t delayMillisecondsLeft = 0;
 	if (!tryParse(argv[3], delayMillisecondsLeft))
 	{
-		std::cout << "Parameter 'delayMillisecondsLeft' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+		std::cerr << "Parameter 'delayMillisecondsLeft' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	double feedbackLeft = 0.0;
 	if (!tryParse(argv[4], feedbackLeft))
 	{
-		std::cout << "Parameter 'feedbackLeft' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
+		std::cerr << "Parameter 'feedbackLeft' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
 	if (feedbackLeft < 0 || feedbackLeft > 100)
 	{
-		std::cout << "Parameter 'feedbackLeft' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
+		std::cerr << "Parameter 'feedbackLeft' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	uint32_t delayMillisecondsRight = 0;
 	if (!tryParse(argv[5], delayMillisecondsRight))
 	{
-		std::cout << "Parameter 'delayMillisecondsRight' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
+		std::cerr << "Parameter 'delayMillisecondsRight' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	double feedbackRight = 0.0;
 	if (!tryParse(argv[6], feedbackRight))
 	{
-		std::cout << "Parameter 'feedbackRight' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
+		std::cerr << "Parameter 'feedbackRight' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
 		return EXIT_FAILURE;
 	}
 	if (feedbackRight < 0 || feedbackRight > 100)
 	{
-		std::cout << "Parameter 'feedbackRight' must be between 0 and 100. Provided value: " << argv[6] << std::endl;
+		std::cerr << "Parameter 'feedbackRight' must be between 0 and 100. Provided value: " << argv[6] << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	double mix = 0.0;
 	if (!tryParse(argv[7], mix))
 	{
-		std::cout << "Parameter 'mix' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
+		std::cerr << "Parameter 'mix' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
 		return EXIT_FAILURE;
 	}
 	if (mix < 0 || mix > 100)
 	{
-		std::cout << "Parameter 'mix' must be between 0 and 100. Provided value: " << argv[7] << std::endl;
+		std::cerr << "Parameter 'mix' must be between 0 and 100. Provided value: " << argv[7] << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -575,7 +575,7 @@ int Commands::tapeDelayStereoCommand(const std::string& command, int argc, char*
 	{
 		if (!tryParse(argv[9], maxFileLengthMs))
 		{
-			std::cout << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[9] << std::endl;
+			std::cerr << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[9] << std::endl;
 			return EXIT_FAILURE;
 		}
 	}
@@ -753,36 +753,36 @@ int Commands::reverbCommand(const std::string& command, int argc, char* argv[])
 	double size = 0.0;
 	if (!tryParse(argv[3], size))
 	{
-		std::cout << "Parameter 'size' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+		std::cerr << "Parameter 'size' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
 		return EXIT_FAILURE;
 	}
 	if (size < 0 || size > 100)
 	{
-		std::cout << "Parameter 'size' must be between 0 and 100. Provided value: " << argv[3] << std::endl;
+		std::cerr << "Parameter 'size' must be between 0 and 100. Provided value: " << argv[3] << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	double time = 0.0;
 	if (!tryParse(argv[4], time))
 	{
-		std::cout << "Parameter 'time' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
+		std::cerr << "Parameter 'time' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
 	if (time < 0 || time > 100)
 	{
-		std::cout << "Parameter 'time' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
+		std::cerr << "Parameter 'time' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	double mix = 0.0;
 	if (!tryParse(argv[5], mix))
 	{
-		std::cout << "Parameter 'mix' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
+		std::cerr << "Parameter 'mix' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
 		return EXIT_FAILURE;
 	}
 	if (mix < 0 || mix > 100)
 	{
-		std::cout << "Parameter 'mix' must be between 0 and 100. Provided value: " << argv[5] << std::endl;
+		std::cerr << "Parameter 'mix' must be between 0 and 100. Provided value: " << argv[5] << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -793,7 +793,7 @@ int Commands::reverbCommand(const std::string& command, int argc, char* argv[])
 	{
 		if (!tryParse(argv[7], maxFileLengthMs))
 		{
-			std::cout << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
+			std::cerr << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
 			return EXIT_FAILURE;
 		}
 	}

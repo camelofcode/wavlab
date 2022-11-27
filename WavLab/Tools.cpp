@@ -256,7 +256,7 @@ int Commands::splitStereoCommand(const std::string& command, int argc, char* arg
 
     if (stereo.getNumberOfChannels() != 2)
     {
-        std::cout << "Input file is not stereo." << std::endl;
+        std::cerr << "Input file is not stereo." << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -318,19 +318,19 @@ int Commands::combineLeftRightCommand(const std::string& command, int argc, char
 
     if (left.getNumberOfChannels() != 1)
     {
-        std::cout << "Left input file is not mono." << std::endl;
+        std::cerr << "Left input file is not mono." << std::endl;
         return EXIT_FAILURE;
     }
 
     if (right.getNumberOfChannels() != 1)
     {
-        std::cout << "Right input file is not mono." << std::endl;
+        std::cerr << "Right input file is not mono." << std::endl;
         return EXIT_FAILURE;
     }
 
     if (left.getSampleRate() != right.getSampleRate())
     {
-        std::cout << "Left and Right input files are not the same sample rate." << std::endl;
+        std::cerr << "Left and Right input files are not the same sample rate." << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -390,7 +390,7 @@ int Commands::splitStereoMidSideCommand(const std::string& command, int argc, ch
 
     if (stereo.getNumberOfChannels() != 2)
     {
-        std::cout << "Input file is not stereo." << std::endl;
+        std::cerr << "Input file is not stereo." << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -454,19 +454,19 @@ int Commands::combineMidSideCommand(const std::string& command, int argc, char* 
 
     if (mid.getNumberOfChannels() != 1)
     {
-        std::cout << "Mid input file is not mono." << std::endl;
+        std::cerr << "Mid input file is not mono." << std::endl;
         return EXIT_FAILURE;
     }
 
     if (side.getNumberOfChannels() != 1)
     {
-        std::cout << "Side input file is not mono." << std::endl;
+        std::cerr << "Side input file is not mono." << std::endl;
         return EXIT_FAILURE;
     }
 
     if (side.getSampleRate() != mid.getSampleRate())
     {
-        std::cout << "Mid and Side input files are not the same sample rate." << std::endl;
+        std::cerr << "Mid and Side input files are not the same sample rate." << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -529,7 +529,7 @@ int Commands::gainCommand(const std::string& command, int argc, char* argv[])
     double gain = 0.0;
     if (!tryParse(argv[3], gain))
     {
-        std::cout << "Parameter 'gain' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+        std::cerr << "Parameter 'gain' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -577,7 +577,7 @@ int Commands::gainDbCommand(const std::string& command, int argc, char* argv[])
     double dB = 0.0;
     if (!tryParse(argv[3], dB))
     {
-        std::cout << "Parameter 'db' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
+        std::cerr << "Parameter 'db' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -826,7 +826,7 @@ int Commands::splitCommand(const std::string& command, int argc, char* argv[])
         uint32_t timeInMs = 0;
         if (!tryParse(argv[i], timeInMs))
         {
-            std::cout << "Parameter 'splitTimeMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[i] << std::endl;
+            std::cerr << "Parameter 'splitTimeMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[i] << std::endl;
             return EXIT_FAILURE;
         }
         splitTimesMs.push_back(timeInMs);
@@ -937,7 +937,7 @@ int Commands::joinCommand(const std::string&command, int argc, char* argv[])
         {
             if (sampleRate != inputWav.getSampleRate())
             {
-                std::cout << "Not all input files are the same sample rate." << std::endl;
+                std::cerr << "Not all input files are the same sample rate." << std::endl;
                 return EXIT_FAILURE;
             }
         }
