@@ -189,7 +189,7 @@ int Commands::eqWithGainCommand(const std::string& command, int argc, char* argv
 	if (argc != 6 && argc != 7)
 	{
         Commands::printIncorrectArgumentsWarning(command);
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	std::string input = static_cast<std::string>(argv[2]);
@@ -198,21 +198,21 @@ int Commands::eqWithGainCommand(const std::string& command, int argc, char* argv
 	if (!tryParse(argv[3], frequency))
 	{
 		std::cout << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	double gain = 6;
 	if (!tryParse(argv[4], gain))
 	{
 		std::cout << "Parameter 'gain' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	double q = 1;
 	if (!tryParse(argv[5], q))
 	{
 		std::cout << "Parameter 'q' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	std::string output = argc == 7 ? static_cast<std::string>(argv[6]) : input;
@@ -226,7 +226,7 @@ int Commands::eqWithGainCommand(const std::string& command, int argc, char* argv
 	EQ::process(wav, type, gain, frequency, q);
 	wav.save(output);
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 void Commands::eqAllPassHelp()
@@ -278,7 +278,7 @@ int Commands::eqPassCommand(const std::string& command, int argc, char* argv[])
 	if (argc != 5 && argc != 6)
 	{
         Commands::printIncorrectArgumentsWarning(command);
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	std::string input = static_cast<std::string>(argv[2]);
@@ -287,14 +287,14 @@ int Commands::eqPassCommand(const std::string& command, int argc, char* argv[])
 	if (!tryParse(argv[3], frequency))
 	{
 		std::cout << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	double q = 1;
 	if (!tryParse(argv[4], q))
 	{
 		std::cout << "Parameter 'q' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	std::string output = argc == 6 ? static_cast<std::string>(argv[5]) : input;
@@ -309,5 +309,5 @@ int Commands::eqPassCommand(const std::string& command, int argc, char* argv[])
 	EQ::process(wav, type, 0, frequency, q);
 	wav.save(output);
 
-	return 0;
+	return EXIT_SUCCESS;
 }

@@ -88,7 +88,7 @@ int CommandsContainer::command(const std::string& command, int argc, char* argv[
 	if (item == commandMap.end())
 	{
 		std::cout << "Unrecognised command specified. To see available commands run 'wavlab help'" << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 	else
 	{

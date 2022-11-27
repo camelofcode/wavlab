@@ -22,7 +22,7 @@ int Commands::saturateCommand(const std::string& command, int argc, char* argv[]
 	if (argc != 4 && argc != 5)
 	{
 		Commands::printIncorrectArgumentsWarning(command);
-		return 1;
+		return EXIT_FAILURE;
 	}
 	std::string input = static_cast<std::string>(argv[2]);
 
@@ -30,7 +30,7 @@ int Commands::saturateCommand(const std::string& command, int argc, char* argv[]
 	if (!tryParse(argv[3], drive))
 	{
 		std::cout << "Parameter 'drive' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	std::string output = argc == 5 ? static_cast<std::string>(argv[4]) : input;
@@ -38,7 +38,7 @@ int Commands::saturateCommand(const std::string& command, int argc, char* argv[]
 	WavFile wav(input, true);
 	FX::saturate(wav, drive);
 	wav.save(output);
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 void FX::saturate(WavFile& wave, double drive)
@@ -81,7 +81,7 @@ int Commands::digitalDelayMonoCommand(const std::string& command, int argc, char
 	if (argc != 6 && argc != 7 && argc != 8)
 	{
 		Commands::printIncorrectArgumentsWarning(command);
-		return 1;
+		return EXIT_FAILURE;
 	}
 	std::string input = static_cast<std::string>(argv[2]);
 
@@ -89,31 +89,31 @@ int Commands::digitalDelayMonoCommand(const std::string& command, int argc, char
 	if (!tryParse(argv[3], delayMilliseconds))
 	{
 		std::cout << "Parameter 'delayMilliseconds' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	double feedback = 0.0;
 	if (!tryParse(argv[4], feedback))
 	{
 		std::cout << "Parameter 'feedback' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 	if (feedback < 0 || feedback > 100)
 	{
 		std::cout << "Parameter 'feedback' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	double mix = 0.0;
 	if (!tryParse(argv[5], mix))
 	{
 		std::cout << "Parameter 'mix' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 	if (mix < 0 || mix > 100)
 	{
 		std::cout << "Parameter 'mix' must be between 0 and 100. Provided value: " << argv[5] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	std::string output = argc == 7 || argc == 8 ? static_cast<std::string>(argv[6]) : input;
@@ -124,14 +124,14 @@ int Commands::digitalDelayMonoCommand(const std::string& command, int argc, char
 		if (!tryParse(argv[7], maxFileLengthMs))
 		{
 			std::cout << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
-			return 1;
+			return EXIT_FAILURE;
 		}
 	}
 
 	WavFile wav(input, true);
 	FX::delay(wav, delayMilliseconds, feedback, mix, maxFileLengthMs);
 	wav.save(output);
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 /* digital-delay-stereo command*/
@@ -155,7 +155,7 @@ int Commands::digitalDelayStereoCommand(const std::string& command, int argc, ch
 	if (argc != 8 && argc != 9 && argc != 10)
 	{
 		Commands::printIncorrectArgumentsWarning(command);
-		return 1;
+		return EXIT_FAILURE;
 	}
 	std::string input = static_cast<std::string>(argv[2]);
 
@@ -163,50 +163,50 @@ int Commands::digitalDelayStereoCommand(const std::string& command, int argc, ch
 	if (!tryParse(argv[3], delayMillisecondsLeft))
 	{
 		std::cout << "Parameter 'delayMillisecondsLeft' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	double feedbackLeft = 0.0;
 	if (!tryParse(argv[4], feedbackLeft))
 	{
 		std::cout << "Parameter 'feedbackLeft' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 	if (feedbackLeft < 0 || feedbackLeft > 100)
 	{
 		std::cout << "Parameter 'feedbackLeft' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	uint32_t delayMillisecondsRight = 0;
 	if (!tryParse(argv[5], delayMillisecondsRight))
 	{
 		std::cout << "Parameter 'delayMillisecondsRight' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	double feedbackRight = 0.0;
 	if (!tryParse(argv[6], feedbackRight))
 	{
 		std::cout << "Parameter 'feedbackRight' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 	if (feedbackRight < 0 || feedbackRight > 100)
 	{
 		std::cout << "Parameter 'feedbackRight' must be between 0 and 100. Provided value: " << argv[6] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	double mix = 0.0;
 	if (!tryParse(argv[7], mix))
 	{
 		std::cout << "Parameter 'mix' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 	if (mix < 0 || mix > 100)
 	{
 		std::cout << "Parameter 'mix' must be between 0 and 100. Provided value: " << argv[7] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	std::string output = argc == 9 || argc == 10 ? static_cast<std::string>(argv[8]) : input;
@@ -217,14 +217,14 @@ int Commands::digitalDelayStereoCommand(const std::string& command, int argc, ch
 		if (!tryParse(argv[9], maxFileLengthMs))
 		{
 			std::cout << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[9] << std::endl;
-			return 1;
+			return EXIT_FAILURE;
 		}
 	}
 
 	WavFile wav(input, true);
 	FX::delay(wav, delayMillisecondsLeft, feedbackLeft, delayMillisecondsRight, feedbackRight, mix, maxFileLengthMs);
 	wav.save(output);
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 /* analog-delay-mono command*/
@@ -246,7 +246,7 @@ int Commands::analogDelayMonoCommand(const std::string& command, int argc, char*
 	if (argc != 6 && argc != 7 && argc != 8)
 	{
 		Commands::printIncorrectArgumentsWarning(command);
-		return 1;
+		return EXIT_FAILURE;
 	}
 	std::string input = static_cast<std::string>(argv[2]);
 
@@ -254,31 +254,31 @@ int Commands::analogDelayMonoCommand(const std::string& command, int argc, char*
 	if (!tryParse(argv[3], delayMilliseconds))
 	{
 		std::cout << "Parameter 'delayMilliseconds' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	double feedback = 0.0;
 	if (!tryParse(argv[4], feedback))
 	{
 		std::cout << "Parameter 'feedback' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 	if (feedback < 0 || feedback > 100)
 	{
 		std::cout << "Parameter 'feedback' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	double mix = 0.0;
 	if (!tryParse(argv[5], mix))
 	{
 		std::cout << "Parameter 'mix' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 	if (mix < 0 || mix > 100)
 	{
 		std::cout << "Parameter 'mix' must be between 0 and 100. Provided value: " << argv[5] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	std::string output = argc == 7 || argc == 8 ? static_cast<std::string>(argv[6]) : input;
@@ -289,7 +289,7 @@ int Commands::analogDelayMonoCommand(const std::string& command, int argc, char*
 		if (!tryParse(argv[7], maxFileLengthMs))
 		{
 			std::cout << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
-			return 1;
+			return EXIT_FAILURE;
 		}
 	}
 
@@ -300,7 +300,7 @@ int Commands::analogDelayMonoCommand(const std::string& command, int argc, char*
 
 	FX::delay(wav, delayMilliseconds, feedback, mix, maxFileLengthMs, feedbackProcessor);
 	wav.save(output);
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 /* analog-delay-stereo command*/
@@ -324,7 +324,7 @@ int Commands::analogDelayStereoCommand(const std::string& command, int argc, cha
 	if (argc != 8 && argc != 9 && argc != 10)
 	{
 		Commands::printIncorrectArgumentsWarning(command);
-		return 1;
+		return EXIT_FAILURE;
 	}
 	std::string input = static_cast<std::string>(argv[2]);
 
@@ -332,50 +332,50 @@ int Commands::analogDelayStereoCommand(const std::string& command, int argc, cha
 	if (!tryParse(argv[3], delayMillisecondsLeft))
 	{
 		std::cout << "Parameter 'delayMillisecondsLeft' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	double feedbackLeft = 0.0;
 	if (!tryParse(argv[4], feedbackLeft))
 	{
 		std::cout << "Parameter 'feedbackLeft' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 	if (feedbackLeft < 0 || feedbackLeft > 100)
 	{
 		std::cout << "Parameter 'feedbackLeft' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	uint32_t delayMillisecondsRight = 0;
 	if (!tryParse(argv[5], delayMillisecondsRight))
 	{
 		std::cout << "Parameter 'delayMillisecondsRight' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	double feedbackRight = 0.0;
 	if (!tryParse(argv[6], feedbackRight))
 	{
 		std::cout << "Parameter 'feedbackRight' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 	if (feedbackRight < 0 || feedbackRight > 100)
 	{
 		std::cout << "Parameter 'feedbackRight' must be between 0 and 100. Provided value: " << argv[6] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	double mix = 0.0;
 	if (!tryParse(argv[7], mix))
 	{
 		std::cout << "Parameter 'mix' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 	if (mix < 0 || mix > 100)
 	{
 		std::cout << "Parameter 'mix' must be between 0 and 100. Provided value: " << argv[7] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	std::string output = argc == 9 || argc == 10 ? static_cast<std::string>(argv[8]) : input;
@@ -386,7 +386,7 @@ int Commands::analogDelayStereoCommand(const std::string& command, int argc, cha
 		if (!tryParse(argv[9], maxFileLengthMs))
 		{
 			std::cout << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[9] << std::endl;
-			return 1;
+			return EXIT_FAILURE;
 		}
 	}
 
@@ -414,7 +414,7 @@ int Commands::analogDelayStereoCommand(const std::string& command, int argc, cha
 
 	FX::delay(wav, true, delayMillisecondsLeft, feedbackLeft, delayMillisecondsRight, feedbackRight, mix, maxFileLengthMs, feedbackProcessor);
 	wav.save(output);
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 /* tape-delay-mono command*/
@@ -436,7 +436,7 @@ int Commands::tapeDelayMonoCommand(const std::string& command, int argc, char* a
 	if (argc != 6 && argc != 7 && argc != 8)
 	{
 		Commands::printIncorrectArgumentsWarning(command);
-		return 1;
+		return EXIT_FAILURE;
 	}
 	std::string input = static_cast<std::string>(argv[2]);
 
@@ -444,31 +444,31 @@ int Commands::tapeDelayMonoCommand(const std::string& command, int argc, char* a
 	if (!tryParse(argv[3], delayMilliseconds))
 	{
 		std::cout << "Parameter 'delayMilliseconds' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	double feedback = 0.0;
 	if (!tryParse(argv[4], feedback))
 	{
 		std::cout << "Parameter 'feedback' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 	if (feedback < 0 || feedback > 100)
 	{
 		std::cout << "Parameter 'feedback' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	double mix = 0.0;
 	if (!tryParse(argv[5], mix))
 	{
 		std::cout << "Parameter 'mix' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 	if (mix < 0 || mix > 100)
 	{
 		std::cout << "Parameter 'mix' must be between 0 and 100. Provided value: " << argv[5] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	std::string output = argc == 7 || argc == 8 ? static_cast<std::string>(argv[6]) : input;
@@ -479,7 +479,7 @@ int Commands::tapeDelayMonoCommand(const std::string& command, int argc, char* a
 		if (!tryParse(argv[7], maxFileLengthMs))
 		{
 			std::cout << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
-			return 1;
+			return EXIT_FAILURE;
 		}
 	}
 
@@ -490,7 +490,7 @@ int Commands::tapeDelayMonoCommand(const std::string& command, int argc, char* a
 
 	FX::delay(wav, delayMilliseconds, feedback, mix, maxFileLengthMs, feedbackProcessor);
 	wav.save(output);
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 /* tape-delay-stereo command*/
@@ -514,7 +514,7 @@ int Commands::tapeDelayStereoCommand(const std::string& command, int argc, char*
 	if (argc != 8 && argc != 9 && argc != 10)
 	{
 		Commands::printIncorrectArgumentsWarning(command);
-		return 1;
+		return EXIT_FAILURE;
 	}
 	std::string input = static_cast<std::string>(argv[2]);
 
@@ -522,50 +522,50 @@ int Commands::tapeDelayStereoCommand(const std::string& command, int argc, char*
 	if (!tryParse(argv[3], delayMillisecondsLeft))
 	{
 		std::cout << "Parameter 'delayMillisecondsLeft' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	double feedbackLeft = 0.0;
 	if (!tryParse(argv[4], feedbackLeft))
 	{
 		std::cout << "Parameter 'feedbackLeft' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 	if (feedbackLeft < 0 || feedbackLeft > 100)
 	{
 		std::cout << "Parameter 'feedbackLeft' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	uint32_t delayMillisecondsRight = 0;
 	if (!tryParse(argv[5], delayMillisecondsRight))
 	{
 		std::cout << "Parameter 'delayMillisecondsRight' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	double feedbackRight = 0.0;
 	if (!tryParse(argv[6], feedbackRight))
 	{
 		std::cout << "Parameter 'feedbackRight' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 	if (feedbackRight < 0 || feedbackRight > 100)
 	{
 		std::cout << "Parameter 'feedbackRight' must be between 0 and 100. Provided value: " << argv[6] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	double mix = 0.0;
 	if (!tryParse(argv[7], mix))
 	{
 		std::cout << "Parameter 'mix' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 	if (mix < 0 || mix > 100)
 	{
 		std::cout << "Parameter 'mix' must be between 0 and 100. Provided value: " << argv[7] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	std::string output = argc == 9 || argc == 10 ? static_cast<std::string>(argv[8]) : input;
@@ -576,7 +576,7 @@ int Commands::tapeDelayStereoCommand(const std::string& command, int argc, char*
 		if (!tryParse(argv[9], maxFileLengthMs))
 		{
 			std::cout << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[9] << std::endl;
-			return 1;
+			return EXIT_FAILURE;
 		}
 	}
 
@@ -604,7 +604,7 @@ int Commands::tapeDelayStereoCommand(const std::string& command, int argc, char*
 
 	FX::delay(wav, true, delayMillisecondsLeft, feedbackLeft, delayMillisecondsRight, feedbackRight, mix, maxFileLengthMs, feedbackProcessor);
 	wav.save(output);
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 /* various delay overloads */
@@ -746,7 +746,7 @@ int Commands::reverbCommand(const std::string& command, int argc, char* argv[])
 	if (argc != 6 && argc != 7 && argc != 8)
 	{
 		Commands::printIncorrectArgumentsWarning(command);
-		return 1;
+		return EXIT_FAILURE;
 	}
 	std::string input = static_cast<std::string>(argv[2]);
 
@@ -754,36 +754,36 @@ int Commands::reverbCommand(const std::string& command, int argc, char* argv[])
 	if (!tryParse(argv[3], size))
 	{
 		std::cout << "Parameter 'size' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 	if (size < 0 || size > 100)
 	{
 		std::cout << "Parameter 'size' must be between 0 and 100. Provided value: " << argv[3] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	double time = 0.0;
 	if (!tryParse(argv[4], time))
 	{
 		std::cout << "Parameter 'time' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 	if (time < 0 || time > 100)
 	{
 		std::cout << "Parameter 'time' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	double mix = 0.0;
 	if (!tryParse(argv[5], mix))
 	{
 		std::cout << "Parameter 'mix' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 	if (mix < 0 || mix > 100)
 	{
 		std::cout << "Parameter 'mix' must be between 0 and 100. Provided value: " << argv[5] << std::endl;
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	std::string output = argc == 7 || argc == 8 ? static_cast<std::string>(argv[6]) : input;
@@ -794,14 +794,14 @@ int Commands::reverbCommand(const std::string& command, int argc, char* argv[])
 		if (!tryParse(argv[7], maxFileLengthMs))
 		{
 			std::cout << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
-			return 1;
+			return EXIT_FAILURE;
 		}
 	}
 
 	WavFile wav(input, true);
 	FX::reverb(wav, size, time, mix, maxFileLengthMs);
 	wav.save(output);
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 void FX::reverb(WavFile& wave, double size, double time, double mix, uint32_t maxFileLengthMs)

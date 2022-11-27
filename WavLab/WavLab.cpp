@@ -6,7 +6,7 @@ int main(int argc, char* argv[])
     if (argc < 2)
     {
         std::cout << "No command specified. To see available commands run 'wavlab help'" << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     CommandsContainer commands;
@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
             std::string argument = static_cast<std::string>(argv[2]);
             commands.help(argument);
         }
-        return 0;
+        return EXIT_SUCCESS;
     }
     else 
     {

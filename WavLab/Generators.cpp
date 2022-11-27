@@ -23,7 +23,7 @@ int Commands::sineWaveCommand(const std::string& command, int argc, char* argv[]
     if (argc != 7)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string output = static_cast<std::string>(argv[2]);
 
@@ -31,35 +31,35 @@ int Commands::sineWaveCommand(const std::string& command, int argc, char* argv[]
     if (!tryParse(argv[3], frequency))
     {
         std::cout << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     uint32_t sampleRate = 44100;
     if (!tryParse(argv[4], sampleRate))
     {
         std::cout << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     unsigned short bitDepth = 16;
     if (!tryParse(argv[5], bitDepth))
     {
         std::cout << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     int lengthMs = 1000;
     if (!tryParse(argv[6], lengthMs))
     {
         std::cout << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     WavFile wav(1, sampleRate, bitDepth);
     Generators::sineWave(wav, lengthMs, frequency);
     wav.save(output);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void Generators::sineWave(WavFile& wave, int lengthMs, double frequency)
@@ -96,7 +96,7 @@ int Commands::squareWaveCommand(const std::string& command, int argc, char* argv
     if (argc != 7)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string output = static_cast<std::string>(argv[2]);
 
@@ -104,35 +104,35 @@ int Commands::squareWaveCommand(const std::string& command, int argc, char* argv
     if (!tryParse(argv[3], frequency))
     {
         std::cout << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     uint32_t sampleRate = 44100;
     if (!tryParse(argv[4], sampleRate))
     {
         std::cout << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     unsigned short bitDepth = 16;
     if (!tryParse(argv[5], bitDepth))
     {
         std::cout << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     int lengthMs = 1000;
     if (!tryParse(argv[6], lengthMs))
     {
         std::cout << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     WavFile wav(1, sampleRate, bitDepth);
     Generators::squareWave(wav, lengthMs, frequency);
     wav.save(output);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void Generators::squareWave(WavFile& wave, int lengthMs, double frequency)
@@ -178,7 +178,7 @@ int Commands::squareWaveAdditiveCommand(const std::string& command, int argc, ch
     if (argc != 7 && argc != 8)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string output = static_cast<std::string>(argv[2]);
 
@@ -186,28 +186,28 @@ int Commands::squareWaveAdditiveCommand(const std::string& command, int argc, ch
     if (!tryParse(argv[3], frequency))
     {
         std::cout << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     uint32_t sampleRate = 44100;
     if (!tryParse(argv[4], sampleRate))
     {
         std::cout << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     unsigned short bitDepth = 16;
     if (!tryParse(argv[5], bitDepth))
     {
         std::cout << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     int lengthMs = 1000;
     if (!tryParse(argv[6], lengthMs))
     {
         std::cout << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     int harmonics = 1000;
@@ -216,7 +216,7 @@ int Commands::squareWaveAdditiveCommand(const std::string& command, int argc, ch
         if (!tryParse(argv[7], harmonics))
         {
             std::cout << "Parameter 'harmonics' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
-            return 1;
+            return EXIT_FAILURE;
         }
     }
 
@@ -224,7 +224,7 @@ int Commands::squareWaveAdditiveCommand(const std::string& command, int argc, ch
     Generators::squareWaveAdditive(wav, lengthMs, frequency, harmonics);
     wav.save(output);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void Generators::squareWaveAdditive(WavFile& wave, int lengthMs, double frequency, int harmonics)
@@ -270,7 +270,7 @@ int Commands::triangleWaveCommand(const std::string& command, int argc, char* ar
     if (argc != 7)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string output = static_cast<std::string>(argv[2]);
 
@@ -278,35 +278,35 @@ int Commands::triangleWaveCommand(const std::string& command, int argc, char* ar
     if (!tryParse(argv[3], frequency))
     {
         std::cout << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     uint32_t sampleRate = 44100;
     if (!tryParse(argv[4], sampleRate))
     {
         std::cout << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     unsigned short bitDepth = 16;
     if (!tryParse(argv[5], bitDepth))
     {
         std::cout << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     int lengthMs = 1000;
     if (!tryParse(argv[6], lengthMs))
     {
         std::cout << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     WavFile wav(1, sampleRate, bitDepth);
     Generators::triangleWave(wav, lengthMs, frequency);
     wav.save(output);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void Generators::triangleWave(WavFile& wave, int lengthMs, double frequency)
@@ -361,7 +361,7 @@ int Commands::triangleWaveAdditiveCommand(const std::string& command, int argc, 
     if (argc != 7 && argc != 8)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string output = static_cast<std::string>(argv[2]);
 
@@ -369,28 +369,28 @@ int Commands::triangleWaveAdditiveCommand(const std::string& command, int argc, 
     if (!tryParse(argv[3], frequency))
     {
         std::cout << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     uint32_t sampleRate = 44100;
     if (!tryParse(argv[4], sampleRate))
     {
         std::cout << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     unsigned short bitDepth = 16;
     if (!tryParse(argv[5], bitDepth))
     {
         std::cout << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     int lengthMs = 1000;
     if (!tryParse(argv[6], lengthMs))
     {
         std::cout << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     int harmonics = 1000;
@@ -399,7 +399,7 @@ int Commands::triangleWaveAdditiveCommand(const std::string& command, int argc, 
         if (!tryParse(argv[7], harmonics))
         {
             std::cout << "Parameter 'harmonics' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
-            return 1;
+            return EXIT_FAILURE;
         }
     }
 
@@ -407,7 +407,7 @@ int Commands::triangleWaveAdditiveCommand(const std::string& command, int argc, 
     Generators::triangleWaveAdditive(wav, lengthMs, frequency, harmonics);
     wav.save(output);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void Generators::triangleWaveAdditive(WavFile& wave, int lengthMs, double frequency, int harmonics)
@@ -453,7 +453,7 @@ int Commands::sawtoothWaveCommand(const std::string& command, int argc, char* ar
     if (argc != 7)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string output = static_cast<std::string>(argv[2]);
 
@@ -461,35 +461,35 @@ int Commands::sawtoothWaveCommand(const std::string& command, int argc, char* ar
     if (!tryParse(argv[3], frequency))
     {
         std::cout << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     uint32_t sampleRate = 44100;
     if (!tryParse(argv[4], sampleRate))
     {
         std::cout << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     unsigned short bitDepth = 16;
     if (!tryParse(argv[5], bitDepth))
     {
         std::cout << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     int lengthMs = 1000;
     if (!tryParse(argv[6], lengthMs))
     {
         std::cout << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     WavFile wav(1, sampleRate, bitDepth);
     Generators::sawtoothWave(wav, lengthMs, frequency);
     wav.save(output);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void Generators::sawtoothWave(WavFile& wave, int lengthMs, double frequency)
@@ -537,7 +537,7 @@ int Commands::sawtoothWaveAdditiveCommand(const std::string& command, int argc, 
     if (argc != 7 && argc != 8)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string output = static_cast<std::string>(argv[2]);
 
@@ -545,28 +545,28 @@ int Commands::sawtoothWaveAdditiveCommand(const std::string& command, int argc, 
     if (!tryParse(argv[3], frequency))
     {
         std::cout << "Parameter 'frequency' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     uint32_t sampleRate = 44100;
     if (!tryParse(argv[4], sampleRate))
     {
         std::cout << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     unsigned short bitDepth = 16;
     if (!tryParse(argv[5], bitDepth))
     {
         std::cout << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     int lengthMs = 1000;
     if (!tryParse(argv[6], lengthMs))
     {
         std::cout << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     int harmonics = 1000;
@@ -575,7 +575,7 @@ int Commands::sawtoothWaveAdditiveCommand(const std::string& command, int argc, 
         if (!tryParse(argv[7], harmonics))
         {
             std::cout << "Parameter 'harmonics' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
-            return 1;
+            return EXIT_FAILURE;
         }
     }
 
@@ -583,7 +583,7 @@ int Commands::sawtoothWaveAdditiveCommand(const std::string& command, int argc, 
     Generators::sawtoothWaveAdditive(wav, lengthMs, frequency, harmonics);
     wav.save(output);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void Generators::sawtoothWaveAdditive(WavFile& wave, int lengthMs, double frequency, int harmonics)
@@ -628,7 +628,7 @@ int Commands::whiteNoiseCommand(const std::string& command, int argc, char* argv
     if (argc != 6)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string output = static_cast<std::string>(argv[2]);
 
@@ -637,28 +637,28 @@ int Commands::whiteNoiseCommand(const std::string& command, int argc, char* argv
     if (!tryParse(argv[3], sampleRate))
     {
         std::cout << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     unsigned short bitDepth = 16;
     if (!tryParse(argv[4], bitDepth))
     {
         std::cout << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     int lengthMs = 1000;
     if (!tryParse(argv[5], lengthMs))
     {
         std::cout << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     WavFile wav(1, sampleRate, bitDepth);
     Generators::whiteNoise(wav, lengthMs);
     wav.save(output);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void Generators::whiteNoise(WavFile& wave, int lengthMs)
@@ -694,7 +694,7 @@ int Commands::pinkNoiseCommand(const std::string& command, int argc, char* argv[
     if (argc != 6)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string output = static_cast<std::string>(argv[2]);
 
@@ -703,28 +703,28 @@ int Commands::pinkNoiseCommand(const std::string& command, int argc, char* argv[
     if (!tryParse(argv[3], sampleRate))
     {
         std::cout << "Parameter 'sampleRate' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     unsigned short bitDepth = 16;
     if (!tryParse(argv[4], bitDepth))
     {
         std::cout << "Parameter 'bitDepth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     int lengthMs = 1000;
     if (!tryParse(argv[5], lengthMs))
     {
         std::cout << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     WavFile wav(1, sampleRate, bitDepth);
     Generators::pinkNoise(wav, lengthMs);
     wav.save(output);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void Generators::pinkNoise(WavFile& wave, int lengthMs)

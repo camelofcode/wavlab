@@ -19,12 +19,12 @@ int Commands::statCommand(const std::string& command, int argc, char* argv[])
     if (argc != 3)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string path = static_cast<std::string>(argv[2]);
     WavFile wav(path, false);
     wav.printDetails();
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 /* normalise command */
@@ -43,7 +43,7 @@ int Commands::normaliseCommand(const std::string& command, int argc, char* argv[
     if (argc != 3 && argc != 4)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string input = static_cast<std::string>(argv[2]);
     std::string output = argc == 4 ? static_cast<std::string>(argv[3]) : input;
@@ -51,7 +51,7 @@ int Commands::normaliseCommand(const std::string& command, int argc, char* argv[
     WavFile wav(input, true);
     Tools::normalise(wav);
     wav.save(output);
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void Tools::normalise(WavFile &wave)
@@ -110,7 +110,7 @@ int Commands::reverseCommand(const std::string& command, int argc, char* argv[])
     if (argc != 3 && argc != 4)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string input = static_cast<std::string>(argv[2]);
     std::string output = argc == 4 ? static_cast<std::string>(argv[3]) : input;
@@ -118,7 +118,7 @@ int Commands::reverseCommand(const std::string& command, int argc, char* argv[])
     WavFile wav(input, true);
     Tools::reverse(wav);
     wav.save(output);
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void Tools::reverse(WavFile& wave)
@@ -161,7 +161,7 @@ int Commands::flipPhaseCommand(const std::string& command, int argc, char* argv[
     if (argc != 3 && argc != 4)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string input = static_cast<std::string>(argv[2]);
     std::string output = argc == 4 ? static_cast<std::string>(argv[3]) : input;
@@ -169,7 +169,7 @@ int Commands::flipPhaseCommand(const std::string& command, int argc, char* argv[
     WavFile wav(input, true);
     Tools::flipPhase(wav);
     wav.save(output);
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void Tools::flipPhase(WavFile& wave)
@@ -199,7 +199,7 @@ int Commands::swapChannelsCommand(const std::string& command, int argc, char* ar
     if (argc != 3 && argc != 4)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string input = static_cast<std::string>(argv[2]);
     std::string output = argc == 4 ? static_cast<std::string>(argv[3]) : input;
@@ -207,7 +207,7 @@ int Commands::swapChannelsCommand(const std::string& command, int argc, char* ar
     WavFile wav(input, true);
     Tools::swapChannels(wav);
     wav.save(output);
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void Tools::swapChannels(WavFile& wave)
@@ -248,7 +248,7 @@ int Commands::splitStereoCommand(const std::string& command, int argc, char* arg
     if (argc != 3)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string input = static_cast<std::string>(argv[2]);
 
@@ -257,7 +257,7 @@ int Commands::splitStereoCommand(const std::string& command, int argc, char* arg
     if (stereo.getNumberOfChannels() != 2)
     {
         std::cout << "Input file is not stereo." << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     WavFile left(1, stereo.getSampleRate(), stereo.getBitsPerSample());
@@ -268,7 +268,7 @@ int Commands::splitStereoCommand(const std::string& command, int argc, char* arg
     left.save(StringHelpers::stringReplace(input, ".wav", "_l.wav"));
     right.save(StringHelpers::stringReplace(input, ".wav", "_r.wav"));
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void Tools::splitStereo(WavFile& stereo, WavFile& left, WavFile& right)
@@ -307,7 +307,7 @@ int Commands::combineLeftRightCommand(const std::string& command, int argc, char
     if (argc != 5)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string leftInput = static_cast<std::string>(argv[2]);
     std::string rightInput = static_cast<std::string>(argv[3]);
@@ -319,19 +319,19 @@ int Commands::combineLeftRightCommand(const std::string& command, int argc, char
     if (left.getNumberOfChannels() != 1)
     {
         std::cout << "Left input file is not mono." << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     if (right.getNumberOfChannels() != 1)
     {
         std::cout << "Right input file is not mono." << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     if (left.getSampleRate() != right.getSampleRate())
     {
         std::cout << "Left and Right input files are not the same sample rate." << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     auto allSampleRates = std::vector<unsigned short>({ left.getBitsPerSample(), right.getBitsPerSample() });
@@ -343,7 +343,7 @@ int Commands::combineLeftRightCommand(const std::string& command, int argc, char
 
     stereo.save(output);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void Tools::combineLeftRight(WavFile& left, WavFile& right, WavFile& out)
@@ -382,7 +382,7 @@ int Commands::splitStereoMidSideCommand(const std::string& command, int argc, ch
     if (argc != 3)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string input = static_cast<std::string>(argv[2]);
 
@@ -391,7 +391,7 @@ int Commands::splitStereoMidSideCommand(const std::string& command, int argc, ch
     if (stereo.getNumberOfChannels() != 2)
     {
         std::cout << "Input file is not stereo." << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     WavFile mid(1, stereo.getSampleRate(), stereo.getBitsPerSample());
@@ -402,7 +402,7 @@ int Commands::splitStereoMidSideCommand(const std::string& command, int argc, ch
     mid.save(StringHelpers::stringReplace(input, ".wav", "_mid.wav"));
     side.save(StringHelpers::stringReplace(input, ".wav", "_side.wav"));
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void Tools::splitStereoMidSide(WavFile& stereo, WavFile& mid, WavFile& side)
@@ -443,7 +443,7 @@ int Commands::combineMidSideCommand(const std::string& command, int argc, char* 
     if (argc != 5)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string midInput = static_cast<std::string>(argv[2]);
     std::string sideInput = static_cast<std::string>(argv[3]);
@@ -455,19 +455,19 @@ int Commands::combineMidSideCommand(const std::string& command, int argc, char* 
     if (mid.getNumberOfChannels() != 1)
     {
         std::cout << "Mid input file is not mono." << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     if (side.getNumberOfChannels() != 1)
     {
         std::cout << "Side input file is not mono." << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     if (side.getSampleRate() != mid.getSampleRate())
     {
         std::cout << "Mid and Side input files are not the same sample rate." << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     auto allSampleRates = std::vector<unsigned short>({ mid.getBitsPerSample(), side.getBitsPerSample() });
@@ -479,7 +479,7 @@ int Commands::combineMidSideCommand(const std::string& command, int argc, char* 
 
     stereo.save(output);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void Tools::combineMidSide(WavFile& mid, WavFile& side, WavFile& out)
@@ -522,7 +522,7 @@ int Commands::gainCommand(const std::string& command, int argc, char* argv[])
     if (argc != 4 && argc != 5)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string input = static_cast<std::string>(argv[2]);
 
@@ -530,7 +530,7 @@ int Commands::gainCommand(const std::string& command, int argc, char* argv[])
     if (!tryParse(argv[3], gain))
     {
         std::cout << "Parameter 'gain' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     std::string output = argc == 5 ? static_cast<std::string>(argv[4]) : input;
@@ -538,7 +538,7 @@ int Commands::gainCommand(const std::string& command, int argc, char* argv[])
     WavFile wav(input, true);
     Tools::gain(wav, gain);
     wav.save(output);
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void Tools::gain(WavFile &wave, double gain)
@@ -570,7 +570,7 @@ int Commands::gainDbCommand(const std::string& command, int argc, char* argv[])
     if (argc != 4 && argc != 5)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string input = static_cast<std::string>(argv[2]);
 
@@ -578,7 +578,7 @@ int Commands::gainDbCommand(const std::string& command, int argc, char* argv[])
     if (!tryParse(argv[3], dB))
     {
         std::cout << "Parameter 'db' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     std::string output = argc == 5 ? static_cast<std::string>(argv[4]) : input;
@@ -586,7 +586,7 @@ int Commands::gainDbCommand(const std::string& command, int argc, char* argv[])
     WavFile wav(input, true);
     Tools::decibelGain(wav, dB);
     wav.save(output);
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void Tools::decibelGain(WavFile &wave, double dB)
@@ -609,13 +609,13 @@ int Commands::getPeakDbCommand(const std::string& command, int argc, char* argv[
     if (argc != 3)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string input = static_cast<std::string>(argv[2]);
 
     WavFile wav(input, true);
     std::cout << Tools::getPeakDecibels(wav) << "dB";
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 double Tools::getPeakDecibels(WavFile& wave) 
@@ -649,13 +649,13 @@ int Commands::getRMSDbCommand(const std::string& command, int argc, char* argv[]
     if (argc != 3)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string input = static_cast<std::string>(argv[2]);
 
     WavFile wav(input, true);
     std::cout << Tools::getRMSDecibels(wav) << "dB";
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 double Tools::getRMSDecibels(WavFile& wave)
@@ -689,7 +689,7 @@ int Commands::mixCommand(const std::string& command, int argc, char* argv[])
     if (argc < 5)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string output = static_cast<std::string>(argv[2]);
 
@@ -708,7 +708,7 @@ int Commands::mixCommand(const std::string& command, int argc, char* argv[])
             if (sampleRate != inputWav.getSampleRate())
             {
                 std::cout << "Not all input files are the same sample rate." << std::endl;
-                return 1;
+                return EXIT_FAILURE;
             }
         }
         sampleRate = inputWav.getSampleRate();
@@ -727,7 +727,7 @@ int Commands::mixCommand(const std::string& command, int argc, char* argv[])
     Tools::mix(inputWavs, outputWav);
     outputWav.save(output);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void Tools::mix(std::vector<WavFile>& inputs, WavFile& output)
@@ -810,7 +810,7 @@ int Commands::splitCommand(const std::string& command, int argc, char* argv[])
     if (argc < 4)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string input = static_cast<std::string>(argv[2]);
 
@@ -827,7 +827,7 @@ int Commands::splitCommand(const std::string& command, int argc, char* argv[])
         if (!tryParse(argv[i], timeInMs))
         {
             std::cout << "Parameter 'splitTimeMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[i] << std::endl;
-            return 1;
+            return EXIT_FAILURE;
         }
         splitTimesMs.push_back(timeInMs);
 
@@ -846,7 +846,7 @@ int Commands::splitCommand(const std::string& command, int argc, char* argv[])
         i++;
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void Tools::split(WavFile& input, std::vector<WavFile>& outputs, const std::vector<uint32_t>& splitTimesMs)
@@ -919,7 +919,7 @@ int Commands::joinCommand(const std::string&command, int argc, char* argv[])
     if (argc < 5)
     {
         Commands::printIncorrectArgumentsWarning(command);
-        return 1;
+        return EXIT_FAILURE;
     }
     std::string output = static_cast<std::string>(argv[2]);
 
@@ -938,7 +938,7 @@ int Commands::joinCommand(const std::string&command, int argc, char* argv[])
             if (sampleRate != inputWav.getSampleRate())
             {
                 std::cout << "Not all input files are the same sample rate." << std::endl;
-                return 1;
+                return EXIT_FAILURE;
             }
         }
         sampleRate = inputWav.getSampleRate();
@@ -957,7 +957,7 @@ int Commands::joinCommand(const std::string&command, int argc, char* argv[])
     Tools::join(inputWavs, outputWav);
     outputWav.save(output);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void Tools::join(std::vector<WavFile>& inputs, WavFile& output)
