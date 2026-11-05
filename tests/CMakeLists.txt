@@ -12,6 +12,11 @@ add_executable(wavlab_api_tests library_api_tests.cpp)
 set_target_properties(wavlab_api_tests PROPERTIES CXX_EXTENSIONS OFF)
 target_compile_features(wavlab_api_tests PRIVATE cxx_std_20)
 target_link_libraries(wavlab_api_tests PRIVATE wavlab::wavlab)
+target_compile_definitions(
+    wavlab_api_tests
+    PRIVATE
+        WAVLAB_FIXTURE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/fixtures"
+)
 wavlab_apply_project_options(wavlab_api_tests)
 add_test(NAME wavlab.library.api COMMAND wavlab_api_tests)
 
@@ -32,6 +37,13 @@ set_tests_properties(
     wavlab.cli.help
     PROPERTIES
         PASS_REGULAR_EXPRESSION "wavlab commands"
+)
+add_test(
+    NAME wavlab.cli.independent-reader
+    COMMAND
+        "${Python3_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/verify_cli_wav.py"
+        "$<TARGET_FILE:wavlab_cli>"
 )
 add_test(
     NAME wavlab.fixtures.current

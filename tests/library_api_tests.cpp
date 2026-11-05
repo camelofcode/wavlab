@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstdint>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <string_view>
 #include <vector>
@@ -41,6 +42,18 @@ std::filesystem::path temporaryWavPath()
     const auto suffix = std::chrono::steady_clock::now().time_since_epoch().count();
     return std::filesystem::temp_directory_path() /
            ("wavlab-library-test-" + std::to_string(suffix) + ".wav");
+}
+
+std::vector<char> fileBytes(const std::filesystem::path &path)
+{
+    std::ifstream file(path, std::ios::binary);
+    return {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
+}
+
+void writeFileBytes(const std::filesystem::path &path, const std::vector<char> &bytes)
+{
+    std::ofstream file(path, std::ios::binary | std::ios::trunc);
+    file.write(bytes.data(), static_cast<std::streamsize>(bytes.size()));
 }
 
 } // namespace
@@ -89,12 +102,81 @@ int main()
     check(reopened.samples().size() == 4, "round trip preserves the sample count");
     check(std::abs(reopened.samples()[0] - 0.25) < 0.0001, "round trip preserves sample values");
 
+    auto overwrite = WavFile::open(path);
+    overwrite.samples()[0] = -0.25;
+    overwrite.save(path);
+    check(std::abs(WavFile::open(path).samples()[0] + 0.25) < 0.0001,
+          "saving over an input file uses a successful replacement");
+
     std::error_code removeError;
     std::filesystem::remove(path, removeError);
     check(!removeError, "temporary WAV file can be removed");
 
     checkError([&path] { static_cast<void>(WavFile::open(path)); }, WavErrorCode::io,
                "open reports missing files as typed I/O errors");
+
+    const std::filesystem::path fixtureDirectory = WAVLAB_FIXTURE_DIR;
+    const auto unknownChunk = WavFile::open(fixtureDirectory / "unknown_odd_chunk.wav");
+    check(unknownChunk.sampleCount() == 2,
+          "unknown odd-sized chunks and their padding are skipped");
+
+    for (const std::string_view fixtureName :
+         {"pcm_u8_mono.wav", "pcm_s16_mono.wav", "pcm_s24_mono.wav", "pcm_s32_mono.wav",
+          "pcm_s16_stereo.wav", "empty_pcm_s16_mono.wav"})
+    {
+        const auto fixture = WavFile::open(fixtureDirectory / fixtureName);
+        check(fixture.sampleCount() == fixture.samples().size(),
+              "PCM fixtures load their declared sample counts");
+    }
+
+    for (const std::string_view fixtureName : {"bext_before_data.wav", "bext_after_data.wav"})
+    {
+        const auto inputPath = fixtureDirectory / fixtureName;
+        auto fixture = WavFile::open(inputPath);
+        check(fixture.details().find("wavlab tests") != std::string::npos,
+              "BEXT text metadata is loaded");
+        const auto outputPath = temporaryWavPath();
+        fixture.save(outputPath);
+        check(fileBytes(inputPath) == fileBytes(outputPath),
+              "BEXT position and unknown extra data survive a round trip");
+        std::filesystem::remove(outputPath, removeError);
+    }
+
+    const auto oddInputPath = fixtureDirectory / "pcm_u8_mono.wav";
+    auto oddFixture = WavFile::open(oddInputPath);
+    const auto oddOutputPath = temporaryWavPath();
+    oddFixture.save(oddOutputPath);
+    check(fileBytes(oddInputPath) == fileBytes(oddOutputPath),
+          "odd-sized sample data is serialized with RIFF padding");
+    std::filesystem::remove(oddOutputPath, removeError);
+
+    const auto validBytes = fileBytes(fixtureDirectory / "pcm_s16_mono.wav");
+    auto corruptBytes = validBytes;
+    corruptBytes[0] = 'N';
+    const auto corruptPath = temporaryWavPath();
+    writeFileBytes(corruptPath, corruptBytes);
+    checkError([&corruptPath] { static_cast<void>(WavFile::open(corruptPath)); },
+               WavErrorCode::invalidFile, "invalid RIFF identifiers are rejected");
+
+    auto incompleteFrameBytes = validBytes;
+    incompleteFrameBytes[40] = 9;
+    incompleteFrameBytes[41] = 0;
+    incompleteFrameBytes[42] = 0;
+    incompleteFrameBytes[43] = 0;
+    const auto incompleteFramePath = temporaryWavPath();
+    writeFileBytes(incompleteFramePath, incompleteFrameBytes);
+    checkError([&incompleteFramePath] { static_cast<void>(WavFile::open(incompleteFramePath)); },
+               WavErrorCode::invalidFile, "partial PCM sample frames are rejected");
+
+    auto truncatedBytes = validBytes;
+    truncatedBytes.pop_back();
+    const auto truncatedPath = temporaryWavPath();
+    writeFileBytes(truncatedPath, truncatedBytes);
+    checkError([&truncatedPath] { static_cast<void>(WavFile::open(truncatedPath)); },
+               WavErrorCode::invalidFile, "truncated WAV files are rejected");
+    std::filesystem::remove(corruptPath, removeError);
+    std::filesystem::remove(incompleteFramePath, removeError);
+    std::filesystem::remove(truncatedPath, removeError);
 
     return failures == 0 ? 0 : 1;
 }

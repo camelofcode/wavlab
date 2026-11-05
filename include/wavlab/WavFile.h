@@ -66,7 +66,7 @@ class WavFile
     WavFile(std::uint16_t numberOfChannels, std::uint32_t sampleRate, std::uint16_t bitsPerSample);
 
     void validate() const;
-    void readBextFields(std::ifstream &file, bool isFooter);
+    void readBextFields(std::ifstream &file, std::uint32_t chunkSize, bool isFooter);
     void setDefaultBextFields();
     void updatePcmLayout();
 
@@ -86,6 +86,7 @@ class WavFile
     std::uint16_t bitsPerSample_{};
 
     bool isBroadcastWav = false;
+    bool bextIsFooter = false;
 
     std::string bextChunkId;
     std::uint32_t bextChunkSize{};
@@ -97,6 +98,7 @@ class WavFile
     std::uint32_t timeReferenceLow{};
     std::uint32_t timeReferenceHigh{};
     std::uint16_t version{};
+    std::vector<std::uint8_t> bextExtraData;
 
     std::string dataChunkId;
     std::uint32_t dataChunkSize{};

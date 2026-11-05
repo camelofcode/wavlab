@@ -333,6 +333,28 @@ Tasks:
 9. Write to a temporary file and atomically replace the destination when the
    CLI overwrites its input, so a failed save does not destroy the source.
 
+Phase 3 status: complete.
+
+Implementation notes:
+
+- Checked stream helpers now encode and decode integer PCM explicitly in
+  little-endian order, including signed 24-bit values.
+- Floating-point conversion handles unsigned 8-bit PCM correctly, preserves
+  full-scale asymmetry, rounds to the nearest integer, clamps out-of-range
+  values, and maps NaN to silence.
+- RIFF input is scanned as bounded, padded chunks. Unknown chunks are skipped;
+  missing, duplicate, truncated, inconsistent, and partial-frame structures
+  are rejected with typed errors.
+- BEXT chunks retain their header/footer location and all unknown extension
+  bytes. Fixed strings are trimmed when read and safely zero-padded when
+  written.
+- Serialization includes all chunk headers and odd-byte padding, checks every
+  narrowing calculation, and writes through a temporary sibling before
+  replacing the destination.
+- Tests exercise every fixture, literal byte order, conversion boundaries,
+  corrupt inputs, byte-identical BEXT and odd-data round trips, sanitizer
+  builds, and Python's independent standard-library WAV reader.
+
 Required tests:
 
 - Little-endian helpers and signed 24-bit boundary values.

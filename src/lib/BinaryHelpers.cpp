@@ -48,6 +48,17 @@ std::string readString(std::istream &stream, std::size_t length)
     return value;
 }
 
+std::vector<std::uint8_t> readBytes(std::istream &stream, std::size_t length)
+{
+    std::vector<std::uint8_t> value(length);
+    stream.read(reinterpret_cast<char *>(value.data()), static_cast<std::streamsize>(length));
+    if (!stream)
+    {
+        throw WavError(WavErrorCode::io, "unexpected end of WAV input");
+    }
+    return value;
+}
+
 std::uint8_t readUInt8(std::istream &stream) { return readBytes<1>(stream)[0]; }
 
 std::uint16_t readUInt16(std::istream &stream)
@@ -95,6 +106,11 @@ void writeString(std::ostream &stream, std::string_view value)
     {
         throw WavError(WavErrorCode::io, "failed while writing WAV output");
     }
+}
+
+void writeBytes(std::ostream &stream, const std::vector<std::uint8_t> &value)
+{
+    writeBytes(stream, value.data(), value.size());
 }
 
 void writeFixedString(std::ostream &stream, std::string_view value, std::size_t size)

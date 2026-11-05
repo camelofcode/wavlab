@@ -1,5 +1,6 @@
 #include "BinaryHelpers.h"
 #include "ConversionHelpers.h"
+#include <chrono>
 #include <fstream>
 #include <limits>
 #include <sstream>
@@ -7,6 +8,10 @@
 #include <utility>
 #include <vector>
 #include <wavlab/WavFile.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 namespace wavlab
 {
@@ -31,6 +36,80 @@ namespace
                        "unsupported PCM bit depth " + std::to_string(bits) +
                            "; expected 8, 16, 24, or 32 bits");
     }
+}
+
+std::string readFixedString(std::istream &stream, std::size_t size)
+{
+    std::string value = BinaryHelpers::readString(stream, size);
+    const auto terminator = value.find('\0');
+    if (terminator != std::string::npos)
+    {
+        value.resize(terminator);
+    }
+    return value;
+}
+
+std::uint64_t serializedChunkSize(std::uint32_t dataSize)
+{
+    return 8ULL + dataSize + (dataSize % 2U);
+}
+
+void writePadding(std::ostream &stream, std::uint32_t dataSize)
+{
+    if (dataSize % 2U != 0)
+    {
+        BinaryHelpers::writeUInt8(stream, 0);
+    }
+}
+
+std::filesystem::path temporarySibling(const std::filesystem::path &destination)
+{
+    const auto suffix = std::chrono::steady_clock::now().time_since_epoch().count();
+    auto temporary = destination;
+    temporary += ".wavlab-tmp-" + std::to_string(suffix);
+    return temporary;
+}
+
+class TemporaryFileGuard
+{
+  public:
+    explicit TemporaryFileGuard(std::filesystem::path path) : path_(std::move(path)) {}
+    ~TemporaryFileGuard()
+    {
+        if (active_)
+        {
+            std::error_code ignored;
+            std::filesystem::remove(path_, ignored);
+        }
+    }
+    TemporaryFileGuard(const TemporaryFileGuard &) = delete;
+    TemporaryFileGuard &operator=(const TemporaryFileGuard &) = delete;
+    void release() noexcept { active_ = false; }
+
+  private:
+    std::filesystem::path path_;
+    bool active_ = true;
+};
+
+void replaceFile(const std::filesystem::path &temporary, const std::filesystem::path &destination)
+{
+#ifdef _WIN32
+    if (!MoveFileExW(temporary.c_str(), destination.c_str(),
+                     MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH))
+    {
+        throw WavError(WavErrorCode::io, "could not replace WAV file: " + destination.string() +
+                                             " (Windows error " + std::to_string(GetLastError()) +
+                                             ")");
+    }
+#else
+    std::error_code error;
+    std::filesystem::rename(temporary, destination, error);
+    if (error)
+    {
+        throw WavError(WavErrorCode::io, "could not replace WAV file: " + destination.string() +
+                                             ": " + error.message());
+    }
+#endif
 }
 
 } // namespace
@@ -62,70 +141,120 @@ WavFile::WavFile(const std::filesystem::path &path, bool loadSamples)
     }
 
     infile.seekg(0, std::ios::end);
-    lengthInBytes = infile.tellg();
+    const auto fileLength = infile.tellg();
+    if (fileLength < 12)
+    {
+        throw WavError(WavErrorCode::invalidFile,
+                       "invalid WAV file: file is too short to contain a RIFF header");
+    }
+    if (static_cast<std::uint64_t>(fileLength) > std::numeric_limits<std::size_t>::max())
+    {
+        throw WavError(WavErrorCode::sizeOverflow,
+                       "WAV file length cannot be represented on this platform");
+    }
+    lengthInBytes = static_cast<std::size_t>(fileLength);
     infile.seekg(0, std::ios::beg);
 
     fileChunkId = BinaryHelpers::readString(infile, 4);
     fileChunkSize = BinaryHelpers::readUInt32(infile);
     format = BinaryHelpers::readString(infile, 4);
 
-    formatChunkId = BinaryHelpers::readString(infile, 4);
-    formatChunkSize = BinaryHelpers::readUInt32(infile);
-    audioFormat = BinaryHelpers::readUInt16(infile);
-    numberOfChannels_ = BinaryHelpers::readUInt16(infile);
-    sampleRate_ = BinaryHelpers::readUInt32(infile);
-    byteRate = BinaryHelpers::readUInt32(infile);
-    blockAlign = BinaryHelpers::readUInt16(infile);
-    bitsPerSample_ = BinaryHelpers::readUInt16(infile);
-
-    auto nextChunk = BinaryHelpers::readString(infile, 4);
-
-    if (nextChunk == "bext")
+    if (fileChunkId != "RIFF")
     {
-        isBroadcastWav = true;
-        readBextFields(infile, false);
-
-        nextChunk = BinaryHelpers::readString(infile, 4);
+        throw WavError(WavErrorCode::invalidFile,
+                       "invalid WAV file: expected RIFF identifier, found " + fileChunkId);
+    }
+    if (format != "WAVE")
+    {
+        throw WavError(WavErrorCode::invalidFile,
+                       "invalid WAV file: expected WAVE format, found " + format);
+    }
+    if (static_cast<std::uint64_t>(fileChunkSize) + 8ULL != lengthInBytes)
+    {
+        throw WavError(WavErrorCode::invalidFile, "invalid WAV file: RIFF header declares " +
+                                                      std::to_string(fileChunkSize + 8ULL) +
+                                                      " bytes, but the file contains " +
+                                                      std::to_string(lengthInBytes));
     }
 
-    if (nextChunk == "JUNK" || nextChunk == "junk") // I've seen both........
+    bool foundFormat = false;
+    bool foundData = false;
+    while (static_cast<std::size_t>(infile.tellg()) < lengthInBytes)
     {
-        auto junkSize = BinaryHelpers::readUInt32(infile);
-        if (junkSize % 2 != 0)
+        const auto headerStart = static_cast<std::size_t>(infile.tellg());
+        if (lengthInBytes - headerStart < 8)
         {
-            junkSize += 1;
+            throw WavError(WavErrorCode::invalidFile, "invalid WAV file: truncated chunk header");
         }
-        infile.ignore(junkSize);
 
-        nextChunk = BinaryHelpers::readString(
-            infile, 4); // Should be "data" if we have read the bext chunk and junk chunks properly.
-    }
-
-    if (nextChunk == "data")
-    {
-        dataChunkId = nextChunk;
-        dataChunkSize = BinaryHelpers::readUInt32(infile);
-        dataChunkStart = infile.tellg();
-    }
-
-    if ((dataChunkStart + dataChunkSize) != static_cast<int64_t>(lengthInBytes))
-    {
-        // There is a footer...
-        infile.seekg(dataChunkStart + dataChunkSize + 1);
-        nextChunk = BinaryHelpers::readString(infile, 4);
-        if (nextChunk == "bext")
+        const std::string chunkId = BinaryHelpers::readString(infile, 4);
+        const std::uint32_t chunkSize = BinaryHelpers::readUInt32(infile);
+        const auto chunkDataStart = static_cast<std::uint64_t>(infile.tellg());
+        const auto chunkDataEnd = chunkDataStart + chunkSize;
+        const auto paddedEnd = chunkDataEnd + (chunkSize % 2U);
+        if (paddedEnd > lengthInBytes)
         {
-            // Unsurprisingly some geniuses think it makes sense to put BWAV ***HEADER*** info as a
-            // footer. Also, unsurprisingly those fine folks at AVID seem to think this is a great
-            // idea. So I'm supporting it I guess.
+            throw WavError(WavErrorCode::invalidFile,
+                           "invalid WAV file: " + chunkId +
+                               " chunk extends beyond the end of the file");
+        }
+
+        if (chunkId == "fmt ")
+        {
+            if (foundFormat)
+            {
+                throw WavError(WavErrorCode::invalidFile, "invalid WAV file: multiple fmt chunks");
+            }
+            if (chunkSize < 16)
+            {
+                throw WavError(WavErrorCode::invalidFile,
+                               "invalid WAV file: fmt chunk is smaller than 16 bytes");
+            }
+            foundFormat = true;
+            formatChunkId = chunkId;
+            formatChunkSize = chunkSize;
+            audioFormat = BinaryHelpers::readUInt16(infile);
+            numberOfChannels_ = BinaryHelpers::readUInt16(infile);
+            sampleRate_ = BinaryHelpers::readUInt32(infile);
+            byteRate = BinaryHelpers::readUInt32(infile);
+            blockAlign = BinaryHelpers::readUInt16(infile);
+            bitsPerSample_ = BinaryHelpers::readUInt16(infile);
+        }
+        else if (chunkId == "data")
+        {
+            if (foundData)
+            {
+                throw WavError(WavErrorCode::invalidFile, "invalid WAV file: multiple data chunks");
+            }
+            foundData = true;
+            dataChunkId = chunkId;
+            dataChunkSize = chunkSize;
+            dataChunkStart = static_cast<std::streamoff>(chunkDataStart);
+        }
+        else if (chunkId == "bext")
+        {
+            if (isBroadcastWav)
+            {
+                throw WavError(WavErrorCode::invalidFile, "invalid WAV file: multiple BEXT chunks");
+            }
             isBroadcastWav = true;
-            readBextFields(infile, true);
+            readBextFields(infile, chunkSize, foundData);
         }
-        else
+
+        infile.seekg(static_cast<std::streamoff>(paddedEnd));
+        if (!infile)
         {
-            // It's a non-standard footer. Let's just ignore it. This branch exists to note I'm
-            // doing it on purpose, I'm sure it will be optimised out.
+            throw WavError(WavErrorCode::io, "failed while seeking through WAV chunks");
         }
+    }
+
+    if (!foundFormat)
+    {
+        throw WavError(WavErrorCode::invalidFile, "invalid WAV file: missing fmt chunk");
+    }
+    if (!foundData)
+    {
+        throw WavError(WavErrorCode::invalidFile, "invalid WAV file: missing data chunk");
     }
 
     validate();
@@ -337,27 +466,39 @@ void WavFile::save(const std::filesystem::path &path)
                            std::to_string(numberOfChannels_) + " channels");
     }
 
-    const auto dataSize = samples_.size() * bytesPerSample(bitsPerSample_);
-    if (dataSize > std::numeric_limits<std::uint32_t>::max())
+    const auto sampleWidth = bytesPerSample(bitsPerSample_);
+    if (samples_.size() > std::numeric_limits<std::uint32_t>::max() / sampleWidth)
     {
         throw WavError(WavErrorCode::sizeOverflow, "sample data is too large for a WAV file");
     }
+    const auto dataSize = samples_.size() * sampleWidth;
 
     formatChunkSize = 16;
     dataChunkSize = static_cast<std::uint32_t>(dataSize);
-    bextChunkSize = isBroadcastWav ? 602 : 0;
-    const std::uint64_t fileSize =
-        36ULL + dataChunkSize + (isBroadcastWav ? 8ULL + bextChunkSize : 0ULL);
-    if (fileSize > std::numeric_limits<std::uint32_t>::max())
+    if (isBroadcastWav && bextExtraData.size() > std::numeric_limits<std::uint32_t>::max() - 348ULL)
+    {
+        throw WavError(WavErrorCode::sizeOverflow, "BEXT chunk is too large for a WAV file");
+    }
+    const auto calculatedBextSize = 348ULL + bextExtraData.size();
+    bextChunkSize = isBroadcastWav ? static_cast<std::uint32_t>(calculatedBextSize) : 0;
+    std::uint64_t totalFileSize =
+        12ULL + serializedChunkSize(16) + serializedChunkSize(dataChunkSize);
+    if (isBroadcastWav)
+    {
+        totalFileSize += serializedChunkSize(bextChunkSize);
+    }
+    if (totalFileSize - 8ULL > std::numeric_limits<std::uint32_t>::max())
     {
         throw WavError(WavErrorCode::sizeOverflow, "RIFF data is too large for a WAV file");
     }
-    fileChunkSize = static_cast<std::uint32_t>(fileSize);
-    lengthInBytes = fileChunkSize + 8ULL;
+    fileChunkSize = static_cast<std::uint32_t>(totalFileSize - 8ULL);
+    lengthInBytes = static_cast<std::size_t>(totalFileSize);
 
     validate();
 
-    std::ofstream outfile(path, std::ofstream::binary);
+    const auto temporaryPath = temporarySibling(path);
+    TemporaryFileGuard temporaryGuard(temporaryPath);
+    std::ofstream outfile(temporaryPath, std::ofstream::binary | std::ofstream::trunc);
 
     if (!outfile)
     {
@@ -377,7 +518,7 @@ void WavFile::save(const std::filesystem::path &path)
     BinaryHelpers::writeUInt16(outfile, blockAlign);
     BinaryHelpers::writeUInt16(outfile, bitsPerSample_);
 
-    if (isBroadcastWav)
+    const auto writeBext = [&outfile, this]
     {
         BinaryHelpers::writeString(outfile, bextChunkId);
         BinaryHelpers::writeUInt32(outfile, bextChunkSize);
@@ -391,19 +532,14 @@ void WavFile::save(const std::filesystem::path &path)
         BinaryHelpers::writeUInt32(outfile, timeReferenceLow);
         BinaryHelpers::writeUInt32(outfile, timeReferenceHigh);
         BinaryHelpers::writeUInt16(outfile, version);
+        BinaryHelpers::writeBytes(outfile, bextExtraData);
+        writePadding(outfile, bextChunkSize);
+    };
 
-        // Write reserved bytes. There should be 254 because we are not yet supporting v1 and v2
-        // fields.
-        for (size_t i = 0; i < 254; i++)
-        {
-            outfile.write("\0", 1);
-        }
+    if (isBroadcastWav && !bextIsFooter)
+    {
+        writeBext();
     }
-
-    // TODO: Write Junk chunk?! Not sure why we need it
-    //"To align RIFF chunks to certain boundaries (i.e. 2048bytes for CD-ROMs) the RIFF
-    // specification includes a JUNK chunk. Its contents are to be skipped when reading. When
-    // writing RIFFs, JUNK chunks should not have odd number as Size."
 
     BinaryHelpers::writeString(outfile, dataChunkId);
     BinaryHelpers::writeUInt32(outfile, dataChunkSize);
@@ -439,11 +575,19 @@ void WavFile::save(const std::filesystem::path &path)
         }
     }
 
+    writePadding(outfile, dataChunkSize);
+    if (isBroadcastWav && bextIsFooter)
+    {
+        writeBext();
+    }
+
     outfile.close();
     if (!outfile)
     {
         throw WavError(WavErrorCode::io, "failed while writing WAV file: " + path.string());
     }
+    replaceFile(temporaryPath, path);
+    temporaryGuard.release();
 }
 
 std::uint16_t WavFile::numberOfChannels() const noexcept { return numberOfChannels_; }
@@ -516,36 +660,33 @@ void WavFile::setSamples(std::vector<double> newSamples)
 }
 
 // Private functions
-void WavFile::readBextFields(std::ifstream &file, bool isFooter)
+void WavFile::readBextFields(std::ifstream &file, std::uint32_t chunkSize, bool isFooter)
 {
+    constexpr std::uint32_t knownFieldsSize = 348;
+    if (chunkSize < knownFieldsSize)
+    {
+        throw WavError(WavErrorCode::invalidFile,
+                       "invalid WAV file: BEXT chunk is smaller than 348 bytes");
+    }
     bextChunkId = "bext";
-    bextChunkSize = BinaryHelpers::readUInt32(file);
+    bextChunkSize = chunkSize;
+    bextIsFooter = isFooter;
 
-    description = BinaryHelpers::readString(file, 256);
-    originator = BinaryHelpers::readString(file, 32);
-    originatorReference = BinaryHelpers::readString(file, 32);
-    originationDate = BinaryHelpers::readString(file, 10);
-    originationTime = BinaryHelpers::readString(file, 8);
+    description = readFixedString(file, 256);
+    originator = readFixedString(file, 32);
+    originatorReference = readFixedString(file, 32);
+    originationDate = readFixedString(file, 10);
+    originationTime = readFixedString(file, 8);
     timeReferenceLow = BinaryHelpers::readUInt32(file);
     timeReferenceHigh = BinaryHelpers::readUInt32(file);
     version = BinaryHelpers::readUInt16(file);
-
-    if (isFooter)
-    {
-        // Might be a JUNK Chunk, but we are pretty much done caring at this point.
-    }
-    else
-    {
-        // Need to get to end of this chunk. We are ignoring v1 and v2 fields for now so need to
-        // skip the 254 reserved bytes
-        std::streamoff position = file.tellg();
-        file.seekg(position + 254);
-    }
+    bextExtraData = BinaryHelpers::readBytes(file, chunkSize - knownFieldsSize);
 }
 
 void WavFile::setDefaultBextFields()
 {
     isBroadcastWav = false;
+    bextIsFooter = false;
     bextChunkId = "bext";
     description = "";
     originator = "";
@@ -555,6 +696,7 @@ void WavFile::setDefaultBextFields()
     timeReferenceLow = 0;
     timeReferenceHigh = 0;
     version = 0;
+    bextExtraData.clear();
 }
 
 void WavFile::updatePcmLayout()
