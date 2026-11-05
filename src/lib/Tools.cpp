@@ -1,7 +1,7 @@
-#include <wavlab/Tools.h>
-#include <algorithm>
 #include "Constants.h"
+#include <algorithm>
 #include <cmath>
+#include <wavlab/Tools.h>
 
 namespace wavlab
 {
@@ -10,25 +10,25 @@ namespace wavlab
 
 void Tools::normalise(WavFile &wave)
 {
-	double highValue = 0;
- 
-    //Find loudest sample
-    for (auto& sample : wave.getSamples())
+    double highValue = 0;
+
+    // Find loudest sample
+    for (auto &sample : wave.samples())
     {
-        if (fabs(sample) > fabs(highValue)) 
+        if (fabs(sample) > fabs(highValue))
         {
             highValue = sample;
         }
     }
 
-    //Calculate gain
+    // Calculate gain
     double peak = fabs(highValue);
     double gain = 1 / peak;
 
     std::vector<double> newSamples;
 
-    //Write new samples with gain applied
-    for (auto& sample : wave.getSamples())
+    // Write new samples with gain applied
+    for (auto &sample : wave.samples())
     {
         newSamples.push_back(sample * gain);
     }
@@ -36,12 +36,12 @@ void Tools::normalise(WavFile &wave)
     wave.setSamples(newSamples);
 }
 
-void Tools::normalise(WavFile& wave, double normaliseTo)
+void Tools::normalise(WavFile &wave, double normaliseTo)
 {
     Tools::normalise(wave);
 
     std::vector<double> newSamples;
-    for (auto& sample : wave.getSamples())
+    for (auto &sample : wave.samples())
     {
         newSamples.push_back(sample * normaliseTo);
     }
@@ -50,17 +50,19 @@ void Tools::normalise(WavFile& wave, double normaliseTo)
 
 /* reverse command */
 
-void Tools::reverse(WavFile& wave)
+void Tools::reverse(WavFile &wave)
 {
-    if (wave.getNumberOfChannels() == 1)
+    if (wave.numberOfChannels() == 1)
     {
-        std::vector<double> original = wave.getSamples();
+        const auto sourceSamples = wave.samples();
+        std::vector<double> original(sourceSamples.begin(), sourceSamples.end());
         std::reverse(original.begin(), original.end());
         wave.setSamples(original);
     }
-    else if (wave.getNumberOfChannels() == 2)
+    else if (wave.numberOfChannels() == 2)
     {
-        std::vector<double> original = wave.getSamples();
+        const auto sourceSamples = wave.samples();
+        std::vector<double> original(sourceSamples.begin(), sourceSamples.end());
         std::vector<double> reversed;
         for (size_t i = original.size() - 1; i > 1; i = i - 2)
         {
@@ -76,11 +78,11 @@ void Tools::reverse(WavFile& wave)
 
 /* flip-phase command */
 
-void Tools::flipPhase(WavFile& wave)
+void Tools::flipPhase(WavFile &wave)
 {
     std::vector<double> newSamples;
 
-    for (auto& sample : wave.getSamples())
+    for (auto &sample : wave.samples())
     {
         newSamples.push_back(-sample);
     }
@@ -89,16 +91,16 @@ void Tools::flipPhase(WavFile& wave)
 
 /* swap-channels command */
 
-void Tools::swapChannels(WavFile& wave)
+void Tools::swapChannels(WavFile &wave)
 {
-    if (wave.getNumberOfChannels() == 1)
+    if (wave.numberOfChannels() == 1)
     {
-        //Can't do anything to a mono file, but why error, no harm done!
+        // Can't do anything to a mono file, but why error, no harm done!
         return;
     }
-    else if (wave.getNumberOfChannels() == 2)
+    else if (wave.numberOfChannels() == 2)
     {
-        std::vector<double> original = wave.getSamples();
+        const auto original = wave.samples();
         std::vector<double> swapped;
         for (size_t i = 0; i < original.size() - 1; i = i + 2)
         {
@@ -114,9 +116,9 @@ void Tools::swapChannels(WavFile& wave)
 
 /* split-stereo command */
 
-void Tools::splitStereo(WavFile& stereo, WavFile& left, WavFile& right)
+void Tools::splitStereo(const WavFile &stereo, WavFile &left, WavFile &right)
 {
-    std::vector<double> original = stereo.getSamples();
+    const auto original = stereo.samples();
     std::vector<double> leftSamples;
     std::vector<double> rightSamples;
 
@@ -135,14 +137,15 @@ void Tools::splitStereo(WavFile& stereo, WavFile& left, WavFile& right)
 
 /* left-right-to-stereo command */
 
-void Tools::combineLeftRight(WavFile& left, WavFile& right, WavFile& out)
+void Tools::combineLeftRight(const WavFile &left, const WavFile &right, WavFile &out)
 {
-    std::vector<double> leftSamples = left.getSamples();
-    std::vector<double> rightSamples = right.getSamples();
+    const auto leftSamples = left.samples();
+    const auto rightSamples = right.samples();
     std::vector<double> stereoSamples;
 
-    auto allNumberOfSamples = std::vector<size_t>({ leftSamples.size(), rightSamples.size()});
-    size_t maxNumberOfSamples = *std::max_element(allNumberOfSamples.begin(), allNumberOfSamples.end());
+    auto allNumberOfSamples = std::vector<size_t>({leftSamples.size(), rightSamples.size()});
+    size_t maxNumberOfSamples =
+        *std::max_element(allNumberOfSamples.begin(), allNumberOfSamples.end());
 
     for (size_t i = 0; i < maxNumberOfSamples - 1; i++)
     {
@@ -158,11 +161,11 @@ void Tools::combineLeftRight(WavFile& left, WavFile& right, WavFile& out)
 
 /* split-mid-side command */
 
-void Tools::splitStereoMidSide(WavFile& stereo, WavFile& mid, WavFile& side)
+void Tools::splitStereoMidSide(const WavFile &stereo, WavFile &mid, WavFile &side)
 {
-    //See https://www.soundonsound.com/sound-advice/q-how-does-mid-sides-recording-actually-work
+    // See https://www.soundonsound.com/sound-advice/q-how-does-mid-sides-recording-actually-work
 
-    std::vector<double> original = stereo.getSamples();
+    const auto original = stereo.samples();
     std::vector<double> midSamples;
     std::vector<double> sideSamples;
 
@@ -181,16 +184,17 @@ void Tools::splitStereoMidSide(WavFile& stereo, WavFile& mid, WavFile& side)
 
 /* mid-side-to-stereo */
 
-void Tools::combineMidSide(WavFile& mid, WavFile& side, WavFile& out)
+void Tools::combineMidSide(const WavFile &mid, const WavFile &side, WavFile &out)
 {
-    //See https://www.soundonsound.com/sound-advice/q-how-does-mid-sides-recording-actually-work
+    // See https://www.soundonsound.com/sound-advice/q-how-does-mid-sides-recording-actually-work
 
-    std::vector<double> midSamples = mid.getSamples();
-    std::vector<double> sideSamples = side.getSamples();
+    const auto midSamples = mid.samples();
+    const auto sideSamples = side.samples();
     std::vector<double> stereoSamples;
 
-    auto allNumberOfSamples = std::vector<size_t>({ midSamples.size(), sideSamples.size() });
-    size_t maxNumberOfSamples = *std::max_element(allNumberOfSamples.begin(), allNumberOfSamples.end());
+    auto allNumberOfSamples = std::vector<size_t>({midSamples.size(), sideSamples.size()});
+    size_t maxNumberOfSamples =
+        *std::max_element(allNumberOfSamples.begin(), allNumberOfSamples.end());
 
     for (size_t i = 0; i < maxNumberOfSamples - 1; i++)
     {
@@ -210,7 +214,7 @@ void Tools::gain(WavFile &wave, double gain)
 {
     std::vector<double> newSamples;
 
-    for (auto& sample : wave.getSamples())
+    for (auto &sample : wave.samples())
     {
         newSamples.push_back(sample * gain);
     }
@@ -220,19 +224,16 @@ void Tools::gain(WavFile &wave, double gain)
 
 /* gain-db command */
 
-void Tools::decibelGain(WavFile &wave, double dB)
-{
-    gain(wave, pow(10.0, dB / 20.0));
-}
+void Tools::decibelGain(WavFile &wave, double dB) { gain(wave, pow(10.0, dB / 20.0)); }
 
 /* get-peak-db command */
 
-double Tools::getPeakDecibels(WavFile& wave) 
+double Tools::getPeakDecibels(const WavFile &wave)
 {
     double highValue = 0;
 
-    //Find loudest sample
-    for (auto& sample : wave.getSamples())
+    // Find loudest sample
+    for (auto &sample : wave.samples())
     {
         if (fabs(sample) > fabs(highValue))
         {
@@ -245,12 +246,12 @@ double Tools::getPeakDecibels(WavFile& wave)
 
 /* get-rms-db command */
 
-double Tools::getRMSDecibels(WavFile& wave)
+double Tools::getRMSDecibels(const WavFile &wave)
 {
-    std::vector<double> samples = wave.getSamples();
+    const auto samples = wave.samples();
     double sumOfSquares = 0;
 
-    for (auto& sample : samples)
+    for (auto &sample : samples)
     {
         sumOfSquares += pow(sample, 2.0);
     }
@@ -262,21 +263,22 @@ double Tools::getRMSDecibels(WavFile& wave)
 }
 
 /* mix command */
-void Tools::mix(std::vector<WavFile>& inputs, WavFile& output)
-{  
+void Tools::mix(std::span<const WavFile> inputs, WavFile &output)
+{
     std::vector<size_t> allNumberOfSamples;
     std::vector<std::vector<double>> allSamples;
-    for (auto& input : inputs)
+    for (auto &input : inputs)
     {
         std::vector<double> samples;
-        if (input.getNumberOfChannels() == 2)
+        if (input.numberOfChannels() == 2)
         {
-            samples = input.getSamples();
+            const auto inputSamples = input.samples();
+            samples.assign(inputSamples.begin(), inputSamples.end());
         }
-        if (input.getNumberOfChannels() == 1)
+        if (input.numberOfChannels() == 1)
         {
-            //Convert mono samples into stereo.
-            for (auto& sample : input.getSamples())
+            // Convert mono samples into stereo.
+            for (auto &sample : input.samples())
             {
                 samples.push_back(sample);
                 samples.push_back(sample);
@@ -291,12 +293,12 @@ void Tools::mix(std::vector<WavFile>& inputs, WavFile& output)
 
     std::vector<double> newSamples;
 
-    if (output.getNumberOfChannels() == 1)
+    if (output.numberOfChannels() == 1)
     {
         for (size_t i = 0; i < maxSamples; i++)
         {
             double addedSamples = 0.0;
-            for (auto& samples : allSamples)
+            for (auto &samples : allSamples)
             {
                 double sample = samples.size() <= maxSamples ? samples[i] : 0.0;
                 addedSamples += sample / static_cast<double>(numberOfInputs);
@@ -304,13 +306,13 @@ void Tools::mix(std::vector<WavFile>& inputs, WavFile& output)
             newSamples.push_back(addedSamples);
         }
     }
-    else if (output.getNumberOfChannels() == 2)
+    else if (output.numberOfChannels() == 2)
     {
         for (size_t i = 0; i < maxSamples - 1; i = i + 2)
         {
             double addedSamplesLeft = 0.0;
             double addedSamplesRight = 0.0;
-            for (auto& samples : allSamples)
+            for (auto &samples : allSamples)
             {
                 double sampleLeft = samples.size() <= maxSamples ? samples[i] : 0.0;
                 double sampleRight = samples.size() <= maxSamples ? samples[i + 1] : 0.0;
@@ -323,28 +325,29 @@ void Tools::mix(std::vector<WavFile>& inputs, WavFile& output)
     }
 
     output.setSamples(newSamples);
-    Tools::normalise(output);   
+    Tools::normalise(output);
 }
 
 /* split command */
 
-void Tools::split(WavFile& input, std::vector<WavFile>& outputs, const std::vector<uint32_t>& splitTimesMs)
+void Tools::split(const WavFile &input, std::vector<WavFile> &outputs,
+                  const std::vector<uint32_t> &splitTimesMs)
 {
     std::vector<uint32_t> splitSamplePositions;
-    uint32_t sampleRateMultiplier = input.getSampleRate() / 1000;
+    uint32_t sampleRateMultiplier = input.sampleRate() / 1000;
 
-    for (const uint32_t& ms : splitTimesMs)
+    for (const uint32_t &ms : splitTimesMs)
     {
-        splitSamplePositions.push_back(ms * sampleRateMultiplier * input.getNumberOfChannels());
+        splitSamplePositions.push_back(ms * sampleRateMultiplier * input.numberOfChannels());
     }
 
     unsigned int splitPosition = 0;
     uint32_t nextSplit = splitSamplePositions[splitPosition];
     auto currentSamples = new std::vector<double>();
 
-    auto originalSamples = input.getSamples();
+    auto originalSamples = input.samples();
 
-    if (input.getNumberOfChannels() == 1)
+    if (input.numberOfChannels() == 1)
     {
         for (size_t i = 0; i < originalSamples.size(); i++)
         {
@@ -361,7 +364,7 @@ void Tools::split(WavFile& input, std::vector<WavFile>& outputs, const std::vect
             }
         }
     }
-    else if (input.getNumberOfChannels() == 2)
+    else if (input.numberOfChannels() == 2)
     {
         for (size_t i = 0; i < originalSamples.size() - 1; i = i + 2)
         {
@@ -384,15 +387,15 @@ void Tools::split(WavFile& input, std::vector<WavFile>& outputs, const std::vect
 
 /* join command */
 
-void Tools::join(std::vector<WavFile>& inputs, WavFile& output)
+void Tools::join(std::span<const WavFile> inputs, WavFile &output)
 {
     std::vector<double> joinedSamples;
-    for (WavFile wav : inputs)
+    for (const WavFile &wav : inputs)
     {
-        auto wavSamples = wav.getSamples();
+        auto wavSamples = wav.samples();
         joinedSamples.insert(joinedSamples.end(), wavSamples.begin(), wavSamples.end());
     }
     output.setSamples(joinedSamples);
 }
 
-}
+} // namespace wavlab

@@ -82,11 +82,23 @@ target_include_directories(wavlab_cli PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/c
 target_link_libraries(wavlab_cli PRIVATE wavlab::wavlab)
 wavlab_apply_project_options(wavlab_cli)
 
+add_executable(wavlab_normalise_example examples/normalise.cpp)
+set_target_properties(wavlab_normalise_example PROPERTIES CXX_EXTENSIONS OFF)
+target_compile_features(wavlab_normalise_example PRIVATE cxx_std_20)
+target_link_libraries(wavlab_normalise_example PRIVATE wavlab::wavlab)
+wavlab_apply_project_options(wavlab_normalise_example)
+
 include(CTest)
 if(BUILD_TESTING AND PROJECT_IS_TOP_LEVEL)
     add_subdirectory(tests)
 endif()
 
 wavlab_add_developer_targets(
+    examples/normalise.cpp
+    include/wavlab/FX.h
+    include/wavlab/WavFile.h
+    src/lib/FX.cpp
+    src/lib/WavFile.cpp
+    tests/library_api_tests.cpp
     tests/smoke/library_smoke.cpp
 )

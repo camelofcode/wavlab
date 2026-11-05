@@ -7,6 +7,14 @@ target_link_libraries(wavlab_tests PRIVATE wavlab::wavlab)
 wavlab_apply_project_options(wavlab_tests)
 
 add_test(NAME wavlab.library.smoke COMMAND wavlab_tests)
+
+add_executable(wavlab_api_tests library_api_tests.cpp)
+set_target_properties(wavlab_api_tests PROPERTIES CXX_EXTENSIONS OFF)
+target_compile_features(wavlab_api_tests PRIVATE cxx_std_20)
+target_link_libraries(wavlab_api_tests PRIVATE wavlab::wavlab)
+wavlab_apply_project_options(wavlab_api_tests)
+add_test(NAME wavlab.library.api COMMAND wavlab_api_tests)
+
 add_test(NAME wavlab.cli.help COMMAND wavlab_cli --help)
 set_tests_properties(
     wavlab.cli.help

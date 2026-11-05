@@ -35,7 +35,7 @@ int Commands::saturateCommand(const std::string& command, int argc, char* argv[]
 
 	std::string output = argc == 5 ? static_cast<std::string>(argv[4]) : input;
 
-	WavFile wav(input, true);
+	auto wav = WavFile::open(input);
 	FX::saturate(wav, drive);
 	wav.save(output);
 	return EXIT_SUCCESS;
@@ -106,8 +106,8 @@ int Commands::digitalDelayMonoCommand(const std::string& command, int argc, char
 		}
 	}
 
-	WavFile wav(input, true);
-	FX::delay(wav, delayMilliseconds, feedback, mix, maxFileLengthMs);
+	auto wav = WavFile::open(input);
+	FX::delay(wav, DelaySettings{{delayMilliseconds, feedback}, mix, maxFileLengthMs});
 	wav.save(output);
 	return EXIT_SUCCESS;
 }
@@ -199,8 +199,14 @@ int Commands::digitalDelayStereoCommand(const std::string& command, int argc, ch
 		}
 	}
 
-	WavFile wav(input, true);
-	FX::delay(wav, delayMillisecondsLeft, feedbackLeft, delayMillisecondsRight, feedbackRight, mix, maxFileLengthMs);
+	auto wav = WavFile::open(input);
+	FX::delay(
+		wav,
+		StereoDelaySettings{
+			{delayMillisecondsLeft, feedbackLeft},
+			{delayMillisecondsRight, feedbackRight},
+			mix,
+			maxFileLengthMs});
 	wav.save(output);
 	return EXIT_SUCCESS;
 }
@@ -271,12 +277,15 @@ int Commands::analogDelayMonoCommand(const std::string& command, int argc, char*
 		}
 	}
 
-	WavFile wav(input, true);
-	EQInstance lowPass(FilterType::LowPass, -24, 2000, 1, wav.getSampleRate());
+	auto wav = WavFile::open(input);
+	EQInstance lowPass(FilterType::LowPass, -24, 2000, 1, wav.sampleRate());
 
 	auto feedbackProcessor = [&lowPass](double in) { return lowPass.processSample(in); };
 
-	FX::delay(wav, delayMilliseconds, feedback, mix, maxFileLengthMs, feedbackProcessor);
+	FX::delay(
+		wav,
+		DelaySettings{{delayMilliseconds, feedback}, mix, maxFileLengthMs},
+		feedbackProcessor);
 	wav.save(output);
 	return EXIT_SUCCESS;
 }
@@ -368,9 +377,9 @@ int Commands::analogDelayStereoCommand(const std::string& command, int argc, cha
 		}
 	}
 
-	WavFile wav(input, true);
-	EQInstance lowPassL(FilterType::LowPass, -24, 2000, 1, wav.getSampleRate());
-	EQInstance lowPassR(FilterType::LowPass, -24, 2000, 1, wav.getSampleRate());
+	auto wav = WavFile::open(input);
+	EQInstance lowPassL(FilterType::LowPass, -24, 2000, 1, wav.sampleRate());
+	EQInstance lowPassR(FilterType::LowPass, -24, 2000, 1, wav.sampleRate());
 
 	int count = 0;
 
@@ -390,7 +399,14 @@ int Commands::analogDelayStereoCommand(const std::string& command, int argc, cha
 		return out;
 	};
 
-	FX::delay(wav, true, delayMillisecondsLeft, feedbackLeft, delayMillisecondsRight, feedbackRight, mix, maxFileLengthMs, feedbackProcessor);
+	FX::delay(
+		wav,
+		StereoDelaySettings{
+			{delayMillisecondsLeft, feedbackLeft},
+			{delayMillisecondsRight, feedbackRight},
+			mix,
+			maxFileLengthMs},
+		feedbackProcessor);
 	wav.save(output);
 	return EXIT_SUCCESS;
 }
@@ -461,12 +477,15 @@ int Commands::tapeDelayMonoCommand(const std::string& command, int argc, char* a
 		}
 	}
 
-	WavFile wav(input, true);
-	EQInstance lowPass(FilterType::LowPass, -24, 1000, 1, wav.getSampleRate());
+	auto wav = WavFile::open(input);
+	EQInstance lowPass(FilterType::LowPass, -24, 1000, 1, wav.sampleRate());
 
 	auto feedbackProcessor = [&lowPass](double in) { return lowPass.processSample(FX::saturateSample(in, 0.55)); };
 
-	FX::delay(wav, delayMilliseconds, feedback, mix, maxFileLengthMs, feedbackProcessor);
+	FX::delay(
+		wav,
+		DelaySettings{{delayMilliseconds, feedback}, mix, maxFileLengthMs},
+		feedbackProcessor);
 	wav.save(output);
 	return EXIT_SUCCESS;
 }
@@ -558,9 +577,9 @@ int Commands::tapeDelayStereoCommand(const std::string& command, int argc, char*
 		}
 	}
 
-	WavFile wav(input, true);
-	EQInstance lowPassL(FilterType::LowPass, -24, 1000, 1, wav.getSampleRate());
-	EQInstance lowPassR(FilterType::LowPass, -24, 1000, 1, wav.getSampleRate());
+	auto wav = WavFile::open(input);
+	EQInstance lowPassL(FilterType::LowPass, -24, 1000, 1, wav.sampleRate());
+	EQInstance lowPassR(FilterType::LowPass, -24, 1000, 1, wav.sampleRate());
 
 	int count = 0;
 
@@ -580,7 +599,14 @@ int Commands::tapeDelayStereoCommand(const std::string& command, int argc, char*
 		return out;
 	};
 
-	FX::delay(wav, true, delayMillisecondsLeft, feedbackLeft, delayMillisecondsRight, feedbackRight, mix, maxFileLengthMs, feedbackProcessor);
+	FX::delay(
+		wav,
+		StereoDelaySettings{
+			{delayMillisecondsLeft, feedbackLeft},
+			{delayMillisecondsRight, feedbackRight},
+			mix,
+			maxFileLengthMs},
+		feedbackProcessor);
 	wav.save(output);
 	return EXIT_SUCCESS;
 }
@@ -657,8 +683,8 @@ int Commands::reverbCommand(const std::string& command, int argc, char* argv[])
 		}
 	}
 
-	WavFile wav(input, true);
-	FX::reverb(wav, size, time, mix, maxFileLengthMs);
+	auto wav = WavFile::open(input);
+	FX::reverb(wav, ReverbSettings{size, time, mix, maxFileLengthMs});
 	wav.save(output);
 	return EXIT_SUCCESS;
 }

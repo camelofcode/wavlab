@@ -2,137 +2,109 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <filesystem>
 #include <fstream>
+#include <span>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
 namespace wavlab
 {
 
-class WavFile
+enum class WavErrorCode
 {
-public:
-	/// <summary>
-	/// Constructor for loading an existing WAV file.
-	/// </summary>
-	/// <param name="path">The path of the file to open</param>
-	/// <param name="loadSamples">Whether sample data should be loaded. This can take a while for large files, so can be set to false if only header information is required</param>
-	WavFile(const std::string& path, bool loadSamples);
-
-	/// <summary>
-	/// Constructor for creating a new WAV file.
-	/// </summary>
-	/// <param name="numberOfChannels">Number of channels, ie. Mono = 1, Stereo = 2</param>
-	/// <param name="sampleRate">The sample rate in Hz</param>
-	/// <param name="bitsPerSample">The number of bits per sample: 8/16/24/32</param>
-	WavFile(unsigned short numberOfChannels, uint32_t sampleRate, unsigned short bitsPerSample);
-	
-	///Destructor
-	~WavFile() = default;
-
-	/// <summary>
-	/// Checks that the file is a valid WAV, exits if not.
-	/// </summary>
-	void validate();
-
-	/// <summary>
-	/// Prints full details of the WAV file to stdout, including things only useful to developers
-	/// </summary>
-    void printDetailsDebug();
-
-	/// <summary>
-	/// Prints the details of the WAV file to stdout.
-	/// </summary>
-	void printDetails();
-
-	/// <summary>
-	/// Writes the file to disk.
-	/// </summary>
-	/// <param name="path">The path to write the file to</param>
-	void save(const std::string& path);
-
-	/// <summary>
-	/// Gets the sample data of the file
-	/// </summary>
-	/// <returns>Sample data as scaled doubles in the range -1.0 to 1.0</returns>
-	std::vector<double> getSamples();
-
-	/// <summary>
-	/// Gets the number of audio channels ie. Mono = 1, Stereo = 2
-	/// </summary>
-	uint16_t getNumberOfChannels() const;
-
-	/// <summary>
-	/// Gets the sample rate in Hz
-	/// </summary>
-	uint32_t getSampleRate() const;
-
-	/// <summary>
-	/// Gets the bits per sample: 8/16/24/32
-	/// </summary>
-	uint16_t getBitsPerSample() const;
-
-	/// <summary>
-	/// Sets the number of channels
-	/// </summary>
-	/// <param name="number">value</param>
-	void setNumberOfChannels(uint16_t number);
-
-	/// <summary>
-	/// Sets the samples of the wav file
-	/// </summary>
-	void setSamples(std::vector<double>& newSamples);
-
-private:
-	size_t lengthInBytes{};
-	
-	//File
-
-	std::string fileChunkId;
-	uint32_t fileChunkSize{};
-	std::string format;
-
-	//Format
-
-	std::string formatChunkId;
-	uint32_t formatChunkSize{};
-	uint16_t audioFormat;
-	uint16_t numberOfChannels;
-	uint32_t sampleRate;
-	uint32_t byteRate{};
-	uint16_t blockAlign;
-	uint16_t bitsPerSample;
-
-	//BWAV Chunks - https://tech.ebu.ch/docs/tech/tech3285.pdf
-
-	bool isBroadcastWav = false;
-	void readBextFields(std::ifstream& file, bool isFooter);
-	void setDefaultBextFields();
-
-	//BWAV v0 fields
-
-	std::string bextChunkId;
-	uint32_t bextChunkSize{};
-	std::string description; /* 256 bytes - ASCII : �Description of the sound sequence�*/
-	std::string originator; /* 32 Bytes - ASCII : �Name of the originator� */
-	std::string originatorReference; /* 32 Bytes - ASCII : �Reference of the originator� */
-	std::string originationDate;  /* 10 Bytes - ASCII : �yyyy:mm:dd� */
-	std::string originationTime; /* 8 Bytes - ASCII : �hh:mm:ss� */
-	uint32_t timeReferenceLow{}; /* First sample count since midnight, low word*/
-	uint32_t timeReferenceHigh{}; /* First sample count since midnight, high word*/
-	uint16_t version{}; /* Version of the BWF; unsigned binary number */
-
-	//Data
-
-	std::string dataChunkId;
-	uint32_t dataChunkSize{};
-	std::streamoff dataChunkStart{};
-
-	//Samples
-
-	size_t numberOfSamples{};
-	std::vector<double> samples;
+    io,
+    invalidFile,
+    unsupportedChannelCount,
+    invalidSampleRate,
+    unsupportedBitsPerSample,
+    samplesNotLoaded,
+    incompleteSampleFrame,
+    sizeOverflow,
 };
 
-}
+class WavError : public std::runtime_error
+{
+  public:
+    WavError(WavErrorCode code, std::string message);
 
+    [[nodiscard]] WavErrorCode code() const noexcept;
+
+  private:
+    WavErrorCode code_;
+};
+
+class WavFile
+{
+  public:
+    [[nodiscard]] static WavFile open(const std::filesystem::path &path);
+    [[nodiscard]] static WavFile openMetadata(const std::filesystem::path &path);
+    [[nodiscard]] static WavFile create(std::uint16_t numberOfChannels, std::uint32_t sampleRate,
+                                        std::uint16_t bitsPerSample);
+
+    void save(const std::filesystem::path &path);
+
+    [[nodiscard]] std::string details() const;
+    [[nodiscard]] std::string debugDetails() const;
+
+    [[nodiscard]] std::uint16_t numberOfChannels() const noexcept;
+    [[nodiscard]] std::uint32_t sampleRate() const noexcept;
+    [[nodiscard]] std::uint16_t bitsPerSample() const noexcept;
+    [[nodiscard]] std::size_t sampleCount() const noexcept;
+    [[nodiscard]] std::size_t frameCount() const noexcept;
+    [[nodiscard]] bool hasLoadedSamples() const noexcept;
+
+    [[nodiscard]] std::span<const double> samples() const;
+    [[nodiscard]] std::span<double> samples();
+
+    void setNumberOfChannels(std::uint16_t number);
+    void setSamples(std::vector<double> newSamples);
+
+  private:
+    WavFile(const std::filesystem::path &path, bool loadSamples);
+    WavFile(std::uint16_t numberOfChannels, std::uint32_t sampleRate, std::uint16_t bitsPerSample);
+
+    void validate() const;
+    void readBextFields(std::ifstream &file, bool isFooter);
+    void setDefaultBextFields();
+    void updatePcmLayout();
+
+    std::size_t lengthInBytes{};
+
+    std::string fileChunkId;
+    std::uint32_t fileChunkSize{};
+    std::string format;
+
+    std::string formatChunkId;
+    std::uint32_t formatChunkSize{};
+    std::uint16_t audioFormat{};
+    std::uint16_t numberOfChannels_{};
+    std::uint32_t sampleRate_{};
+    std::uint32_t byteRate{};
+    std::uint16_t blockAlign{};
+    std::uint16_t bitsPerSample_{};
+
+    bool isBroadcastWav = false;
+
+    std::string bextChunkId;
+    std::uint32_t bextChunkSize{};
+    std::string description;
+    std::string originator;
+    std::string originatorReference;
+    std::string originationDate;
+    std::string originationTime;
+    std::uint32_t timeReferenceLow{};
+    std::uint32_t timeReferenceHigh{};
+    std::uint16_t version{};
+
+    std::string dataChunkId;
+    std::uint32_t dataChunkSize{};
+    std::streamoff dataChunkStart{};
+
+    std::size_t numberOfSamples{};
+    bool samplesLoaded = false;
+    std::vector<double> samples_;
+};
+
+} // namespace wavlab

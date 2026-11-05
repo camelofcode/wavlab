@@ -1,5 +1,6 @@
 #pragma once
 #include <wavlab/WavFile.h>
+#include <span>
 
 namespace wavlab
 {
@@ -43,7 +44,7 @@ namespace Tools
 	/// <param name="stereo">The wave file to split</param>
 	/// <param name="left">The wave file to write left channel to</param>
 	/// <param name="right">The wave file to write right channel to</param>
-	void splitStereo(WavFile& stereo, WavFile& left, WavFile& right);
+	void splitStereo(const WavFile& stereo, WavFile& left, WavFile& right);
 
 	/// <summary>
 	/// Splits a stereo wav into left and right mono files
@@ -51,7 +52,7 @@ namespace Tools
 	/// <param name="left">The left channel wave file</param>
 	/// <param name="right">The right channel wave file</param>
 	/// <param name="out">The wave file to write combined samples to</param>
-	void combineLeftRight(WavFile& left, WavFile& right, WavFile& out);
+	void combineLeftRight(const WavFile& left, const WavFile& right, WavFile& out);
 
 	/// <summary>
 	/// Splits a stereo wav into mid and side mono files
@@ -59,7 +60,7 @@ namespace Tools
 	/// <param name="wave">The wave file to split</param>
 	/// <param name="mid">The wave file to write mid channel to</param>
 	/// <param name="side">The wave file to write side channel to</param>
-	void splitStereoMidSide(WavFile& stereo, WavFile& mid, WavFile& side);
+	void splitStereoMidSide(const WavFile& stereo, WavFile& mid, WavFile& side);
 
 	/// <summary>
 	/// Joins mid and side mono wavs into a single stereo file
@@ -67,7 +68,7 @@ namespace Tools
 	/// <param name="mid">The mid channel wave file</param>
 	/// <param name="side">The side channel wave file</param>
 	/// <param name="out">The wave file to write combined samples to</param>
-	void combineMidSide(WavFile& mid, WavFile& side, WavFile& out);
+	void combineMidSide(const WavFile& mid, const WavFile& side, WavFile& out);
 
 	/// <summary>
 	/// Applies a gain multiplier to the wave file
@@ -86,19 +87,19 @@ namespace Tools
 	/// <summary>
 	/// Returns the peak dB value of the wave file
 	/// </summary>
-	double getPeakDecibels(WavFile& wave);
+	double getPeakDecibels(const WavFile& wave);
 
 	/// <summary>
 	/// Returns the RMS dB value of the wave file
 	/// </summary>
-	double getRMSDecibels(WavFile& wave);
+	double getRMSDecibels(const WavFile& wave);
 
 	/// <summary>
 	/// Mixes an arbitrary number of wave files to a single wave file. Will attenuate and re-normalise to ensure lack of clipping. Currently will start all files at zero. In future could use BWAV chunk to determine position
 	/// </summary>
 	/// <param name="inputs">The wave files to mix</param>
 	/// <param name="output">The output wave</param>
-	void mix(std::vector<WavFile>& inputs, WavFile& output);
+	void mix(std::span<const WavFile> inputs, WavFile& output);
 
 	/// <summary>
 	/// Splits a wave file at specified times in milliseconds
@@ -106,14 +107,14 @@ namespace Tools
 	/// <param name="input">The wave file to split</param>
 	/// <param name="outputs">The separate output wave files</param>
 	/// <param name="splitTimesMs">The times to split at in milliseconds</param>
-	void split(WavFile& input, std::vector<WavFile>& outputs, const std::vector<uint32_t>& splitTimesMs);
+	void split(const WavFile& input, std::vector<WavFile>& outputs, const std::vector<uint32_t>& splitTimesMs);
 
 	/// <summary>
 	/// Joins an arbitrary number of wave files to a single wave file.
 	/// </summary>
 	/// <param name="inputs">The wave files to join</param>
 	/// <param name="output">The output wave</param>
-	void join(std::vector<WavFile>& inputs, WavFile& output);
+	void join(std::span<const WavFile> inputs, WavFile& output);
 }
 
 }

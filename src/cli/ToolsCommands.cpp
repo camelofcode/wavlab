@@ -23,8 +23,8 @@ int Commands::statCommand(const std::string& command, int argc, char* argv[])
         return EXIT_FAILURE;
     }
     std::string path = static_cast<std::string>(argv[2]);
-    WavFile wav(path, false);
-    wav.printDetails();
+    auto wav = WavFile::openMetadata(path);
+    std::cout << wav.details() << std::endl;
     return EXIT_SUCCESS;
 }
 
@@ -49,7 +49,7 @@ int Commands::normaliseCommand(const std::string& command, int argc, char* argv[
     std::string input = static_cast<std::string>(argv[2]);
     std::string output = argc == 4 ? static_cast<std::string>(argv[3]) : input;
 
-    WavFile wav(input, true);
+    auto wav = WavFile::open(input);
     Tools::normalise(wav);
     wav.save(output);
     return EXIT_SUCCESS;
@@ -74,7 +74,7 @@ int Commands::reverseCommand(const std::string& command, int argc, char* argv[])
     std::string input = static_cast<std::string>(argv[2]);
     std::string output = argc == 4 ? static_cast<std::string>(argv[3]) : input;
 
-    WavFile wav(input, true);
+    auto wav = WavFile::open(input);
     Tools::reverse(wav);
     wav.save(output);
     return EXIT_SUCCESS;
@@ -99,7 +99,7 @@ int Commands::flipPhaseCommand(const std::string& command, int argc, char* argv[
     std::string input = static_cast<std::string>(argv[2]);
     std::string output = argc == 4 ? static_cast<std::string>(argv[3]) : input;
 
-    WavFile wav(input, true);
+    auto wav = WavFile::open(input);
     Tools::flipPhase(wav);
     wav.save(output);
     return EXIT_SUCCESS;
@@ -124,7 +124,7 @@ int Commands::swapChannelsCommand(const std::string& command, int argc, char* ar
     std::string input = static_cast<std::string>(argv[2]);
     std::string output = argc == 4 ? static_cast<std::string>(argv[3]) : input;
 
-    WavFile wav(input, true);
+    auto wav = WavFile::open(input);
     Tools::swapChannels(wav);
     wav.save(output);
     return EXIT_SUCCESS;
@@ -147,16 +147,16 @@ int Commands::splitStereoCommand(const std::string& command, int argc, char* arg
     }
     std::string input = static_cast<std::string>(argv[2]);
 
-    WavFile stereo(input, true);
+    auto stereo = WavFile::open(input);
 
-    if (stereo.getNumberOfChannels() != 2)
+    if (stereo.numberOfChannels() != 2)
     {
         std::cerr << "Input file is not stereo." << std::endl;
         return EXIT_FAILURE;
     }
 
-    WavFile left(1, stereo.getSampleRate(), stereo.getBitsPerSample());
-    WavFile right(1, stereo.getSampleRate(), stereo.getBitsPerSample());
+    auto left = WavFile::create(1, stereo.sampleRate(), stereo.bitsPerSample());
+    auto right = WavFile::create(1, stereo.sampleRate(), stereo.bitsPerSample());
 
     Tools::splitStereo(stereo, left, right);
 
@@ -187,31 +187,31 @@ int Commands::combineLeftRightCommand(const std::string& command, int argc, char
     std::string rightInput = static_cast<std::string>(argv[3]);
     std::string output = static_cast<std::string>(argv[4]);
 
-    WavFile left(leftInput, true);
-    WavFile right(rightInput, true);
+    auto left = WavFile::open(leftInput);
+    auto right = WavFile::open(rightInput);
 
-    if (left.getNumberOfChannels() != 1)
+    if (left.numberOfChannels() != 1)
     {
         std::cerr << "Left input file is not mono." << std::endl;
         return EXIT_FAILURE;
     }
 
-    if (right.getNumberOfChannels() != 1)
+    if (right.numberOfChannels() != 1)
     {
         std::cerr << "Right input file is not mono." << std::endl;
         return EXIT_FAILURE;
     }
 
-    if (left.getSampleRate() != right.getSampleRate())
+    if (left.sampleRate() != right.sampleRate())
     {
         std::cerr << "Left and Right input files are not the same sample rate." << std::endl;
         return EXIT_FAILURE;
     }
 
-    auto allSampleRates = std::vector<unsigned short>({ left.getBitsPerSample(), right.getBitsPerSample() });
+    auto allSampleRates = std::vector<unsigned short>({ left.bitsPerSample(), right.bitsPerSample() });
     unsigned short maxSampleRate = *std::max_element(allSampleRates.begin(), allSampleRates.end());
 
-    WavFile stereo(2, left.getSampleRate(), maxSampleRate);
+    auto stereo = WavFile::create(2, left.sampleRate(), maxSampleRate);
 
     Tools::combineLeftRight(left, right, stereo);
 
@@ -237,16 +237,16 @@ int Commands::splitStereoMidSideCommand(const std::string& command, int argc, ch
     }
     std::string input = static_cast<std::string>(argv[2]);
 
-    WavFile stereo(input, true);
+    auto stereo = WavFile::open(input);
 
-    if (stereo.getNumberOfChannels() != 2)
+    if (stereo.numberOfChannels() != 2)
     {
         std::cerr << "Input file is not stereo." << std::endl;
         return EXIT_FAILURE;
     }
 
-    WavFile mid(1, stereo.getSampleRate(), stereo.getBitsPerSample());
-    WavFile side(1, stereo.getSampleRate(), stereo.getBitsPerSample());
+    auto mid = WavFile::create(1, stereo.sampleRate(), stereo.bitsPerSample());
+    auto side = WavFile::create(1, stereo.sampleRate(), stereo.bitsPerSample());
 
     Tools::splitStereoMidSide(stereo, mid, side);
 
@@ -277,31 +277,31 @@ int Commands::combineMidSideCommand(const std::string& command, int argc, char* 
     std::string sideInput = static_cast<std::string>(argv[3]);
     std::string output = static_cast<std::string>(argv[4]);
 
-    WavFile mid(midInput, true);
-    WavFile side(sideInput, true);
+    auto mid = WavFile::open(midInput);
+    auto side = WavFile::open(sideInput);
 
-    if (mid.getNumberOfChannels() != 1)
+    if (mid.numberOfChannels() != 1)
     {
         std::cerr << "Mid input file is not mono." << std::endl;
         return EXIT_FAILURE;
     }
 
-    if (side.getNumberOfChannels() != 1)
+    if (side.numberOfChannels() != 1)
     {
         std::cerr << "Side input file is not mono." << std::endl;
         return EXIT_FAILURE;
     }
 
-    if (side.getSampleRate() != mid.getSampleRate())
+    if (side.sampleRate() != mid.sampleRate())
     {
         std::cerr << "Mid and Side input files are not the same sample rate." << std::endl;
         return EXIT_FAILURE;
     }
 
-    auto allSampleRates = std::vector<unsigned short>({ mid.getBitsPerSample(), side.getBitsPerSample() });
+    auto allSampleRates = std::vector<unsigned short>({ mid.bitsPerSample(), side.bitsPerSample() });
     unsigned short maxSampleRate = *std::max_element(allSampleRates.begin(), allSampleRates.end());
 
-    WavFile stereo(2, side.getSampleRate(), maxSampleRate);
+    auto stereo = WavFile::create(2, side.sampleRate(), maxSampleRate);
 
     Tools::combineMidSide(mid, side, stereo);
 
@@ -338,7 +338,7 @@ int Commands::gainCommand(const std::string& command, int argc, char* argv[])
 
     std::string output = argc == 5 ? static_cast<std::string>(argv[4]) : input;
 
-    WavFile wav(input, true);
+    auto wav = WavFile::open(input);
     Tools::gain(wav, gain);
     wav.save(output);
     return EXIT_SUCCESS;
@@ -372,7 +372,7 @@ int Commands::gainDbCommand(const std::string& command, int argc, char* argv[])
 
     std::string output = argc == 5 ? static_cast<std::string>(argv[4]) : input;
 
-    WavFile wav(input, true);
+    auto wav = WavFile::open(input);
     Tools::decibelGain(wav, dB);
     wav.save(output);
     return EXIT_SUCCESS;
@@ -395,7 +395,7 @@ int Commands::getPeakDbCommand(const std::string& command, int argc, char* argv[
     }
     std::string input = static_cast<std::string>(argv[2]);
 
-    WavFile wav(input, true);
+    auto wav = WavFile::open(input);
     std::cout << Tools::getPeakDecibels(wav) << "dB";
     return EXIT_SUCCESS;
 }
@@ -417,7 +417,7 @@ int Commands::getRMSDbCommand(const std::string& command, int argc, char* argv[]
     }
     std::string input = static_cast<std::string>(argv[2]);
 
-    WavFile wav(input, true);
+    auto wav = WavFile::open(input);
     std::cout << Tools::getRMSDecibels(wav) << "dB";
     return EXIT_SUCCESS;
 }
@@ -448,20 +448,20 @@ int Commands::mixCommand(const std::string& command, int argc, char* argv[])
     for (int i = 3; i < argc; i++)
     {
         std::string input = static_cast<std::string>(argv[i]);
-        WavFile inputWav(input, true);
+        auto inputWav = WavFile::open(input);
 
         if (sampleRate != 0)
         {
-            if (sampleRate != inputWav.getSampleRate())
+            if (sampleRate != inputWav.sampleRate())
             {
                 std::cout << "Not all input files are the same sample rate." << std::endl;
                 return EXIT_FAILURE;
             }
         }
-        sampleRate = inputWav.getSampleRate();
+        sampleRate = inputWav.sampleRate();
 
-        allBitDepths.push_back(inputWav.getBitsPerSample());
-        allNumberOfChannels.push_back(inputWav.getNumberOfChannels());
+        allBitDepths.push_back(inputWav.bitsPerSample());
+        allNumberOfChannels.push_back(inputWav.numberOfChannels());
         inputWavs.push_back(inputWav);
 
     }
@@ -469,7 +469,7 @@ int Commands::mixCommand(const std::string& command, int argc, char* argv[])
     unsigned short maxBitDepth = *std::max_element(allBitDepths.begin(), allBitDepths.end());
     unsigned short maxNumberOfChannels = *std::max_element(allNumberOfChannels.begin(), allNumberOfChannels.end());
 
-    WavFile outputWav(maxNumberOfChannels, sampleRate, maxBitDepth);
+    auto outputWav = WavFile::create(maxNumberOfChannels, sampleRate, maxBitDepth);
 
     Tools::mix(inputWavs, outputWav);
     outputWav.save(output);
@@ -495,11 +495,11 @@ int Commands::splitCommand(const std::string& command, int argc, char* argv[])
     }
     std::string input = static_cast<std::string>(argv[2]);
 
-    WavFile inputWav(input, true);
+    auto inputWav = WavFile::open(input);
     std::vector<WavFile> outputWavs;
     std::vector<uint32_t> splitTimesMs;
 
-    WavFile firstOutputWav(inputWav.getNumberOfChannels(), inputWav.getSampleRate(), inputWav.getBitsPerSample());
+    auto firstOutputWav = WavFile::create(inputWav.numberOfChannels(), inputWav.sampleRate(), inputWav.bitsPerSample());
     outputWavs.push_back(firstOutputWav);
 
     for (int i = 3; i < argc; i++)
@@ -512,7 +512,7 @@ int Commands::splitCommand(const std::string& command, int argc, char* argv[])
         }
         splitTimesMs.push_back(timeInMs);
 
-        WavFile subsequentOutputWav(inputWav.getNumberOfChannels(), inputWav.getSampleRate(), inputWav.getBitsPerSample());
+        auto subsequentOutputWav = WavFile::create(inputWav.numberOfChannels(), inputWav.sampleRate(), inputWav.bitsPerSample());
         outputWavs.push_back(subsequentOutputWav);
     }
 
@@ -556,20 +556,20 @@ int Commands::joinCommand(const std::string&command, int argc, char* argv[])
     for (int i = 3; i < argc; i++)
     {
         std::string input = static_cast<std::string>(argv[i]);
-        WavFile inputWav(input, true);
+        auto inputWav = WavFile::open(input);
 
         if (sampleRate != 0)
         {
-            if (sampleRate != inputWav.getSampleRate())
+            if (sampleRate != inputWav.sampleRate())
             {
                 std::cerr << "Not all input files are the same sample rate." << std::endl;
                 return EXIT_FAILURE;
             }
         }
-        sampleRate = inputWav.getSampleRate();
+        sampleRate = inputWav.sampleRate();
 
-        allBitDepths.push_back(inputWav.getBitsPerSample());
-        allNumberOfChannels.push_back(inputWav.getNumberOfChannels());
+        allBitDepths.push_back(inputWav.bitsPerSample());
+        allNumberOfChannels.push_back(inputWav.numberOfChannels());
         inputWavs.push_back(inputWav);
 
     }
@@ -577,7 +577,7 @@ int Commands::joinCommand(const std::string&command, int argc, char* argv[])
     unsigned short maxBitDepth = *std::max_element(allBitDepths.begin(), allBitDepths.end());
     unsigned short maxNumberOfChannels = *std::max_element(allNumberOfChannels.begin(), allNumberOfChannels.end());
 
-    WavFile outputWav(maxNumberOfChannels, sampleRate, maxBitDepth);
+    auto outputWav = WavFile::create(maxNumberOfChannels, sampleRate, maxBitDepth);
 
     Tools::join(inputWavs, outputWav);
     outputWav.save(output);

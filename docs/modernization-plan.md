@@ -270,6 +270,24 @@ Tasks:
    positional parameter lists.
 10. Add a minimal library example to `examples/` and compile it in CI.
 
+Phase 2 status: complete.
+
+Implementation notes:
+
+- Public headers now live under `include/wavlab/`; CLI sources and private
+  implementation helpers are separate.
+- `WavFile::open`, `openMetadata`, and `create` replace the ambiguous legacy
+  constructors. `WavError` carries a machine-readable category and a
+  contextual diagnostic.
+- Sample access uses fixed-size spans, replacement validates complete frames,
+  and distinct sample/frame counts remove the old stereo ambiguity.
+- Library code no longer prints or exits. The CLI catches exceptions once and
+  remains responsible for diagnostics and exit status.
+- Multi-input tools are const-correct, delay/reverb parameters use settings
+  types, and `examples/normalise.cpp` compiles as a library-only consumer.
+- The API suite covers creation errors, frame invariants, metadata-only reads,
+  mutable spans, typed I/O errors, and a stereo save/open round trip.
+
 Exit criteria:
 
 - A library consumer can open, process, and save a WAV without including CLI

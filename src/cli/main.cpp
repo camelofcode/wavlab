@@ -1,7 +1,11 @@
+#include <exception>
 #include <iostream>
 #include "Commands.h"
 
-int main(int argc, char* argv[])
+namespace
+{
+
+int run(int argc, char* argv[])
 {
     if (argc < 2)
     {
@@ -36,5 +40,20 @@ int main(int argc, char* argv[])
     else 
     {
         return commands.command(command, argc, argv);
+    }
+}
+
+}
+
+int main(int argc, char* argv[])
+{
+    try
+    {
+        return run(argc, argv);
+    }
+    catch (const std::exception& error)
+    {
+        std::cerr << "wavlab: " << error.what() << std::endl;
+        return EXIT_FAILURE;
     }
 }

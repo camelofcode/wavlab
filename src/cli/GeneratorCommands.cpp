@@ -55,7 +55,7 @@ int Commands::sineWaveCommand(const std::string& command, int argc, char* argv[]
         return EXIT_FAILURE;
     }
 
-    WavFile wav(1, sampleRate, bitDepth);
+    auto wav = WavFile::create(1, sampleRate, bitDepth);
     Generators::sineWave(wav, lengthMs, frequency);
     wav.save(output);
 
@@ -111,7 +111,7 @@ int Commands::squareWaveCommand(const std::string& command, int argc, char* argv
         return EXIT_FAILURE;
     }
 
-    WavFile wav(1, sampleRate, bitDepth);
+    auto wav = WavFile::create(1, sampleRate, bitDepth);
     Generators::squareWave(wav, lengthMs, frequency);
     wav.save(output);
 
@@ -178,7 +178,7 @@ int Commands::squareWaveAdditiveCommand(const std::string& command, int argc, ch
         }
     }
 
-    WavFile wav(1, sampleRate, bitDepth);
+    auto wav = WavFile::create(1, sampleRate, bitDepth);
     Generators::squareWaveAdditive(wav, lengthMs, frequency, harmonics);
     wav.save(output);
 
@@ -234,7 +234,7 @@ int Commands::triangleWaveCommand(const std::string& command, int argc, char* ar
         return EXIT_FAILURE;
     }
 
-    WavFile wav(1, sampleRate, bitDepth);
+    auto wav = WavFile::create(1, sampleRate, bitDepth);
     Generators::triangleWave(wav, lengthMs, frequency);
     wav.save(output);
 
@@ -301,7 +301,7 @@ int Commands::triangleWaveAdditiveCommand(const std::string& command, int argc, 
         }
     }
 
-    WavFile wav(1, sampleRate, bitDepth);
+    auto wav = WavFile::create(1, sampleRate, bitDepth);
     Generators::triangleWaveAdditive(wav, lengthMs, frequency, harmonics);
     wav.save(output);
 
@@ -357,7 +357,7 @@ int Commands::sawtoothWaveCommand(const std::string& command, int argc, char* ar
         return EXIT_FAILURE;
     }
 
-    WavFile wav(1, sampleRate, bitDepth);
+    auto wav = WavFile::create(1, sampleRate, bitDepth);
     Generators::sawtoothWave(wav, lengthMs, frequency);
     wav.save(output);
 
@@ -424,7 +424,7 @@ int Commands::sawtoothWaveAdditiveCommand(const std::string& command, int argc, 
         }
     }
 
-    WavFile wav(1, sampleRate, bitDepth);
+    auto wav = WavFile::create(1, sampleRate, bitDepth);
     Generators::sawtoothWaveAdditive(wav, lengthMs, frequency, harmonics);
     wav.save(output);
 
@@ -473,7 +473,7 @@ int Commands::whiteNoiseCommand(const std::string& command, int argc, char* argv
         return EXIT_FAILURE;
     }
 
-    WavFile wav(1, sampleRate, bitDepth);
+    auto wav = WavFile::create(1, sampleRate, bitDepth);
     Generators::whiteNoise(wav, lengthMs);
     wav.save(output);
 
@@ -522,7 +522,7 @@ int Commands::pinkNoiseCommand(const std::string& command, int argc, char* argv[
         return EXIT_FAILURE;
     }
 
-    WavFile wav(1, sampleRate, bitDepth);
+    auto wav = WavFile::create(1, sampleRate, bitDepth);
     Generators::pinkNoise(wav, lengthMs);
     wav.save(output);
 

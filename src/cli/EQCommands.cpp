@@ -81,7 +81,7 @@ int Commands::eqWithGainCommand(const std::string& command, int argc, char* argv
 	if (command == "eq-lowshelf") type = FilterType::LowShelf;
 	if (command == "eq-highshelf") type = FilterType::HighShelf;
 
-	WavFile wav(input, true);
+	auto wav = WavFile::open(input);
 	EQ::process(wav, type, gain, frequency, q);
 	wav.save(output);
 
@@ -164,7 +164,7 @@ int Commands::eqPassCommand(const std::string& command, int argc, char* argv[])
 	if (command == "eq-lowpass") type = FilterType::LowPass;
 	if (command == "eq-highpass") type = FilterType::HighPass;
 
-	WavFile wav(input, true);
+	auto wav = WavFile::open(input);
 	EQ::process(wav, type, 0, frequency, q);
 	wav.save(output);
 

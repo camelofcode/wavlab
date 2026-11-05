@@ -117,25 +117,26 @@ double EQInstance::processSample(double in)
 
 void EQ::process(WavFile& wave, FilterType type, double gainDecibels, double centreFrequency, double q)
 {
-	if (wave.getNumberOfChannels() == 1)
+	if (wave.numberOfChannels() == 1)
 	{
-		EQInstance eqMono(type, gainDecibels, centreFrequency, q, wave.getSampleRate());
+		EQInstance eqMono(type, gainDecibels, centreFrequency, q, wave.sampleRate());
 
 		std::vector<double> newSamples;
 
-		for (auto& sample : wave.getSamples())
+		for (auto& sample : wave.samples())
 		{
 			newSamples.push_back(eqMono.processSample(sample));
 		}
 		wave.setSamples(newSamples);
 		return;
 	}
-	else if (wave.getNumberOfChannels() == 2)
+	else if (wave.numberOfChannels() == 2)
 	{
-		EQInstance eqLeft(type, gainDecibels, centreFrequency, q, wave.getSampleRate());
-		EQInstance eqRight(type, gainDecibels, centreFrequency, q, wave.getSampleRate());
+		EQInstance eqLeft(type, gainDecibels, centreFrequency, q, wave.sampleRate());
+		EQInstance eqRight(type, gainDecibels, centreFrequency, q, wave.sampleRate());
 
-		std::vector<double> original = wave.getSamples();
+		const auto sourceSamples = wave.samples();
+		std::vector<double> original(sourceSamples.begin(), sourceSamples.end());
 		std::vector<double> newSamples;
 
 		for (size_t i = 0; i < original.size() - 1; i = i + 2)
