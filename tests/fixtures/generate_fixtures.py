@@ -272,6 +272,11 @@ def check():
             expected = expected_directory / name
             if not checked_in.exists():
                 mismatches.append("missing: {}".format(name))
+            elif name == MANIFEST_NAME:
+                checked_in_manifest = json.loads(checked_in.read_text(encoding="utf-8"))
+                expected_manifest = json.loads(expected.read_text(encoding="utf-8"))
+                if checked_in_manifest != expected_manifest:
+                    mismatches.append("stale: {}".format(name))
             elif checked_in.read_bytes() != expected.read_bytes():
                 mismatches.append("stale: {}".format(name))
 
