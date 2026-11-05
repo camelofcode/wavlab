@@ -9,6 +9,7 @@ project(
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(WavLabProjectOptions)
+include(FetchContent)
 
 option(BUILD_SHARED_LIBS "Build wavlab as a shared library" OFF)
 
@@ -36,16 +37,29 @@ set(WAVLAB_LIBRARY_SOURCES
     src/lib/WavFile.cpp
 )
 
-set(WAVLAB_CLI_SOURCES
-    src/cli/Commands.cpp
-    src/cli/EQCommands.cpp
-    src/cli/FXCommands.cpp
-    src/cli/GeneratorCommands.cpp
-    src/cli/ModulationCommands.cpp
+set(WAVLAB_CLI_CORE_SOURCES
+    src/cli/Cli.cpp
+    src/cli/EffectsCli.cpp
+    src/cli/EqCli.cpp
+    src/cli/GeneratorCli.cpp
     src/cli/StringHelpers.cpp
-    src/cli/ToolsCommands.cpp
-    src/cli/main.cpp
+    src/cli/ToolsCli.cpp
 )
+
+find_package(CLI11 2.7.2 QUIET CONFIG)
+if(NOT CLI11_FOUND)
+    set(CLI11_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+    set(CLI11_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(CLI11_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(CLI11_INSTALL OFF CACHE BOOL "" FORCE)
+    FetchContent_Declare(
+        CLI11
+        GIT_REPOSITORY https://github.com/CLIUtils/CLI11.git
+        GIT_TAG cbd58a3696887b34c70949aef21a71735a0c2ad5
+        GIT_SHALLOW OFF
+    )
+    FetchContent_MakeAvailable(CLI11)
+endif()
 
 add_library(wavlab_lib ${WAVLAB_LIBRARY_SOURCES} ${WAVLAB_PUBLIC_HEADERS})
 add_library(wavlab::wavlab ALIAS wavlab_lib)
@@ -71,7 +85,15 @@ target_include_directories(
 )
 wavlab_apply_project_options(wavlab_lib)
 
-add_executable(wavlab_cli ${WAVLAB_CLI_SOURCES})
+add_library(wavlab_cli_core STATIC ${WAVLAB_CLI_CORE_SOURCES})
+set_target_properties(wavlab_cli_core PROPERTIES CXX_EXTENSIONS OFF)
+target_compile_features(wavlab_cli_core PRIVATE cxx_std_20)
+target_include_directories(wavlab_cli_core PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/cli")
+target_link_libraries(wavlab_cli_core PUBLIC wavlab::wavlab CLI11::CLI11)
+target_compile_definitions(wavlab_cli_core PRIVATE WAVLAB_VERSION="${PROJECT_VERSION}")
+wavlab_apply_project_options(wavlab_cli_core)
+
+add_executable(wavlab_cli src/cli/main.cpp)
 set_target_properties(
     wavlab_cli
     PROPERTIES
@@ -81,8 +103,7 @@ set_target_properties(
         PDB_NAME wavlab_cli
 )
 target_compile_features(wavlab_cli PRIVATE cxx_std_20)
-target_include_directories(wavlab_cli PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cli")
-target_link_libraries(wavlab_cli PRIVATE wavlab::wavlab)
+target_link_libraries(wavlab_cli PRIVATE wavlab_cli_core)
 wavlab_apply_project_options(wavlab_cli)
 
 add_executable(wavlab_normalise_example examples/normalise.cpp)
@@ -105,12 +126,16 @@ wavlab_add_developer_targets(
     include/wavlab/LFO.h
     include/wavlab/Tools.h
     include/wavlab/WavFile.h
-    src/cli/Commands.cpp
-    src/cli/Commands.h
-    src/cli/ModulationCommands.cpp
+    src/cli/Cli.cpp
+    src/cli/Cli.h
+    src/cli/CliCommon.h
+    src/cli/EffectsCli.cpp
+    src/cli/EqCli.cpp
+    src/cli/GeneratorCli.cpp
     src/cli/StringHelpers.cpp
     src/cli/StringHelpers.h
-    src/cli/ToolsCommands.cpp
+    src/cli/ToolsCli.cpp
+    src/cli/main.cpp
     src/lib/BinaryHelpers.cpp
     src/lib/BinaryHelpers.h
     src/lib/ConversionHelpers.cpp
@@ -126,6 +151,7 @@ wavlab_add_developer_targets(
     src/lib/Tools.cpp
     src/lib/WavFile.cpp
     tests/binary_conversion_tests.cpp
+    tests/cli_parser_tests.cpp
     tests/delay_lfo_tests.cpp
     tests/editing_tools_tests.cpp
     tests/effects_tests.cpp

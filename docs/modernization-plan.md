@@ -670,6 +670,40 @@ Tasks:
    writes, omitted-output overwrite behavior, invalid arguments, missing
    files, and help/version output.
 
+Phase 8 status: complete.
+
+Implementation notes:
+
+- CLI11 2.7.2 is pinned to commit
+  `cbd58a3696887b34c70949aef21a71735a0c2ad5`. CMake first tries an installed
+  config package and otherwise uses `FetchContent`; CLI11 links only to the
+  internal command-line target and never propagates into `wavlab::wavlab`.
+- `CommandLine` owns one typed definition tree. `main.cpp` constructs it,
+  parses once, executes the selected library-facing action once, and handles
+  CLI11 parse errors separately from library exceptions at the process
+  boundary.
+- Generator, tool, EQ, and effect definitions live in focused translation
+  units. Shared helpers provide typed input/output paths and the common
+  open/process/save sequence. The old `argc`/`argv`, stringstream parser, help
+  maps, and duplicated command handlers have been removed.
+- Canonical commands now use normalised `[0, 1]` mix/depth values, RT60
+  seconds, dB drive, and named `--tail-ms`, `--cutoff-hz`, `--drive-db`, and
+  `--stages` options. This is an intentional pre-1.0 CLI break; percentage
+  positionals are not silently reinterpreted.
+- `normalise` and `normalise-db` are canonical, with `normalize` aliases.
+  `metadata` retains the `stat` alias and adds `--full`; `get-peak-db` and
+  `get-rms-db` remain visibly labelled compatibility commands.
+- Top-level/per-command help, `--version`, typed conversion, existing-file
+  checks, paired-output requirements, range checks, and parse failures now use
+  consistent CLI11 behaviour and stderr handling.
+- `docs/cli.md` is generated recursively from the live parser definitions by
+  the hidden `_generate-cli-docs` maintenance command. CTest fails when the
+  checked-in reference is stale.
+- `tests/cli_parser_tests.cpp` covers every canonical command shape plus
+  aliases and invalid forms without executing handlers. Black-box Python tests
+  cover writes, overwrite-by-omission, missing files, validation, metadata,
+  help, version, every effect/EQ route, and the generated reference.
+
 Exit criteria:
 
 - No CLI handler contains DSP or WAV parsing logic.

@@ -81,11 +81,23 @@ target_link_libraries(wavlab_filter_effects_tests PRIVATE wavlab::wavlab)
 wavlab_apply_project_options(wavlab_filter_effects_tests)
 add_test(NAME wavlab.library.filter-effects COMMAND wavlab_filter_effects_tests)
 
+add_executable(wavlab_cli_parser_tests cli_parser_tests.cpp)
+set_target_properties(wavlab_cli_parser_tests PROPERTIES CXX_EXTENSIONS OFF)
+target_compile_features(wavlab_cli_parser_tests PRIVATE cxx_std_20)
+target_link_libraries(wavlab_cli_parser_tests PRIVATE wavlab_cli_core)
+target_compile_definitions(
+    wavlab_cli_parser_tests
+    PRIVATE
+        WAVLAB_FIXTURE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/fixtures"
+)
+wavlab_apply_project_options(wavlab_cli_parser_tests)
+add_test(NAME wavlab.cli.parser COMMAND wavlab_cli_parser_tests)
+
 add_test(NAME wavlab.cli.help COMMAND wavlab_cli --help)
 set_tests_properties(
     wavlab.cli.help
     PROPERTIES
-        PASS_REGULAR_EXPRESSION "wavlab commands"
+        PASS_REGULAR_EXPRESSION "Inspect and process PCM WAV files"
 )
 add_test(
     NAME wavlab.cli.independent-reader
@@ -102,11 +114,26 @@ add_test(
         "$<TARGET_FILE:wavlab_cli>"
 )
 add_test(
+    NAME wavlab.cli.execution
+    COMMAND
+        "${Python3_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/cli_execution_tests.py"
+        "$<TARGET_FILE:wavlab_cli>"
+)
+add_test(
     NAME wavlab.cli.modulation-effects
     COMMAND
         "${Python3_EXECUTABLE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/modulation_cli_tests.py"
         "$<TARGET_FILE:wavlab_cli>"
+)
+add_test(
+    NAME wavlab.cli.reference-current
+    COMMAND
+        "${Python3_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/cli_reference_test.py"
+        "$<TARGET_FILE:wavlab_cli>"
+        "${PROJECT_SOURCE_DIR}/docs/cli.md"
 )
 add_test(
     NAME wavlab.fixtures.current

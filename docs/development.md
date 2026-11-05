@@ -77,6 +77,7 @@ presets that inherit from the checked-in configurations.
 ## Targets
 
 - `wavlab_lib` builds the library, with alias `wavlab::wavlab`.
+- `wavlab_cli_core` builds the internal typed CLI definitions and handlers.
 - `wavlab_cli` builds the executable with output name `wavlab`.
 - `wavlab_tests` is the dependency-free library consumer smoke test.
 - `wavlab_header_smoke` compiles every public header in an isolated translation
@@ -85,9 +86,10 @@ presets that inherit from the checked-in configurations.
   installed.
 - `format-check` reports formatting differences without modifying files.
 
-The current library target still contains legacy command handlers because CLI
-and processing functions share translation units. Phase 2 separates those
-sources and removes the CLI dependency from the library API.
+CLI11 is confined to `wavlab_cli_core`. The reusable library has no command-line
+parser, terminal-output, or process-exit dependency. CMake uses an installed
+CLI11 2.7.2 config package when available, with a pinned `FetchContent`
+fallback for clean builds.
 
 ## Build options
 
@@ -104,15 +106,17 @@ global CMake flags and do not propagate to consumers of `wavlab::wavlab`.
 
 ## Tests
 
-Phase 1 deliberately uses CTest and a tiny dependency-free smoke executable.
-This keeps the foundational build working offline. Before the broad unit-test
-port begins, select and pin the test framework in a separate mechanical
-change; Catch2 remains the leading option.
+The library tests remain dependency-free and use CTest executables. CLI parser
+tests link only the internal CLI target and therefore do not affect library
+consumers.
 
 Current tests verify:
 
 - an external-style executable can link `wavlab::wavlab` and construct a WAV;
 - the CLI builds and provides conventional `--help` output;
+- every canonical command shape parses independently of execution;
+- black-box CLI tests cover output, overwrite, errors, help, and version;
+- `docs/cli.md` exactly matches the live CLI11 definitions;
 - all generated WAV fixtures and their manifest are reproducible; and
 - every public header compiles independently as part of the normal build.
 
@@ -122,6 +126,15 @@ List or run tests directly:
 ctest --preset dev --show-only
 ctest --preset dev
 ```
+
+Regenerate the checked-in command reference after changing a CLI definition:
+
+```console
+./out/build/dev/wavlab _generate-cli-docs docs/cli.md
+```
+
+`wavlab.cli.reference-current` compares this file with freshly generated
+output, so an omitted update also fails locally and in CI.
 
 ## Static analysis and formatting
 

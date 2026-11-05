@@ -84,7 +84,7 @@ def main() -> int:
         invalid_output = root / "invalid.wav"
         invalid = run(cli, "tremolo", input_path, 0.5, 1.0, "sawtooth", invalid_output)
         assert invalid.returncode != 0
-        assert "Waveform must be" in invalid.stderr
+        assert "not in {sine,triangle,square}" in invalid.stderr
         assert not invalid_output.exists()
 
         help_result = run(cli, "--help")

@@ -242,9 +242,9 @@ copying implementation details.
 | Delay/LFO primitives | Timing, wrap, feedback, waveforms, validation | `tests/delay_lfo_tests.cpp` | [x] |
 | Existing effects | Saturation, three delays, reverb | `tests/effects_tests.cpp` | [x] |
 | New effects | Chorus, vibrato, flanger, tremolo, autopan, phaser, modulated filter | `tests/modulation_effects_tests.cpp`, `tests/filter_effects_tests.cpp` | [x] |
-| CLI parsing | Every command and argument shape | parser unit tests | [ ] |
-| CLI execution | Output samples, overwrite/default paths, errors | process-level integration tests | [ ] |
-| Generated docs | Checked-in reference matches parser | generated-doc test | [ ] |
+| CLI parsing | Every command and argument shape | `tests/cli_parser_tests.cpp` | [x] |
+| CLI execution | Output samples, overwrite/default paths, errors | process-level Python integration tests | [x] |
+| Generated docs | Checked-in reference matches parser | `wavlab.cli.reference-current` | [x] |
 
 ## Behavior decisions that must be explicit
 
