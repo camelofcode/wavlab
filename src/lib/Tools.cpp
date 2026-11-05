@@ -1,401 +1,485 @@
-#include "Constants.h"
-#include <algorithm>
-#include <cmath>
 #include <wavlab/Tools.h>
+
+#include "Constants.h"
+
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <limits>
+#include <span>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 namespace wavlab
 {
 
-/* stat command */
-
-void Tools::normalise(WavFile &wave)
+ProcessingError::ProcessingError(ProcessingErrorCode code, std::string message)
+    : std::invalid_argument(std::move(message)), code_(code)
 {
-    double highValue = 0;
+}
 
-    // Find loudest sample
-    for (auto &sample : wave.samples())
+ProcessingErrorCode ProcessingError::code() const noexcept { return code_; }
+
+namespace
+{
+
+[[nodiscard]] double amplitudeToDecibels(double amplitude)
+{
+    if (amplitude == 0.0)
     {
-        if (fabs(sample) > fabs(highValue))
+        return -std::numeric_limits<double>::infinity();
+    }
+    return 20.0 * std::log10(amplitude);
+}
+
+void requireMono(const WavFile &input, std::string_view role)
+{
+    if (input.numberOfChannels() != 1)
+    {
+        throw ProcessingError(ProcessingErrorCode::expectedMono,
+                              std::string(role) + " input must be mono, but has " +
+                                  std::to_string(input.numberOfChannels()) + " channels");
+    }
+}
+
+void requireSameSampleRate(const WavFile &first, const WavFile &second)
+{
+    if (first.sampleRate() != second.sampleRate())
+    {
+        throw ProcessingError(ProcessingErrorCode::sampleRateMismatch,
+                              "sample rates do not match: " + std::to_string(first.sampleRate()) +
+                                  " and " + std::to_string(second.sampleRate()));
+    }
+}
+
+template <typename Combine>
+[[nodiscard]] WavFile combineMonoPair(const WavFile &first, const WavFile &second, Combine combine)
+{
+    requireMono(first, "first");
+    requireMono(second, "second");
+    requireSameSampleRate(first, second);
+
+    const auto firstSamples = first.samples();
+    const auto secondSamples = second.samples();
+    const auto frameCount = std::max(firstSamples.size(), secondSamples.size());
+    std::vector<double> outputSamples;
+    if (frameCount > outputSamples.max_size() / 2)
+    {
+        throw ProcessingError(ProcessingErrorCode::sizeOverflow,
+                              "combined sample data is too large");
+    }
+    outputSamples.reserve(frameCount * 2);
+
+    for (std::size_t frame = 0; frame < frameCount; ++frame)
+    {
+        const auto firstSample = frame < firstSamples.size() ? firstSamples[frame] : 0.0;
+        const auto secondSample = frame < secondSamples.size() ? secondSamples[frame] : 0.0;
+        const auto outputFrame = combine(firstSample, secondSample);
+        outputSamples.insert(outputSamples.end(), outputFrame.begin(), outputFrame.end());
+    }
+
+    auto output = WavFile::create(2, first.sampleRate(),
+                                  std::max(first.bitsPerSample(), second.bitsPerSample()));
+    output.setSamples(std::move(outputSamples));
+    return output;
+}
+
+void requireMinimumInputs(std::span<const WavFile> inputs)
+{
+    constexpr std::size_t minimumInputs = 2;
+    if (inputs.size() < minimumInputs)
+    {
+        throw ProcessingError(ProcessingErrorCode::tooFewInputs,
+                              "at least two input files are required; received " +
+                                  std::to_string(inputs.size()));
+    }
+}
+
+[[nodiscard]] std::uint32_t commonSampleRate(std::span<const WavFile> inputs)
+{
+    const auto expected = inputs.front().sampleRate();
+    for (const auto &input : inputs.subspan(1))
+    {
+        if (input.sampleRate() != expected)
         {
-            highValue = sample;
+            throw ProcessingError(ProcessingErrorCode::sampleRateMismatch,
+                                  "sample rates do not match: expected " +
+                                      std::to_string(expected) + ", received " +
+                                      std::to_string(input.sampleRate()));
         }
     }
-
-    // Calculate gain
-    double peak = fabs(highValue);
-    double gain = 1 / peak;
-
-    std::vector<double> newSamples;
-
-    // Write new samples with gain applied
-    for (auto &sample : wave.samples())
-    {
-        newSamples.push_back(sample * gain);
-    }
-
-    wave.setSamples(newSamples);
+    return expected;
 }
 
-void Tools::normalise(WavFile &wave, double normaliseTo)
+[[nodiscard]] std::uint16_t commonChannelCount(std::span<const WavFile> inputs)
 {
-    Tools::normalise(wave);
-
-    std::vector<double> newSamples;
-    for (auto &sample : wave.samples())
+    const auto expected = inputs.front().numberOfChannels();
+    for (const auto &input : inputs.subspan(1))
     {
-        newSamples.push_back(sample * normaliseTo);
-    }
-    wave.setSamples(newSamples);
-}
-
-/* reverse command */
-
-void Tools::reverse(WavFile &wave)
-{
-    if (wave.numberOfChannels() == 1)
-    {
-        const auto sourceSamples = wave.samples();
-        std::vector<double> original(sourceSamples.begin(), sourceSamples.end());
-        std::reverse(original.begin(), original.end());
-        wave.setSamples(original);
-    }
-    else if (wave.numberOfChannels() == 2)
-    {
-        const auto sourceSamples = wave.samples();
-        std::vector<double> original(sourceSamples.begin(), sourceSamples.end());
-        std::vector<double> reversed;
-        for (size_t i = original.size() - 1; i > 1; i = i - 2)
+        if (input.numberOfChannels() != expected)
         {
-            double right = original[i];
-            double left = original[i - 1];
-
-            reversed.push_back(left);
-            reversed.push_back(right);
+            throw ProcessingError(ProcessingErrorCode::channelCountMismatch,
+                                  "channel counts do not match: expected " +
+                                      std::to_string(expected) + ", received " +
+                                      std::to_string(input.numberOfChannels()));
         }
-        wave.setSamples(reversed);
     }
+    return expected;
 }
 
-/* flip-phase command */
-
-void Tools::flipPhase(WavFile &wave)
+[[nodiscard]] std::uint16_t maximumBitDepth(std::span<const WavFile> inputs)
 {
-    std::vector<double> newSamples;
-
-    for (auto &sample : wave.samples())
-    {
-        newSamples.push_back(-sample);
-    }
-    wave.setSamples(newSamples);
+    return std::max_element(inputs.begin(), inputs.end(), [](const auto &left, const auto &right)
+                            { return left.bitsPerSample() < right.bitsPerSample(); })
+        ->bitsPerSample();
 }
 
-/* swap-channels command */
-
-void Tools::swapChannels(WavFile &wave)
+[[nodiscard]] WavFile fileWithSamplesLike(const WavFile &source, std::uint16_t channels,
+                                          std::vector<double> samples)
 {
-    if (wave.numberOfChannels() == 1)
+    auto output = WavFile::create(channels, source.sampleRate(), source.bitsPerSample());
+    output.setSamples(std::move(samples));
+    return output;
+}
+
+} // namespace
+
+namespace Tools
+{
+
+void normalise(WavFile &wave)
+{
+    const auto samples = wave.samples();
+    double peak = 0.0;
+    for (const auto sample : samples)
     {
-        // Can't do anything to a mono file, but why error, no harm done!
+        peak = std::max(peak, std::abs(sample));
+    }
+
+    if (peak == 0.0)
+    {
         return;
     }
-    else if (wave.numberOfChannels() == 2)
-    {
-        const auto original = wave.samples();
-        std::vector<double> swapped;
-        for (size_t i = 0; i < original.size() - 1; i = i + 2)
-        {
-            double left = original[i];
-            double right = original[i + 1];
 
-            swapped.push_back(right);
-            swapped.push_back(left);
+    gain(wave, 1.0 / peak);
+}
+
+void normalize(WavFile &wave) { normalise(wave); }
+
+void normaliseToAmplitude(WavFile &wave, double targetAmplitude)
+{
+    normalise(wave);
+    gain(wave, targetAmplitude);
+}
+
+void normalise(WavFile &wave, double targetAmplitude)
+{
+    normaliseToAmplitude(wave, targetAmplitude);
+}
+
+void normalizeToAmplitude(WavFile &wave, double targetAmplitude)
+{
+    normaliseToAmplitude(wave, targetAmplitude);
+}
+
+void normaliseToDecibels(WavFile &wave, double targetDecibels)
+{
+    normalise(wave);
+    decibelGain(wave, targetDecibels);
+}
+
+void normalizeToDecibels(WavFile &wave, double targetDecibels)
+{
+    normaliseToDecibels(wave, targetDecibels);
+}
+
+void reverse(WavFile &wave)
+{
+    const auto channels = static_cast<std::size_t>(wave.numberOfChannels());
+    auto samples = wave.samples();
+    const auto frames = samples.size() / channels;
+
+    for (std::size_t first = 0; first < frames / 2; ++first)
+    {
+        const auto last = frames - first - 1;
+        for (std::size_t channel = 0; channel < channels; ++channel)
+        {
+            std::swap(samples[first * channels + channel], samples[last * channels + channel]);
         }
-        wave.setSamples(swapped);
     }
 }
 
-/* split-stereo command */
-
-void Tools::splitStereo(const WavFile &stereo, WavFile &left, WavFile &right)
+void flipPhase(WavFile &wave)
 {
-    const auto original = stereo.samples();
+    for (auto &sample : wave.samples())
+    {
+        sample = -sample;
+    }
+}
+
+void swapChannels(WavFile &wave)
+{
+    if (wave.numberOfChannels() == 1)
+    {
+        return;
+    }
+
+    auto samples = wave.samples();
+    for (std::size_t frame = 0; frame < samples.size(); frame += 2)
+    {
+        std::swap(samples[frame], samples[frame + 1]);
+    }
+}
+
+std::pair<WavFile, WavFile> splitStereo(const WavFile &stereo)
+{
+    if (stereo.numberOfChannels() != 2)
+    {
+        throw ProcessingError(ProcessingErrorCode::expectedStereo,
+                              "input must be stereo, but has " +
+                                  std::to_string(stereo.numberOfChannels()) + " channels");
+    }
+
+    const auto samples = stereo.samples();
     std::vector<double> leftSamples;
     std::vector<double> rightSamples;
+    leftSamples.reserve(samples.size() / 2);
+    rightSamples.reserve(samples.size() / 2);
 
-    for (size_t i = 0; i < original.size() - 1; i = i + 2)
+    for (std::size_t frame = 0; frame < samples.size(); frame += 2)
     {
-        double leftSample = original[i];
-        double rightSample = original[i + 1];
-
-        leftSamples.push_back(leftSample);
-        rightSamples.push_back(rightSample);
+        leftSamples.push_back(samples[frame]);
+        rightSamples.push_back(samples[frame + 1]);
     }
 
-    left.setSamples(leftSamples);
-    right.setSamples(rightSamples);
+    return {fileWithSamplesLike(stereo, 1, std::move(leftSamples)),
+            fileWithSamplesLike(stereo, 1, std::move(rightSamples))};
 }
 
-/* left-right-to-stereo command */
-
-void Tools::combineLeftRight(const WavFile &left, const WavFile &right, WavFile &out)
+WavFile combineLeftRight(const WavFile &left, const WavFile &right)
 {
-    const auto leftSamples = left.samples();
-    const auto rightSamples = right.samples();
-    std::vector<double> stereoSamples;
+    return combineMonoPair(left, right, [](double leftSample, double rightSample)
+                           { return std::array{leftSample, rightSample}; });
+}
 
-    auto allNumberOfSamples = std::vector<size_t>({leftSamples.size(), rightSamples.size()});
-    size_t maxNumberOfSamples =
-        *std::max_element(allNumberOfSamples.begin(), allNumberOfSamples.end());
-
-    for (size_t i = 0; i < maxNumberOfSamples - 1; i++)
+std::pair<WavFile, WavFile> splitStereoMidSide(const WavFile &stereo)
+{
+    if (stereo.numberOfChannels() != 2)
     {
-        double leftSample = i < leftSamples.size() - 1 ? leftSamples[i] : 0.0;
-        double rightSample = i < rightSamples.size() - 1 ? rightSamples[i] : 0.0;
-
-        stereoSamples.push_back(leftSample);
-        stereoSamples.push_back(rightSample);
+        throw ProcessingError(ProcessingErrorCode::expectedStereo,
+                              "input must be stereo, but has " +
+                                  std::to_string(stereo.numberOfChannels()) + " channels");
     }
 
-    out.setSamples(stereoSamples);
-}
-
-/* split-mid-side command */
-
-void Tools::splitStereoMidSide(const WavFile &stereo, WavFile &mid, WavFile &side)
-{
-    // See https://www.soundonsound.com/sound-advice/q-how-does-mid-sides-recording-actually-work
-
-    const auto original = stereo.samples();
+    const auto samples = stereo.samples();
     std::vector<double> midSamples;
     std::vector<double> sideSamples;
+    midSamples.reserve(samples.size() / 2);
+    sideSamples.reserve(samples.size() / 2);
 
-    for (size_t i = 0; i < original.size() - 1; i = i + 2)
+    for (std::size_t frame = 0; frame < samples.size(); frame += 2)
     {
-        double left = original[i];
-        double right = original[i + 1];
-
+        const auto left = samples[frame];
+        const auto right = samples[frame + 1];
         midSamples.push_back((left + right) * Constants::MINUS_THREE_DB);
         sideSamples.push_back((left - right) * Constants::MINUS_THREE_DB);
     }
 
-    mid.setSamples(midSamples);
-    side.setSamples(sideSamples);
+    return {fileWithSamplesLike(stereo, 1, std::move(midSamples)),
+            fileWithSamplesLike(stereo, 1, std::move(sideSamples))};
 }
 
-/* mid-side-to-stereo */
-
-void Tools::combineMidSide(const WavFile &mid, const WavFile &side, WavFile &out)
+WavFile combineMidSide(const WavFile &mid, const WavFile &side)
 {
-    // See https://www.soundonsound.com/sound-advice/q-how-does-mid-sides-recording-actually-work
-
-    const auto midSamples = mid.samples();
-    const auto sideSamples = side.samples();
-    std::vector<double> stereoSamples;
-
-    auto allNumberOfSamples = std::vector<size_t>({midSamples.size(), sideSamples.size()});
-    size_t maxNumberOfSamples =
-        *std::max_element(allNumberOfSamples.begin(), allNumberOfSamples.end());
-
-    for (size_t i = 0; i < maxNumberOfSamples - 1; i++)
-    {
-        double midSample = i < midSamples.size() - 1 ? midSamples[i] : 0.0;
-        double sideSample = i < sideSamples.size() - 1 ? sideSamples[i] : 0.0;
-
-        stereoSamples.push_back((midSample + sideSample) * Constants::MINUS_THREE_DB);
-        stereoSamples.push_back((midSample - sideSample) * Constants::MINUS_THREE_DB);
-    }
-
-    out.setSamples(stereoSamples);
+    const auto decodeScale = 0.5 / Constants::MINUS_THREE_DB;
+    return combineMonoPair(mid, side,
+                           [decodeScale](double midSample, double sideSample)
+                           {
+                               return std::array{(midSample + sideSample) * decodeScale,
+                                                 (midSample - sideSample) * decodeScale};
+                           });
 }
 
-/* gain command */
-
-void Tools::gain(WavFile &wave, double gain)
+void gain(WavFile &wave, double gainFactor)
 {
-    std::vector<double> newSamples;
-
     for (auto &sample : wave.samples())
     {
-        newSamples.push_back(sample * gain);
+        sample *= gainFactor;
     }
-
-    wave.setSamples(newSamples);
 }
 
-/* gain-db command */
+void decibelGain(WavFile &wave, double decibels) { gain(wave, std::pow(10.0, decibels / 20.0)); }
 
-void Tools::decibelGain(WavFile &wave, double dB) { gain(wave, pow(10.0, dB / 20.0)); }
-
-/* get-peak-db command */
-
-double Tools::getPeakDecibels(const WavFile &wave)
+double getPeakDecibels(const WavFile &wave)
 {
-    double highValue = 0;
-
-    // Find loudest sample
-    for (auto &sample : wave.samples())
+    double peak = 0.0;
+    for (const auto sample : wave.samples())
     {
-        if (fabs(sample) > fabs(highValue))
-        {
-            highValue = sample;
-        }
+        peak = std::max(peak, std::abs(sample));
     }
-
-    return 20.0 * log10(fabs(highValue));
+    return amplitudeToDecibels(peak);
 }
 
-/* get-rms-db command */
-
-double Tools::getRMSDecibels(const WavFile &wave)
+double getRMSDecibels(const WavFile &wave)
 {
     const auto samples = wave.samples();
-    double sumOfSquares = 0;
-
-    for (auto &sample : samples)
+    if (samples.empty())
     {
-        sumOfSquares += pow(sample, 2.0);
+        return -std::numeric_limits<double>::infinity();
     }
 
-    double mean = sumOfSquares / static_cast<double>(samples.size());
-    double rms = sqrt(mean);
-
-    return 20.0 * log10(rms);
+    double sumOfSquares = 0.0;
+    for (const auto sample : samples)
+    {
+        sumOfSquares += sample * sample;
+    }
+    return amplitudeToDecibels(std::sqrt(sumOfSquares / static_cast<double>(samples.size())));
 }
 
-/* mix command */
-void Tools::mix(std::span<const WavFile> inputs, WavFile &output)
+WavFile mix(std::span<const WavFile> inputs)
 {
-    std::vector<size_t> allNumberOfSamples;
-    std::vector<std::vector<double>> allSamples;
-    for (auto &input : inputs)
+    requireMinimumInputs(inputs);
+    const auto sampleRate = commonSampleRate(inputs);
+    const auto outputChannels =
+        std::max_element(inputs.begin(), inputs.end(), [](const auto &left, const auto &right)
+                         { return left.numberOfChannels() < right.numberOfChannels(); })
+            ->numberOfChannels();
+    std::size_t frameCount = 0;
+    for (const auto &input : inputs)
     {
-        std::vector<double> samples;
-        if (input.numberOfChannels() == 2)
+        static_cast<void>(input.samples());
+        frameCount = std::max(frameCount, input.frameCount());
+    }
+
+    std::vector<double> outputSamples;
+    if (frameCount > outputSamples.max_size() / outputChannels)
+    {
+        throw ProcessingError(ProcessingErrorCode::sizeOverflow, "mixed sample data is too large");
+    }
+    outputSamples.reserve(frameCount * outputChannels);
+    const auto inputCount = static_cast<double>(inputs.size());
+
+    for (std::size_t frame = 0; frame < frameCount; ++frame)
+    {
+        if (outputChannels == 1)
         {
-            const auto inputSamples = input.samples();
-            samples.assign(inputSamples.begin(), inputSamples.end());
-        }
-        if (input.numberOfChannels() == 1)
-        {
-            // Convert mono samples into stereo.
-            for (auto &sample : input.samples())
+            double sum = 0.0;
+            for (const auto &input : inputs)
             {
-                samples.push_back(sample);
-                samples.push_back(sample);
+                const auto samples = input.samples();
+                sum += frame < samples.size() ? samples[frame] : 0.0;
             }
+            outputSamples.push_back(sum / inputCount);
+            continue;
         }
-        allNumberOfSamples.push_back(samples.size());
-        allSamples.push_back(samples);
-    }
 
-    size_t numberOfInputs = inputs.size();
-    size_t maxSamples = *std::max_element(allNumberOfSamples.begin(), allNumberOfSamples.end());
-
-    std::vector<double> newSamples;
-
-    if (output.numberOfChannels() == 1)
-    {
-        for (size_t i = 0; i < maxSamples; i++)
+        double leftSum = 0.0;
+        double rightSum = 0.0;
+        for (const auto &input : inputs)
         {
-            double addedSamples = 0.0;
-            for (auto &samples : allSamples)
+            const auto samples = input.samples();
+            if (input.numberOfChannels() == 1)
             {
-                double sample = samples.size() <= maxSamples ? samples[i] : 0.0;
-                addedSamples += sample / static_cast<double>(numberOfInputs);
+                const auto sample = frame < samples.size() ? samples[frame] : 0.0;
+                leftSum += sample;
+                rightSum += sample;
             }
-            newSamples.push_back(addedSamples);
-        }
-    }
-    else if (output.numberOfChannels() == 2)
-    {
-        for (size_t i = 0; i < maxSamples - 1; i = i + 2)
-        {
-            double addedSamplesLeft = 0.0;
-            double addedSamplesRight = 0.0;
-            for (auto &samples : allSamples)
+            else
             {
-                double sampleLeft = samples.size() <= maxSamples ? samples[i] : 0.0;
-                double sampleRight = samples.size() <= maxSamples ? samples[i + 1] : 0.0;
-                addedSamplesLeft += sampleLeft / static_cast<double>(numberOfInputs);
-                addedSamplesRight += sampleRight / static_cast<double>(numberOfInputs);
-            }
-            newSamples.push_back(addedSamplesLeft);
-            newSamples.push_back(addedSamplesRight);
-        }
-    }
-
-    output.setSamples(newSamples);
-    Tools::normalise(output);
-}
-
-/* split command */
-
-void Tools::split(const WavFile &input, std::vector<WavFile> &outputs,
-                  const std::vector<uint32_t> &splitTimesMs)
-{
-    std::vector<uint32_t> splitSamplePositions;
-    uint32_t sampleRateMultiplier = input.sampleRate() / 1000;
-
-    for (const uint32_t &ms : splitTimesMs)
-    {
-        splitSamplePositions.push_back(ms * sampleRateMultiplier * input.numberOfChannels());
-    }
-
-    unsigned int splitPosition = 0;
-    uint32_t nextSplit = splitSamplePositions[splitPosition];
-    auto currentSamples = new std::vector<double>();
-
-    auto originalSamples = input.samples();
-
-    if (input.numberOfChannels() == 1)
-    {
-        for (size_t i = 0; i < originalSamples.size(); i++)
-        {
-            currentSamples->push_back(originalSamples[i]);
-            if (i == nextSplit)
-            {
-                outputs[splitPosition].setSamples(*currentSamples);
-                splitPosition++;
-                if (splitPosition < splitSamplePositions.size())
+                const auto samplePosition = frame * 2;
+                if (samplePosition < samples.size())
                 {
-                    nextSplit = splitSamplePositions[splitPosition];
+                    leftSum += samples[samplePosition];
+                    rightSum += samples[samplePosition + 1];
                 }
-                currentSamples = new std::vector<double>();
             }
         }
+        outputSamples.push_back(leftSum / inputCount);
+        outputSamples.push_back(rightSum / inputCount);
     }
-    else if (input.numberOfChannels() == 2)
-    {
-        for (size_t i = 0; i < originalSamples.size() - 1; i = i + 2)
-        {
-            currentSamples->push_back(originalSamples[i]);
-            currentSamples->push_back(originalSamples[i + 1]);
-            if (i == nextSplit)
-            {
-                outputs[splitPosition].setSamples(*currentSamples);
-                splitPosition++;
-                if (splitPosition < splitSamplePositions.size())
-                {
-                    nextSplit = splitSamplePositions[splitPosition];
-                }
-                currentSamples = new std::vector<double>();
-            }
-        }
-    }
-    outputs[splitPosition].setSamples(*currentSamples);
+
+    auto output = WavFile::create(outputChannels, sampleRate, maximumBitDepth(inputs));
+    output.setSamples(std::move(outputSamples));
+    normalise(output);
+    return output;
 }
 
-/* join command */
-
-void Tools::join(std::span<const WavFile> inputs, WavFile &output)
+std::vector<WavFile> split(const WavFile &input, std::span<const std::uint64_t> splitTimesMs)
 {
+    const auto samples = input.samples();
+    const auto channels = static_cast<std::size_t>(input.numberOfChannels());
+    const auto frameCount = samples.size() / channels;
+    std::vector<std::size_t> splitSamplePositions;
+    splitSamplePositions.reserve(splitTimesMs.size());
+    std::uint64_t previousFrame = 0;
+
+    for (const auto milliseconds : splitTimesMs)
+    {
+        if (milliseconds > std::numeric_limits<std::uint64_t>::max() / input.sampleRate())
+        {
+            throw ProcessingError(ProcessingErrorCode::invalidSplitTime,
+                                  "invalid split time " + std::to_string(milliseconds) + " ms");
+        }
+        const auto frame = milliseconds * input.sampleRate() / 1'000;
+        if (frame <= previousFrame || frame >= frameCount)
+        {
+            throw ProcessingError(ProcessingErrorCode::invalidSplitTime,
+                                  "invalid split time " + std::to_string(milliseconds) + " ms");
+        }
+        previousFrame = frame;
+        splitSamplePositions.push_back(static_cast<std::size_t>(frame) * channels);
+    }
+
+    std::vector<WavFile> outputs;
+    outputs.reserve(splitSamplePositions.size() + 1);
+    std::size_t start = 0;
+    for (const auto end : splitSamplePositions)
+    {
+        outputs.push_back(fileWithSamplesLike(
+            input, input.numberOfChannels(),
+            std::vector<double>(samples.begin() + static_cast<std::ptrdiff_t>(start),
+                                samples.begin() + static_cast<std::ptrdiff_t>(end))));
+        start = end;
+    }
+    outputs.push_back(fileWithSamplesLike(
+        input, input.numberOfChannels(),
+        std::vector<double>(samples.begin() + static_cast<std::ptrdiff_t>(start), samples.end())));
+    return outputs;
+}
+
+WavFile join(std::span<const WavFile> inputs)
+{
+    requireMinimumInputs(inputs);
+    const auto sampleRate = commonSampleRate(inputs);
+    const auto channels = commonChannelCount(inputs);
     std::vector<double> joinedSamples;
-    for (const WavFile &wav : inputs)
+    std::size_t totalSamples = 0;
+    for (const auto &input : inputs)
     {
-        auto wavSamples = wav.samples();
-        joinedSamples.insert(joinedSamples.end(), wavSamples.begin(), wavSamples.end());
+        const auto samples = input.samples();
+        if (samples.size() > joinedSamples.max_size() - totalSamples)
+        {
+            throw ProcessingError(ProcessingErrorCode::sizeOverflow,
+                                  "joined sample data is too large");
+        }
+        totalSamples += samples.size();
     }
-    output.setSamples(joinedSamples);
+    joinedSamples.reserve(totalSamples);
+    for (const auto &input : inputs)
+    {
+        const auto samples = input.samples();
+        joinedSamples.insert(joinedSamples.end(), samples.begin(), samples.end());
+    }
+
+    auto output = WavFile::create(channels, sampleRate, maximumBitDepth(inputs));
+    output.setSamples(std::move(joinedSamples));
+    return output;
 }
+
+} // namespace Tools
 
 } // namespace wavlab

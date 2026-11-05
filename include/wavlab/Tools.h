@@ -1,120 +1,106 @@
 #pragma once
+
 #include <wavlab/WavFile.h>
+
+#include <cstdint>
 #include <span>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace wavlab
 {
 
+enum class ProcessingErrorCode
+{
+    expectedMono,
+    expectedStereo,
+    sampleRateMismatch,
+    channelCountMismatch,
+    tooFewInputs,
+    invalidSplitTime,
+    sizeOverflow,
+};
+
+class ProcessingError : public std::invalid_argument
+{
+  public:
+    ProcessingError(ProcessingErrorCode code, std::string message);
+
+    [[nodiscard]] ProcessingErrorCode code() const noexcept;
+
+  private:
+    ProcessingErrorCode code_;
+};
+
 namespace Tools
 {
-	/// <summary>
-	/// Normalises a wave file to maximum
-	/// </summary>
-	/// <param name="wave">The wave file to normalise</param>
-	void normalise(WavFile& wave);
 
-	/// <summary>
-	/// Normalises a wave file to maximum
-	/// </summary>
-	/// <param name="wave">The wave file to normalise</param>
-	/// <param name="normaliseTo">Level to normalise to</param>
-	void normalise(WavFile& wave, double normaliseTo);
+/// Scales loaded samples to a peak amplitude of 1.0. Silence is unchanged.
+void normalise(WavFile &wave);
 
-	/// <summary>
-	/// Reverses a wave file
-	/// </summary>
-	/// <param name="wave">The wave file to reverse</param>
-	void reverse(WavFile& wave);
+/// US-English compatibility alias for normalise().
+void normalize(WavFile &wave);
 
-	/// <summary>
-	/// Flips the phase of a wave file
-	/// </summary>
-	/// <param name="wave">The wave file to phase flip</param>
-	void flipPhase(WavFile& wave);
+/// Scales loaded samples to the requested peak amplitude. Silence is unchanged.
+void normaliseToAmplitude(WavFile &wave, double targetAmplitude);
 
-	/// <summary>
-	/// Swaps the left and right channels of a (stereo) wave file
-	/// </summary>
-	/// <param name="wave">The wave file to swap channels of</param>
-	void swapChannels(WavFile& wave);
+/// Compatibility overload whose second argument is a linear target amplitude.
+void normalise(WavFile &wave, double targetAmplitude);
 
-	/// <summary>
-	/// Splits a stereo wav into left and right mono files
-	/// </summary>
-	/// <param name="stereo">The wave file to split</param>
-	/// <param name="left">The wave file to write left channel to</param>
-	/// <param name="right">The wave file to write right channel to</param>
-	void splitStereo(const WavFile& stereo, WavFile& left, WavFile& right);
+/// US-English compatibility alias for normaliseToAmplitude().
+void normalizeToAmplitude(WavFile &wave, double targetAmplitude);
 
-	/// <summary>
-	/// Splits a stereo wav into left and right mono files
-	/// </summary>
-	/// <param name="left">The left channel wave file</param>
-	/// <param name="right">The right channel wave file</param>
-	/// <param name="out">The wave file to write combined samples to</param>
-	void combineLeftRight(const WavFile& left, const WavFile& right, WavFile& out);
+/// Scales loaded samples to the requested peak level in dBFS.
+void normaliseToDecibels(WavFile &wave, double targetDecibels);
 
-	/// <summary>
-	/// Splits a stereo wav into mid and side mono files
-	/// </summary>
-	/// <param name="wave">The wave file to split</param>
-	/// <param name="mid">The wave file to write mid channel to</param>
-	/// <param name="side">The wave file to write side channel to</param>
-	void splitStereoMidSide(const WavFile& stereo, WavFile& mid, WavFile& side);
+/// US-English compatibility alias for normaliseToDecibels().
+void normalizeToDecibels(WavFile &wave, double targetDecibels);
 
-	/// <summary>
-	/// Joins mid and side mono wavs into a single stereo file
-	/// </summary>
-	/// <param name="mid">The mid channel wave file</param>
-	/// <param name="side">The side channel wave file</param>
-	/// <param name="out">The wave file to write combined samples to</param>
-	void combineMidSide(const WavFile& mid, const WavFile& side, WavFile& out);
+/// Reverses sample frames while retaining the channel order within each frame.
+void reverse(WavFile &wave);
 
-	/// <summary>
-	/// Applies a gain multiplier to the wave file
-	/// </summary>
-	/// <param name="wave">The wave file to apply gain to</param>
-	/// <param name="gain">The gain multiplier to apply</param>
-	void gain(WavFile& wave, double gain);
+/// Inverts the polarity of every loaded sample.
+void flipPhase(WavFile &wave);
 
-	/// <summary>
-	/// Applies a gain in dB to the wave file
-	/// </summary>
-	/// <param name="wave">The wave file to apply gain to</param>
-	/// <param name="dB">The gain in dB to apply</param>
-	void decibelGain(WavFile& wave, double dB);
+/// Swaps the left and right samples of every stereo frame. Mono is unchanged.
+void swapChannels(WavFile &wave);
 
-	/// <summary>
-	/// Returns the peak dB value of the wave file
-	/// </summary>
-	double getPeakDecibels(const WavFile& wave);
+/// Splits a stereo file into left and right mono files.
+[[nodiscard]] std::pair<WavFile, WavFile> splitStereo(const WavFile &stereo);
 
-	/// <summary>
-	/// Returns the RMS dB value of the wave file
-	/// </summary>
-	double getRMSDecibels(const WavFile& wave);
+/// Combines mono left and right files, silence-padding the shorter input.
+[[nodiscard]] WavFile combineLeftRight(const WavFile &left, const WavFile &right);
 
-	/// <summary>
-	/// Mixes an arbitrary number of wave files to a single wave file. Will attenuate and re-normalise to ensure lack of clipping. Currently will start all files at zero. In future could use BWAV chunk to determine position
-	/// </summary>
-	/// <param name="inputs">The wave files to mix</param>
-	/// <param name="output">The output wave</param>
-	void mix(std::span<const WavFile> inputs, WavFile& output);
+/// Splits a stereo file into mono mid and side files.
+[[nodiscard]] std::pair<WavFile, WavFile> splitStereoMidSide(const WavFile &stereo);
 
-	/// <summary>
-	/// Splits a wave file at specified times in milliseconds
-	/// </summary>
-	/// <param name="input">The wave file to split</param>
-	/// <param name="outputs">The separate output wave files</param>
-	/// <param name="splitTimesMs">The times to split at in milliseconds</param>
-	void split(const WavFile& input, std::vector<WavFile>& outputs, const std::vector<uint32_t>& splitTimesMs);
+/// Decodes mono mid and side files, silence-padding the shorter input.
+[[nodiscard]] WavFile combineMidSide(const WavFile &mid, const WavFile &side);
 
-	/// <summary>
-	/// Joins an arbitrary number of wave files to a single wave file.
-	/// </summary>
-	/// <param name="inputs">The wave files to join</param>
-	/// <param name="output">The output wave</param>
-	void join(std::span<const WavFile> inputs, WavFile& output);
-}
+/// Multiplies every loaded sample by a linear gain factor.
+void gain(WavFile &wave, double gainFactor);
 
-}
+/// Applies an amplitude gain measured in decibels.
+void decibelGain(WavFile &wave, double decibels);
+
+/// Returns the greatest absolute sample level in dBFS.
+[[nodiscard]] double getPeakDecibels(const WavFile &wave);
+
+/// Returns the RMS level across all interleaved samples in dBFS.
+[[nodiscard]] double getRMSDecibels(const WavFile &wave);
+
+/// Mixes at least two compatible files, with mono promotion and silence padding.
+[[nodiscard]] WavFile mix(std::span<const WavFile> inputs);
+
+/// Splits a file at increasing millisecond positions on frame boundaries.
+[[nodiscard]] std::vector<WavFile> split(const WavFile &input,
+                                         std::span<const std::uint64_t> splitTimesMs);
+
+/// Joins at least two files with matching sample rates and channel counts.
+[[nodiscard]] WavFile join(std::span<const WavFile> inputs);
+
+} // namespace Tools
+
+} // namespace wavlab

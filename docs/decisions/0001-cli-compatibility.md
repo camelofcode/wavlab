@@ -11,7 +11,7 @@ improves naming, validation, units, path handling, and generated help, but a
 few commands reuse C++ names with incompatible argument semantics. In
 particular, existing delay commands accept integer milliseconds, feedback and
 mix as percentages, and an absolute maximum output length. Rust accepts
-fractional milliseconds, a signed feedback ratio, a normalized mix, and an
+fractional milliseconds, a signed feedback ratio, a normalised mix, and an
 additional tail duration.
 
 Silently guessing which interpretation a caller intended would make scripts
@@ -21,19 +21,22 @@ the refactor harder to reason about and test.
 ## Decision
 
 The modernization release is an intentional CLI-breaking release. Its
-canonical commands, parameter names, and units will match `wavlab-rs` at the
-pinned parity revision documented in [parity-baseline.md](../parity-baseline.md).
+commands, parameter names, and units will match `wavlab-rs` at the pinned
+parity revision documented in [parity-baseline.md](../parity-baseline.md),
+except that the C++ project uses the maintainer's preferred British `-ise`
+spelling for canonical command and API names.
 
 The following low-risk aliases will remain for one deprecation cycle:
 
 | Legacy command | Canonical replacement |
 |---|---|
 | `stat` | `metadata` |
-| `normalise` | `normalize` |
+| `normalize` | `normalise` |
 | `get-peak-db` | `metadata --full` |
 | `get-rms-db` | `metadata --full` |
 
-Aliases will be documented as deprecated and covered by CLI tests. Their
+The Rust-compatible `normalize` and `normalize-db` spellings are also retained
+as aliases. Aliases will be documented and covered by CLI tests. Their
 removal will require a later, explicit compatibility decision.
 
 Commands whose names stay the same but whose numeric semantics change will

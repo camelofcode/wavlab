@@ -216,10 +216,20 @@ mix <output> <input...>
                 input: arbitrary number of input files (minimum 2)
 
 normalise <input> [output]
-        description: normalises a wave file
+        description: normalises a wave file to 0 dBFS
         parameters:
                 input: path to wave file
                 output: path to output file. Optional, if not specified input will be overwritten
+
+normalise-db <input> <dBFS> [output]
+        description: normalises a wave file to a target peak level in dBFS
+        parameters:
+                input: path to wave file
+                dBFS: target peak level in decibels relative to full scale
+                output: path to output file. Optional, if not specified input will be overwritten
+
+normalize / normalize-db
+        description: Rust-compatible US-English aliases for normalise / normalise-db
 
 pink-noise <output> <sampleRate> <bitDepth> <length>
         description: writes generated pink noise to specified output file
@@ -286,15 +296,17 @@ split <input> <splitTimeMs...>
                 input: path to wave file to split
                 splitTimeMs: arbitrary number of split times in milliseconds
 
-split-mid-side <input>
+split-mid-side <input> [midOutput sideOutput]
         description: splits a stereo wave file to mid and side components, {original}_mid.wav and {original}_side.wav
         parameters:
                 input: path to wave file
+                midOutput/sideOutput: optional explicit destinations; provide both or neither
 
-split-stereo <input>
+split-stereo <input> [leftOutput rightOutput]
         description: splits a stereo wave file to two mono files, {original}_l.wav and {original}_r.wav
         parameters:
                 input: path to wave file
+                leftOutput/rightOutput: optional explicit destinations; provide both or neither
 
 square-wave <output> <frequency> <sampleRate> <bitDepth> <length>
         description: writes a square wave to the specified output file

@@ -44,20 +44,20 @@ Legend:
 | Arbitrary RIFF chunk scan | Missing | Unknown chunks skipped safely in any supported order | [ ] |
 | BEXT preservation | Partial | Preserve header/footer position and extra bytes | [ ] |
 | Metadata report | Present as `stat` | Canonical `metadata`; optional `--full` peak/RMS scan | [ ] |
-| Normalize to 0 dBFS | Present as `normalise` | Silence remains unchanged | [ ] |
-| Normalize to target dBFS | Library overload is linear target only; no command | `normalize-db` uses dBFS | [ ] |
-| Linear and dB gain | Present | Explicit clipping-on-save behavior | [ ] |
-| Peak and RMS | Separate commands | Included by `metadata --full`; silence is `-inf` | [ ] |
-| Reverse frames | Present, defective for stereo | Preserve channel order and every frame | [ ] |
-| Flip polarity | Present | All interleaved samples | [ ] |
-| Swap channels | Present | Stereo swap; mono unchanged | [ ] |
-| Split stereo L/R | Present | Optional explicit outputs or derived safe paths | [ ] |
-| Split stereo M/S | Present | Optional explicit outputs or derived safe paths | [ ] |
-| Split at times | Present, defective | Increasing millisecond points on frame boundaries | [ ] |
-| Combine L/R | Present, defective | Silence-pad unequal mono inputs | [ ] |
-| Combine M/S | Present, defective | Invert M/S transform and silence-pad | [ ] |
-| Mix | Present, unsafe | Minimum two, compatible rates, mono promotion, padding, normalize | [ ] |
-| Join | Present, under-validated | Minimum two, same rate/channels, maximum bit depth | [ ] |
+| Normalise to 0 dBFS | Present as `normalise` | Silence remains unchanged | [x] |
+| Normalise to target dBFS | `normalise-db`; Rust-compatible alias | Target dBFS with unclamped in-memory samples | [x] |
+| Linear and dB gain | Present | Explicit clipping-on-save behaviour | [x] |
+| Peak and RMS | Separate commands | Silence and empty input are `-inf` | [x] |
+| Reverse frames | Frame-aware | Preserve channel order and every frame | [x] |
+| Flip polarity | Present | All interleaved samples | [x] |
+| Swap channels | Present | Stereo swap; mono unchanged | [x] |
+| Split stereo L/R | Complete | Optional explicit outputs or derived safe paths | [x] |
+| Split stereo M/S | Complete | Optional explicit outputs or derived safe paths | [x] |
+| Split at times | Frame-aware | Increasing millisecond points on frame boundaries | [x] |
+| Combine L/R | Complete | Silence-pad unequal mono inputs | [x] |
+| Combine M/S | Complete | Invert M/S transform and silence-pad | [x] |
+| Mix | Checked | Minimum two, compatible rates, mono promotion, padding, normalise | [x] |
+| Join | Checked | Minimum two, same rate/channels, maximum bit depth | [x] |
 
 ### Generators and EQ
 
@@ -80,7 +80,7 @@ Legend:
 | Delay-line primitive | Present | Fractional ms, checked ring buffer, modulation offset | [ ] |
 | LFO | Partial sine-like absolute waveform | Sine/triangle/square with validated frequency | [ ] |
 | Tape saturation | Present | Drive expressed in dB; finite validation | [ ] |
-| Digital delay mono/stereo | Present | Signed feedback, normalized mix, additional tail | [ ] |
+| Digital delay mono/stereo | Present | Signed feedback, normalised mix, additional tail | [ ] |
 | Analog delay mono/stereo | Present | Configurable feedback low-pass cutoff | [ ] |
 | Tape delay mono/stereo | Present | Configurable dB drive and cutoff | [ ] |
 | Schroeder reverb | Present, algorithm differs | Parallel combs plus series all-pass, RT60 seconds | [ ] |
@@ -146,26 +146,26 @@ focused failing test before changing the implementation.
 
 ### Editing tools
 
-- [ ] Normalizing an empty or silent file divides by zero and can create NaN.
-- [ ] Stereo reverse starts at the last frame but stops before copying the
+- [x] Normalising an empty or silent file divides by zero and can create NaN.
+- [x] Stereo reverse starts at the last frame but stops before copying the
   first frame; empty input also risks unsigned underflow.
-- [ ] Several loops use `size() - 1` as a bound and are unsafe for empty input.
-- [ ] Left/right and mid/side combine loop to `max_size - 1`, dropping the
+- [x] Several loops use `size() - 1` as a bound and are unsafe for empty input.
+- [x] Left/right and mid/side combine loop to `max_size - 1`, dropping the
   final mono sample and underflowing for empty inputs.
-- [ ] Mix uses `samples.size() <= maxSamples` as its indexing condition. That
+- [x] Mix uses `samples.size() <= maxSamples` as its indexing condition. That
   is true for every input and indexes beyond shorter inputs instead of adding
   silence.
-- [ ] Mix normalizes unconditionally, including silent output.
-- [ ] Split converts time using `sample_rate / 1000`, losing precision for
+- [x] Mix normalises unconditionally, including silent output.
+- [x] Split converts time using `sample_rate / 1000`, losing precision for
   rates not divisible by 1000.
-- [ ] Split checks the boundary after appending the current frame, producing
+- [x] Split checks the boundary after appending the current frame, producing
   off-by-one segment placement.
-- [ ] Split allocates vectors with `new` and never deletes them.
-- [ ] Split does not validate sorted, unique, in-range points or avoid empty
+- [x] Split allocates vectors with `new` and never deletes them.
+- [x] Split does not validate sorted, unique, in-range points or avoid empty
   segments.
-- [ ] Join permits mismatched channel counts even though concatenating their
+- [x] Join permits mismatched channel counts even though concatenating their
   interleaved buffers under one output layout is invalid.
-- [ ] Derived names use global string replacement of `.wav`, mishandling
+- [x] Derived names use global string replacement of `.wav`, mishandling
   uppercase/no extension and directory components containing that substring.
 
 ### Generators and filters
@@ -177,7 +177,7 @@ focused failing test before changing the implementation.
   comprehensively validated before constructing or mutating output.
 - [ ] Direct waveforms can divide by zero for zero/too-high frequencies or
   degenerate period sizes.
-- [ ] Additive generators calculate harmonics beyond Nyquist and normalize
+- [ ] Additive generators calculate harmonics beyond Nyquist and normalise
   even if output is silent/empty.
 - [ ] Filter constructors accept zero/non-finite Q, invalid frequency, and
   non-finite gain, which can create NaN/Inf coefficients.
@@ -200,7 +200,7 @@ focused failing test before changing the implementation.
   tail beyond the original duration.
 - [ ] Peak tracking for delay/reverb compares signed samples instead of
   absolute amplitude, so all-negative material produces the wrong reference.
-- [ ] Effects auto-normalize their output afterward, changing the requested
+- [ ] Effects auto-normalise their output afterward, changing the requested
   wet/dry behavior and hiding actual gain behavior.
 - [ ] Stereo analog/tape feedback processing multiplexes left/right state with
   a shared call counter rather than binding a processor directly to each
@@ -234,9 +234,9 @@ copying implementation details.
 | Binary I/O | Endianness, signed 24-bit, truncation | `tests/unit/wav_binary_io_test.cpp` | [ ] |
 | Sample conversion | Limits, round trips, clamp, NaN | `tests/unit/sample_conversion_test.cpp` | [ ] |
 | WAV model/I/O | Construction, layout, fixtures, metadata-only, BEXT | `tests/unit/wav_file_test.cpp`, integration round trips | [ ] |
-| Level/gain/normalize | Sign, silence, dB, clipping policy | `tests/unit/levels_gain_normalize_test.cpp` | [ ] |
-| Frame transforms | Reverse, flip, swap | `tests/unit/frame_tools_test.cpp` | [ ] |
-| Split/combine/mix/join | Padding, promotion, validation, boundaries | focused tool test files | [ ] |
+| Level/gain/normalise | Sign, silence, dB, clipping policy | `tests/editing_tools_tests.cpp` | [x] |
+| Frame transforms | Reverse, flip, swap | `tests/editing_tools_tests.cpp` | [x] |
+| Split/combine/mix/join | Padding, promotion, validation, boundaries | `tests/editing_tools_tests.cpp` | [x] |
 | Generators | Shapes, duration, channels, invalid settings | focused generator tests | [ ] |
 | EQ | Coefficients, state, impulse behavior | focused EQ tests | [ ] |
 | Delay/LFO primitives | Timing, wrap, feedback, waveforms, validation | focused DSP primitive tests | [ ] |
@@ -252,9 +252,10 @@ These are not safe to resolve accidentally during implementation.
 
 ### CLI naming
 
-Recommended canonical names match Rust (`metadata`, `normalize`,
-`normalize-db`). Preserve `stat`, `normalise`, `get-peak-db`, and `get-rms-db`
-as aliases for one deprecation cycle if backward compatibility matters.
+Canonical C++ names use the maintainer's preferred British spelling
+(`normalise`, `normalise-db`). Preserve Rust-compatible `normalize` and
+`normalize-db` aliases. The later CLI replacement will decide the separate
+`metadata`/`stat` and level-reporting aliases.
 
 ### Effect units
 
@@ -263,7 +264,7 @@ Recommended library and new CLI units:
 - gain and EQ gain: dB where named as dB;
 - saturation/tape drive: dB;
 - feedback: signed ratio, normally `-1 < feedback < 1`;
-- mix/depth/room size: normalized ratio in `[0, 1]`;
+- mix/depth/room size: normalised ratio in `[0, 1]`;
 - delay and tail: milliseconds, allowing fractional delay time;
 - reverb decay: RT60 seconds;
 - frequency: Hz;
@@ -284,8 +285,8 @@ meaning.
 ### Mixing and clipping
 
 Match the Rust reference initially: average inputs, silence-pad shorter inputs,
-promote mono to stereo when required, then normalize the result. Keep ordinary
-gain/effect operations unnormalized and clamp only during integer encoding.
+promote mono to stereo when required, then normalise the result. Keep ordinary
+gain/effect operations unnormalised and clamp only during integer encoding.
 If a different mixer policy is desired, add it as an explicit option rather
 than changing hidden gain behavior.
 

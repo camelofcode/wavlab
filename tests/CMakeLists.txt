@@ -32,6 +32,13 @@ target_link_libraries(wavlab_binary_conversion_tests PRIVATE wavlab::wavlab)
 wavlab_apply_project_options(wavlab_binary_conversion_tests)
 add_test(NAME wavlab.library.binary-conversion COMMAND wavlab_binary_conversion_tests)
 
+add_executable(wavlab_editing_tools_tests editing_tools_tests.cpp)
+set_target_properties(wavlab_editing_tools_tests PROPERTIES CXX_EXTENSIONS OFF)
+target_compile_features(wavlab_editing_tools_tests PRIVATE cxx_std_20)
+target_link_libraries(wavlab_editing_tools_tests PRIVATE wavlab::wavlab)
+wavlab_apply_project_options(wavlab_editing_tools_tests)
+add_test(NAME wavlab.library.editing-tools COMMAND wavlab_editing_tools_tests)
+
 add_test(NAME wavlab.cli.help COMMAND wavlab_cli --help)
 set_tests_properties(
     wavlab.cli.help
@@ -43,6 +50,13 @@ add_test(
     COMMAND
         "${Python3_EXECUTABLE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/verify_cli_wav.py"
+        "$<TARGET_FILE:wavlab_cli>"
+)
+add_test(
+    NAME wavlab.cli.editing-tools
+    COMMAND
+        "${Python3_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/editing_cli_tests.py"
         "$<TARGET_FILE:wavlab_cli>"
 )
 add_test(

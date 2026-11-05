@@ -1,7 +1,9 @@
 #pragma once
+#include <filesystem>
 #include <string>
 
 namespace StringHelpers
 {
-	std::string stringReplace(std::string str, std::string const& old, std::string const& replacement);
+std::filesystem::path pathWithStemSuffix(const std::filesystem::path &path,
+                                         const std::string &suffix);
 }

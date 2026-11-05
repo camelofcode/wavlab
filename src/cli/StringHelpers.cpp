@@ -1,12 +1,9 @@
 #include "StringHelpers.h"
 
-std::string StringHelpers::stringReplace(std::string str, std::string const& old, std::string const& replacement)
+std::filesystem::path StringHelpers::pathWithStemSuffix(const std::filesystem::path &path,
+                                                        const std::string &suffix)
 {
-	std::size_t pos = str.find(old);
-	if (pos == std::string::npos)
-	{
-		return str;
-	}
-	str.replace(pos, old.length(), replacement);
-	return str;
+    auto fileName = path.stem().string() + suffix;
+    fileName += path.extension().string();
+    return path.parent_path() / fileName;
 }

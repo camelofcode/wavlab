@@ -96,14 +96,22 @@ endif()
 wavlab_add_developer_targets(
     examples/normalise.cpp
     include/wavlab/FX.h
+    include/wavlab/Tools.h
     include/wavlab/WavFile.h
+    src/cli/Commands.cpp
+    src/cli/Commands.h
+    src/cli/StringHelpers.cpp
+    src/cli/StringHelpers.h
+    src/cli/ToolsCommands.cpp
     src/lib/FX.cpp
     src/lib/BinaryHelpers.cpp
     src/lib/BinaryHelpers.h
     src/lib/ConversionHelpers.cpp
     src/lib/ConversionHelpers.h
+    src/lib/Tools.cpp
     src/lib/WavFile.cpp
     tests/binary_conversion_tests.cpp
+    tests/editing_tools_tests.cpp
     tests/library_api_tests.cpp
     tests/smoke/library_smoke.cpp
 )

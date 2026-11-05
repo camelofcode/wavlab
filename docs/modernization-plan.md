@@ -380,8 +380,8 @@ Goal: establish correct frame-aware operations and remove the CLI code from
 
 Implement and test in this order:
 
-1. Level measurement, linear gain, dB gain, normalization, and new
-   `normalize_to_db`.
+1. Level measurement, linear gain, dB gain, normalisation, and new
+   `normalise_to_db` (with a Rust-compatible US-English alias).
 2. Reverse by frames, polarity inversion, and channel swap.
 3. Stereo to left/right and mid/side splits.
 4. Left/right and mid/side combination with silence padding.
@@ -392,7 +392,7 @@ Implement and test in this order:
 
 Fix the audited defects as tests are introduced:
 
-- Normalizing silence must leave it silent, not divide by zero.
+- Normalising silence must leave it silent, not divide by zero.
 - Stereo reverse must retain every frame and preserve L/R order.
 - Empty files must not underflow `size_t` loop bounds.
 - Pair-combination must not drop the last sample.
@@ -404,6 +404,35 @@ Fix the audited defects as tests are introduced:
   output.
 - Derived output filenames must preserve directories and extensions, and the
   CLI should accept explicit split destinations as the Rust version does.
+
+Phase 4 status: complete.
+
+Implementation notes:
+
+- Frame-aware library operations now work entirely with in-memory `WavFile`
+  values and report invalid combinations through typed `ProcessingError`
+  exceptions.
+- Level measurement, gain, normalisation, target-dBFS normalisation, frame
+  reversal, polarity inversion, and channel swapping cover silent, empty,
+  mono, and stereo inputs without unsigned underflow or division by zero.
+- Stereo and mid/side split/combine operations return complete output files,
+  preserve PCM settings, pad shorter mono inputs with silence, and exactly
+  invert the project's mid/side scale.
+- Time splitting uses checked 64-bit millisecond-to-frame arithmetic, rejects
+  duplicate, descending, zero, and end-of-file boundaries, and never places a
+  boundary frame in the preceding segment.
+- Mixing validates sample rates, promotes mono to stereo when required,
+  silence-pads shorter inputs, averages all inputs, and safely normalises
+  silence. Joining additionally requires matching channel counts. Both choose
+  the greatest input bit depth.
+- British `normalise` spelling is canonical in the C++ API and CLI following
+  maintainer preference. Rust-compatible `normalize` aliases remain available.
+- CLI path derivation uses `std::filesystem`, preserving parent directories,
+  compound filenames, and extension case. Stereo and mid/side splits accept
+  either two explicit destinations or neither.
+- `tests/editing_tools_tests.cpp` exercises the library without file I/O;
+  `tests/editing_cli_tests.py` independently checks encoded CLI outputs and
+  output-path behaviour.
 
 Exit criteria:
 
@@ -460,7 +489,7 @@ Tasks:
    least one sample, validate maximum/current delay, and expose explicit wet,
    feedback, feedback-processor, and modulation-offset operations.
 2. Add an LFO with sine, triangle, and square waveforms, finite positive
-   frequency validation, normalized output, and stable phase progression.
+   frequency validation, normalised output, and stable phase progression.
 3. Define shared conversion helpers for milliseconds/frames and dB/amplitude.
 4. Port tape saturation with drive in dB and test negative, zero, and positive
    drive.
@@ -475,8 +504,8 @@ Tasks:
 6. Replace reverb's final feedback delays with true Schroeder all-pass stages,
    use published delay times, interpret decay as RT60 seconds, and give every
    channel independent comb/all-pass state.
-7. Remove post-effect auto-normalization. Wet/dry mix must not secretly change
-   global level; clipping policy belongs to encoding or an explicit normalize
+7. Remove post-effect auto-normalisation. Wet/dry mix must not secretly change
+   global level; clipping policy belongs to encoding or an explicit normalise
    operation.
 8. Validate all settings before mutation and make failure preserve input.
 
@@ -530,14 +559,14 @@ Tasks:
 2. Put all command definitions and help text in the CLI target. `main.cpp`
    should parse once, dispatch once, catch once, and return once.
 3. Match the Rust canonical command set and units where a CLI-breaking release
-   is allowed. In particular, use normalized `[0, 1]` mix/depth values,
+   is allowed. In particular, use normalised `[0, 1]` mix/depth values,
    seconds for RT60, dB for saturation drive, and an explicit additional tail.
 4. If compatibility is required:
    - keep `stat` as an alias for `metadata`;
-   - keep `normalise` as an alias for `normalize`;
+   - keep `normalize` as a Rust-compatible alias for canonical `normalise`;
    - retain peak/RMS commands as aliases for `metadata --full` or deprecate
      them visibly;
-   - do not silently reinterpret old delay percentage positionals as normalized
+   - do not silently reinterpret old delay percentage positionals as normalised
      values. Provide an explicit legacy mode or make the semantic change part
      of a major release.
 5. Add `--version`, top-level `--help`, command help, validation messages,
@@ -646,7 +675,7 @@ structure changes:
 2. Error model and public `WavFile` skeleton.
 3. Binary helpers and sample conversion tests/fixes.
 4. RIFF/WAV/BEXT parser and serializer.
-5. Levels/gain/normalize and frame transforms.
+5. Levels/gain/normalise and frame transforms.
 6. Split/combine/mix/join.
 7. Generators.
 8. EQ.
