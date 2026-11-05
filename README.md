@@ -1,5 +1,7 @@
 # wavlab
 
+[![C++ build and test](https://github.com/camelofcode/wavlab/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/camelofcode/wavlab/actions/workflows/ci.yml)
+
 WavLab is a C++20 library and command-line utility for inspecting, generating,
 editing, and applying effects to PCM WAV files. It supports ordinary WAV files
 and version-0 BWF/BEXT metadata with 8-, 16-, 24-, and 32-bit integer samples.
