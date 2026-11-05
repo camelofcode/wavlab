@@ -29,7 +29,8 @@ The build produces:
 - the CTest suite, including parser, black-box CLI, DSP, fixture, and I/O tests.
 
 See [Development](docs/development.md) for supported toolchains, presets,
-sanitizers, formatting, and static analysis.
+sanitizers, formatting, and static analysis. Release-facing changes are
+recorded in the [changelog](CHANGELOG.md).
 
 The supported CI toolchains are GCC and Clang on Linux, MSVC on Windows, and
 Apple Clang on macOS. Other conforming C++20 toolchains may work but are not

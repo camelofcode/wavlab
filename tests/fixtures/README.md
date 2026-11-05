@@ -19,8 +19,7 @@ python3 tests/fixtures/generate_fixtures.py --check
 
 The first command rewrites all declared fixtures and the manifest. The second
 generates them in a temporary directory and compares exact bytes with the
-checked-in copies. CI should run `--check` once the Phase 1 test workflow is in
-place.
+checked-in copies. The normal CTest suite runs `--check` in CI.
 
 ## Fixture groups
 
