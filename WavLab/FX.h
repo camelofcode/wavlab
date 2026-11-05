@@ -1,5 +1,6 @@
 #pragma once
 #include "WavFile.h"
+#include <cstdint>
 #include <functional>
 
 namespace FX

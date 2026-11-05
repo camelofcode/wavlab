@@ -1,18 +1,78 @@
-cmake_minimum_required(VERSION 3.15)  # CMake version check
-project(wavlab)               # Create project "simple_example"
-set(CMAKE_CXX_STANDARD 14)            # Enable c++14 standard
+cmake_minimum_required(VERSION 3.24)
 
-set(CMAKE_EXE_LINKER_FLAGS "-static") #include libraries
+project(
+    wavlab
+    VERSION 0.1.0
+    DESCRIPTION "PCM WAV processing library and command-line utility"
+    LANGUAGES CXX
+)
 
-# Ensure warnings logged
-if ( CMAKE_COMPILER_IS_GNUCC )
-    #Ignore reorder as initialisation order doesn't matter too much right now
-    set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(WavLabProjectOptions)
+
+option(BUILD_SHARED_LIBS "Build wavlab as a shared library" OFF)
+
+set(WAVLAB_PUBLIC_HEADERS
+    WavLab/BinaryHelpers.h
+    WavLab/Commands.h
+    WavLab/Constants.h
+    WavLab/ConversionHelpers.h
+    WavLab/Delay.h
+    WavLab/EQ.h
+    WavLab/FX.h
+    WavLab/Generators.h
+    WavLab/LFO.h
+    WavLab/StringHelpers.h
+    WavLab/Tools.h
+    WavLab/TryParse.h
+    WavLab/WavFile.h
+)
+
+set(WAVLAB_LIBRARY_SOURCES
+    WavLab/BinaryHelpers.cpp
+    WavLab/Commands.cpp
+    WavLab/ConversionHelpers.cpp
+    WavLab/Delay.cpp
+    WavLab/EQ.cpp
+    WavLab/FX.cpp
+    WavLab/Generators.cpp
+    WavLab/LFO.cpp
+    WavLab/StringHelpers.cpp
+    WavLab/Tools.cpp
+    WavLab/WavFile.cpp
+)
+
+add_library(wavlab_lib ${WAVLAB_LIBRARY_SOURCES} ${WAVLAB_PUBLIC_HEADERS})
+add_library(wavlab::wavlab ALIAS wavlab_lib)
+
+set_target_properties(
+    wavlab_lib
+    PROPERTIES
+        CXX_EXTENSIONS OFF
+        OUTPUT_NAME wavlab
+        WINDOWS_EXPORT_ALL_SYMBOLS ON
+)
+
+target_compile_features(wavlab_lib PUBLIC cxx_std_20)
+target_include_directories(
+    wavlab_lib
+    PUBLIC
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/WavLab>"
+        "$<INSTALL_INTERFACE:include>"
+)
+wavlab_apply_project_options(wavlab_lib)
+
+add_executable(wavlab_cli WavLab/WavLab.cpp)
+set_target_properties(wavlab_cli PROPERTIES CXX_EXTENSIONS OFF OUTPUT_NAME wavlab)
+target_compile_features(wavlab_cli PRIVATE cxx_std_20)
+target_link_libraries(wavlab_cli PRIVATE wavlab::wavlab)
+wavlab_apply_project_options(wavlab_cli)
+
+include(CTest)
+if(BUILD_TESTING AND PROJECT_IS_TOP_LEVEL)
+    add_subdirectory(tests)
 endif()
-if ( MSVC )
-    set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} /W4")
-    string(REGEX REPLACE "/W[3|4]" "/w" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-endif()
 
-
-add_executable(wavlab WavLab/WavLab.cpp WavLab/WavFile.cpp WavLab/Tools.cpp WavLab/StringHelpers.cpp WavLab/Generators.cpp WavLab/FX.cpp WavLab/EQ.cpp WavLab/ConversionHelpers.cpp WavLab/Commands.cpp WavLab/BinaryHelpers.cpp WavLab/Delay.cpp WavLab/LFO.cpp)
+wavlab_add_developer_targets(
+    tests/smoke/library_smoke.cpp
+)

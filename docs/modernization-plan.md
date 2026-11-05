@@ -39,13 +39,15 @@ References:
 - <https://mesonbuild.com/Build-targets.html>
 - <https://mesonbuild.com/Unit-tests.html>
 
-### Use C++20 for the refreshed API
+### Use C++20 for the refreshed API, with a defined C++23 upgrade gate
 
 C++20 gives the library useful standard facilities such as `std::span`,
-`std::numbers`, stronger type traits, and improved tooling support. The
-supported compiler matrix should be documented and enforced in CI. If an
-older compiler is a real requirement, C++17 is a workable fallback; decide
-that before public headers are redesigned.
+`std::numbers`, stronger type traits, and improved tooling support. C++23 is
+published and is the next target, but the project will wait until production
+`/std:c++23` support is available in stable MSVC and the complete compiler
+matrix passes. The upgrade gate is recorded in
+[development.md](development.md). The supported compiler matrix is enforced
+in CI.
 
 ### Use exceptions at the library boundary, exit codes at the CLI boundary
 
@@ -211,6 +213,15 @@ Tasks:
    `clang-tidy`) without silently rewriting sources during a normal build.
 9. Add CI for GCC and Clang on Linux and MSVC on Windows; add Apple Clang when
    a macOS runner is available. Cache dependencies, not build products.
+
+Phase 1 implementation notes:
+
+- The initial CTest smoke harness is dependency-free so a clean checkout can
+  build and test offline. Pinning Catch2 (or another framework) is deferred to
+  the first broad unit-test change rather than making the foundational build
+  depend on a network fetch.
+- The current mixed translation units are compiled into a transitional
+  library target. Removing command handlers from the library is Phase 2.
 
 Expected local workflow:
 

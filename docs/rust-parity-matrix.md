@@ -17,10 +17,10 @@ formatting churn but retains its useful self-contained `<cstdint>` include.
 
 | Area | C++ baseline | Rust reference | Target |
 |---|---|---|---|
-| Build products | One `wavlab` executable | Library crate plus executable | C++ library plus linked executable |
-| Build UX | One global CMake file; forced `-static` | Standard Cargo workflow | CMake presets and target-based options |
-| Current build | Fails with GCC 16 because fixed-width types lack self-contained includes | `cargo test --all-targets` passes | Clean supported-toolchain matrix |
-| Automated tests | None | 175 `#[test]` cases | Port behavior coverage, not necessarily test-for-test syntax |
+| Build products | `wavlab::wavlab` library plus linked executable since Phase 1 | Library crate plus executable | Complete CLI-free public library |
+| Build UX | Target-based CMake presets since Phase 1 | Standard Cargo workflow | Preserve the three-command preset workflow |
+| Current build | Debug, Release, shared, warning-as-error, and sanitizer presets pass locally | `cargo test --all-targets` passes | Keep the supported-toolchain matrix clean |
+| Automated tests | Phase 1 smoke, CLI, fixture, and header checks | 175 `#[test]` cases | Port behavior coverage, not necessarily test-for-test syntax |
 | Library/CLI boundary | Command help/parsing and DSP share `.cpp` files | Reusable library with thin dispatch layer | No CLI dependencies in the library |
 | Error behavior | Library constructors/functions print and call `exit` | Typed errors propagated to `main` | Typed C++ exceptions caught by CLI |
 | Documentation | Hand-maintained long README command list | Generated CLI reference plus library docs | Generated CLI reference and public C++ API docs |

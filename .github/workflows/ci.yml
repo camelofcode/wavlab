@@ -1,0 +1,112 @@
+name: C++ build and test
+
+on:
+  push:
+    branches:
+      - main
+      - feature/cpp-modernization
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: Linux (${{ matrix.compiler }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - compiler: GCC
+            cc: gcc
+            cxx: g++
+          - compiler: Clang
+            cc: clang
+            cxx: clang++
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - run: cmake --preset ci
+      - run: cmake --build --preset ci --parallel 2
+      - run: ctest --preset ci
+
+  linux-shared:
+    name: Linux shared library
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - run: cmake --preset ci-shared
+      - run: cmake --build --preset ci-shared --parallel 2
+      - run: ctest --preset ci-shared
+
+  sanitizers:
+    name: Linux ASan and UBSan
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - run: cmake --preset asan-ubsan
+      - run: cmake --build --preset asan-ubsan --parallel 2
+      - run: ctest --preset asan-ubsan
+
+  windows:
+    name: Windows MSVC
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - run: cmake --preset windows-msvc
+      - run: cmake --build --preset windows-msvc --parallel 2
+      - run: ctest --preset windows-msvc
+
+  macos:
+    name: macOS Apple Clang
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Ensure Ninja is available
+        run: command -v ninja >/dev/null || brew install ninja
+      - run: cmake --preset ci
+      - run: cmake --build --preset ci --parallel 2
+      - run: ctest --preset ci
+
+  required:
+    name: Required C++ checks
+    if: always()
+    needs:
+      - linux
+      - linux-shared
+      - sanitizers
+      - windows
+      - macos
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Verify all build and test jobs passed
+        env:
+          LINUX_RESULT: ${{ needs.linux.result }}
+          SHARED_RESULT: ${{ needs.linux-shared.result }}
+          SANITIZERS_RESULT: ${{ needs.sanitizers.result }}
+          WINDOWS_RESULT: ${{ needs.windows.result }}
+          MACOS_RESULT: ${{ needs.macos.result }}
+        run: |
+          test "$LINUX_RESULT" = success
+          test "$SHARED_RESULT" = success
+          test "$SANITIZERS_RESULT" = success
+          test "$WINDOWS_RESULT" = success
+          test "$MACOS_RESULT" = success

@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
 
     std::string command = static_cast<std::string>(argv[1]);
 
-    if (command == "help")
+    if (command == "help" || command == "--help" || command == "-h")
     {
         if (argc == 2)
         {
