@@ -142,6 +142,34 @@ add_test(
         "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/generate_fixtures.py"
         --check
 )
+if(NOT WAVLAB_ENABLE_SANITIZERS)
+    add_test(
+        NAME wavlab.package.consumer
+        COMMAND
+            "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/package_consumer_test.py"
+            --cmake "${CMAKE_COMMAND}"
+            --ctest "${CMAKE_CTEST_COMMAND}"
+            --build-dir "${PROJECT_BINARY_DIR}"
+            --source-dir "${CMAKE_CURRENT_SOURCE_DIR}/package_consumer"
+            --config "$<CONFIG>"
+            --generator "${CMAKE_GENERATOR}"
+            --platform "${CMAKE_GENERATOR_PLATFORM}"
+            --toolset "${CMAKE_GENERATOR_TOOLSET}"
+    )
+endif()
+
+find_program(WAVLAB_FFPROBE_EXECUTABLE NAMES ffprobe)
+if(WAVLAB_FFPROBE_EXECUTABLE)
+    add_test(
+        NAME wavlab.cli.ffprobe
+        COMMAND
+            "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/ffprobe_cli_wav.py"
+            "$<TARGET_FILE:wavlab_cli>"
+            "${WAVLAB_FFPROBE_EXECUTABLE}"
+    )
+endif()
 
 set(WAVLAB_HEADER_SMOKE_SOURCES)
 foreach(header IN LISTS WAVLAB_PUBLIC_HEADERS)

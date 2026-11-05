@@ -2,16 +2,17 @@
 
 ## Prerequisites
 
-The normal local build has no third-party C++ dependencies. It requires:
+The normal local build requires:
 
 - a C++20 compiler;
 - CMake 3.24 or later;
 - Ninja for the checked-in single-configuration presets; and
-- Python 3 when tests are enabled, to verify generated fixtures.
+- Python 3 when tests are enabled, to verify generated fixtures and the
+  installed-package consumer.
 
 The supported CI matrix is GCC and Clang on Linux, MSVC on Windows, and Apple
-Clang on macOS. Phase 1 intentionally uses only standard-library facilities so
-the build does not need network access.
+Clang on macOS. CMake uses an installed CLI11 2.7.2 package when available and
+otherwise fetches its pinned revision during configuration.
 
 On Fedora, the optional sanitizer build also needs:
 
@@ -91,6 +92,29 @@ parser, terminal-output, or process-exit dependency. CMake uses an installed
 CLI11 2.7.2 config package when available, with a pinned `FetchContent`
 fallback for clean builds.
 
+## Installation and package consumers
+
+Install a Release build to an explicit prefix:
+
+```console
+cmake --preset release
+cmake --build --preset release
+ctest --preset release
+cmake --install out/build/release --prefix /your/install/prefix
+```
+
+The install contains the executable, library, public headers, licence, README,
+and versioned CMake config/export files. Consumers use:
+
+```cmake
+find_package(wavlab 0.1 CONFIG REQUIRED)
+target_link_libraries(my_target PRIVATE wavlab::wavlab)
+```
+
+For a non-system prefix, pass `-DCMAKE_PREFIX_PATH=/your/install/prefix` while
+configuring the consumer. `wavlab.package.consumer` performs this complete
+install/configure/build/run sequence in a fresh temporary directory.
+
 ## Build options
 
 | Option | Default | Effect |
@@ -116,7 +140,10 @@ Current tests verify:
 - the CLI builds and provides conventional `--help` output;
 - every canonical command shape parses independently of execution;
 - black-box CLI tests cover output, overwrite, errors, help, and version;
+- failed overwrite attempts leave the existing destination unchanged;
 - `docs/cli.md` exactly matches the live CLI11 definitions;
+- an independent CMake project consumes the installed package;
+- Python's WAV reader, plus `ffprobe` when available, validates generated WAVs;
 - all generated WAV fixtures and their manifest are reproducible; and
 - every public header compiles independently as part of the normal build.
 
@@ -152,7 +179,5 @@ cmake --build --preset dev --target format-check
 cmake --build --preset dev --target format
 ```
 
-The targets initially cover new smoke-test code. Legacy files are added as
-they are migrated so this phase does not disguise logic changes inside a
-repository-wide reformat. Do not combine a broad formatting change with a
-behavioral change.
+The targets cover all maintained C++ sources and headers. Do not combine a
+broad formatting change with behavioural changes.

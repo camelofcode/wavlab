@@ -88,7 +88,7 @@ int main()
     const auto path = temporaryWavPath();
     wav.save(path);
 
-    const auto metadata = WavFile::openMetadata(path);
+    auto metadata = WavFile::openMetadata(path);
     check(!metadata.hasLoadedSamples(), "openMetadata does not load sample values");
     check(metadata.sampleCount() == 4 && metadata.frameCount() == 2,
           "metadata exposes sample and frame counts");
@@ -96,6 +96,11 @@ int main()
           "details returns a printable metadata report");
     checkError([&metadata] { static_cast<void>(metadata.samples()); },
                WavErrorCode::samplesNotLoaded, "metadata-only files reject sample access");
+    const auto bytesBeforeFailedOverwrite = fileBytes(path);
+    checkError([&metadata, &path] { metadata.save(path); }, WavErrorCode::samplesNotLoaded,
+               "saving metadata-only input reports an error");
+    check(fileBytes(path) == bytesBeforeFailedOverwrite,
+          "a failed overwrite leaves the destination unchanged");
 
     const auto reopened = WavFile::open(path);
     check(reopened.numberOfChannels() == 2, "saved stereo layout can be reopened");

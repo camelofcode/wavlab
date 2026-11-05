@@ -31,6 +31,25 @@ The build produces:
 See [Development](docs/development.md) for supported toolchains, presets,
 sanitizers, formatting, and static analysis.
 
+The supported CI toolchains are GCC and Clang on Linux, MSVC on Windows, and
+Apple Clang on macOS. Other conforming C++20 toolchains may work but are not
+part of the release gate.
+
+## Install
+
+Build, test, and install an optimised release to a chosen prefix:
+
+```console
+cmake --preset release
+cmake --build --preset release
+ctest --preset release
+cmake --install out/build/release --prefix /your/install/prefix
+```
+
+The installed files include the `wavlab` executable, the static or shared
+library selected at configure time, public headers, licence, and CMake package
+metadata.
+
 ## Command line
 
 CLI11 provides generated top-level and per-command help, typed arguments,
@@ -97,8 +116,19 @@ wavlab::Tools::normaliseToDecibels(wave, -6.0);
 wave.save("output.wav");
 ```
 
-Installation and exported-package support are planned for the packaging phase;
-the build-tree target is currently the supported library-consumer interface.
+An installed consumer can discover the package without knowing its source-tree
+layout:
+
+```cmake
+find_package(wavlab 0.1 CONFIG REQUIRED)
+
+add_executable(my_audio_tool main.cpp)
+target_link_libraries(my_audio_tool PRIVATE wavlab::wavlab)
+```
+
+Set `CMAKE_PREFIX_PATH` to the chosen installation prefix when it is not a
+standard system location. Both build-tree and installed consumers use the same
+`wavlab::wavlab` target name.
 
 ## Current limitations
 

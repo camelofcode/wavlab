@@ -10,6 +10,8 @@ project(
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(WavLabProjectOptions)
 include(FetchContent)
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
 option(BUILD_SHARED_LIBS "Build wavlab as a shared library" OFF)
 
@@ -69,8 +71,11 @@ set_target_properties(
     PROPERTIES
         COMPILE_PDB_NAME wavlab_lib
         CXX_EXTENSIONS OFF
+        EXPORT_NAME wavlab
         OUTPUT_NAME wavlab
         PDB_NAME wavlab_lib
+        VERSION ${PROJECT_VERSION}
+        SOVERSION ${PROJECT_VERSION_MAJOR}
         WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
 
@@ -79,7 +84,7 @@ target_include_directories(
     wavlab_lib
     PUBLIC
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-        "$<INSTALL_INTERFACE:include>"
+        "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
     PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/src/lib"
 )
@@ -105,6 +110,42 @@ set_target_properties(
 target_compile_features(wavlab_cli PRIVATE cxx_std_20)
 target_link_libraries(wavlab_cli PRIVATE wavlab_cli_core)
 wavlab_apply_project_options(wavlab_cli)
+
+install(
+    TARGETS wavlab_lib
+    EXPORT wavlabTargets
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+)
+install(TARGETS wavlab_cli RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+install(DIRECTORY include/wavlab DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+install(FILES LICENSE README.md CHANGELOG.md DESTINATION "${CMAKE_INSTALL_DOCDIR}")
+
+set(WAVLAB_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/wavlab")
+configure_package_config_file(
+    cmake/wavlabConfig.cmake.in
+    "${CMAKE_CURRENT_BINARY_DIR}/wavlabConfig.cmake"
+    INSTALL_DESTINATION "${WAVLAB_INSTALL_CMAKEDIR}"
+)
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/wavlabConfigVersion.cmake"
+    VERSION "${PROJECT_VERSION}"
+    COMPATIBILITY SameMinorVersion
+)
+install(
+    EXPORT wavlabTargets
+    FILE wavlabTargets.cmake
+    NAMESPACE wavlab::
+    DESTINATION "${WAVLAB_INSTALL_CMAKEDIR}"
+)
+install(
+    FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/wavlabConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/wavlabConfigVersion.cmake"
+    DESTINATION "${WAVLAB_INSTALL_CMAKEDIR}"
+)
 
 add_executable(wavlab_normalise_example examples/normalise.cpp)
 set_target_properties(wavlab_normalise_example PROPERTIES CXX_EXTENSIONS OFF)
@@ -160,5 +201,6 @@ wavlab_add_developer_targets(
     tests/generator_tests.cpp
     tests/library_api_tests.cpp
     tests/modulation_effects_tests.cpp
+    tests/package_consumer/main.cpp
     tests/smoke/library_smoke.cpp
 )

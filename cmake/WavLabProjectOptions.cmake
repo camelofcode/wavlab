@@ -38,7 +38,12 @@ if(WAVLAB_ENABLE_CLANG_TIDY)
 endif()
 
 function(wavlab_apply_project_options target)
-    target_link_libraries(${target} PRIVATE wavlab_warnings wavlab_sanitizers)
+    target_link_libraries(
+        ${target}
+        PRIVATE
+            "$<BUILD_INTERFACE:wavlab_warnings>"
+            "$<BUILD_INTERFACE:wavlab_sanitizers>"
+    )
     if(WAVLAB_ENABLE_CLANG_TIDY)
         set_target_properties(
             ${target}
