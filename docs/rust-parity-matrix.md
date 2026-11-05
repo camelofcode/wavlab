@@ -84,13 +84,13 @@ Legend:
 | Analog delay mono/stereo | Configurable cutoff | Configurable feedback low-pass cutoff | [x] |
 | Tape delay mono/stereo | Configurable drive/cutoff | Configurable dB drive and cutoff | [x] |
 | Schroeder reverb | Parallel combs plus series all-pass | Parallel combs plus series all-pass, RT60 seconds | [x] |
-| Chorus mono/stereo | Missing | Common or independent channel settings | [ ] |
-| Vibrato mono/stereo | Missing | Fully wet modulated delay | [ ] |
-| Flanger mono/stereo | Missing | Modulated short delay and signed feedback | [ ] |
-| Tremolo | Missing | Depth/rate/selectable waveform | [ ] |
-| Autopan | Missing | Depth/rate/waveform, stereo output | [ ] |
-| Phaser mono/stereo | Missing | Modulated all-pass stages, feedback, mix | [ ] |
-| Modulated LPF/HPF | Missing | Frequency range, rate, waveform, Q, filter kind | [ ] |
+| Chorus mono/stereo | Implemented | Common or independent channel settings | [x] |
+| Vibrato mono/stereo | Implemented | Fully wet modulated delay | [x] |
+| Flanger mono/stereo | Implemented | Modulated short delay and signed feedback | [x] |
+| Tremolo | Implemented | Depth/rate/selectable waveform | [x] |
+| Autopan | Implemented | Depth/rate/waveform, stereo output | [x] |
+| Phaser mono/stereo | Implemented | Modulated all-pass stages and wet/dry mix | [x] |
+| Modulated LPF/HPF | Implemented | Frequency range, rate, waveform, Q, filter kind | [x] |
 
 ## Confirmed or high-confidence C++ defect inventory
 
@@ -241,7 +241,7 @@ copying implementation details.
 | EQ | Coefficients, state, impulse behaviour | `tests/eq_tests.cpp` | [x] |
 | Delay/LFO primitives | Timing, wrap, feedback, waveforms, validation | `tests/delay_lfo_tests.cpp` | [x] |
 | Existing effects | Saturation, three delays, reverb | `tests/effects_tests.cpp` | [x] |
-| New effects | Chorus, vibrato, flanger, tremolo, autopan, phaser, modulated filter | focused effect tests | [ ] |
+| New effects | Chorus, vibrato, flanger, tremolo, autopan, phaser, modulated filter | `tests/modulation_effects_tests.cpp`, `tests/filter_effects_tests.cpp` | [x] |
 | CLI parsing | Every command and argument shape | parser unit tests | [ ] |
 | CLI execution | Output samples, overwrite/default paths, errors | process-level integration tests | [ ] |
 | Generated docs | Checked-in reference matches parser | generated-doc test | [ ] |

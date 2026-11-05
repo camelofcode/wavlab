@@ -71,6 +71,13 @@ class EQInstance
     [[nodiscard]] static EQInstance highShelf(double centreFrequency, std::uint32_t sampleRate,
                                               double q, double gainDecibels);
 
+    /// Updates coefficients without clearing the filter's sample history.
+    void setAllPass(double centreFrequency, std::uint32_t sampleRate, double bandwidthOctaves);
+    /// Updates coefficients without clearing the filter's sample history.
+    void setLowPass(double cutoffFrequency, std::uint32_t sampleRate, double q);
+    /// Updates coefficients without clearing the filter's sample history.
+    void setHighPass(double cutoffFrequency, std::uint32_t sampleRate, double q);
+
     [[nodiscard]] double processSample(double input) noexcept;
     [[nodiscard]] const BiquadCoefficients &coefficients() const noexcept;
 

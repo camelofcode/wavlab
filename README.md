@@ -48,6 +48,11 @@ checked-in configuration. Static libraries are the default; configure with
 	* Tape saturation effect
 	* Digital, analogue-style and tape-style delays
 	* Schroeder algorithmic reverb with independent channel state
+	* Chorus and vibrato with common or independent stereo modulation
+	* Flanging with stable signed feedback
+	* Tremolo and automatic panning with selectable LFO waveforms
+	* Configurable multi-stage phasing
+	* LFO-modulated low-pass and high-pass filters
 
 ## Usage
 run `wavlab [command]` using one of the following commands:
@@ -55,6 +60,61 @@ run `wavlab [command]` using one of the following commands:
 ```
 help
         description: shows the command list
+
+autopan <input> <depth> <frequencyHz> <sine|triangle|square> [output]
+        description: pans mono or stereo input across an always-stereo output
+        depth and mix are normalised values from 0 to 1; frequencies are in Hz
+        output is optional and defaults to overwriting the input
+
+chorus-mono <input> <depth> <frequencyHz> <mix> [output]
+        description: applies common-setting chorus to every input channel
+        depth and mix are normalised values from 0 to 1; frequencies are in Hz
+        output is optional and defaults to overwriting the input
+
+chorus-stereo <input> <leftDepth> <leftFrequencyHz> <rightDepth> <rightFrequencyHz> <mix> [output]
+        description: applies independent left/right chorus and promotes mono input
+        depth and mix are normalised values from 0 to 1; frequencies are in Hz
+        output is optional and defaults to overwriting the input
+
+flanger-mono <input> <depth> <frequencyHz> <feedback> <mix> [output]
+        description: applies triangle-modulated flanging with signed feedback
+        depth and mix are normalised values from 0 to 1; frequencies are in Hz
+        output is optional and defaults to overwriting the input
+
+flanger-stereo <input> <leftDepth> <leftFrequencyHz> <leftFeedback> <rightDepth> <rightFrequencyHz> <rightFeedback> <mix> [output]
+        description: applies independent stereo flanging and promotes mono input
+        depth and mix are normalised values from 0 to 1; frequencies are in Hz
+        output is optional and defaults to overwriting the input
+
+modulated-filter <input> <minimumFrequencyHz> <maximumFrequencyHz> <frequencyHz> <low-pass|high-pass> <waveform> <q> [output]
+        description: applies an LFO-modulated low- or high-pass filter
+        depth and mix are normalised values from 0 to 1; frequencies are in Hz
+        output is optional and defaults to overwriting the input
+
+phaser-mono <input> <depth> <frequencyHz> <centreFrequencyHz> <waveform> <mix> [output] [--stages N]
+        description: applies a configurable cascade of modulated all-pass filters
+        depth and mix are normalised values from 0 to 1; frequencies are in Hz
+        output is optional and defaults to overwriting the input
+
+phaser-stereo <input> <leftDepth> <leftFrequencyHz> <leftCentreFrequencyHz> <leftWaveform> <rightDepth> <rightFrequencyHz> <rightCentreFrequencyHz> <rightWaveform> <mix> [output] [--stages N]
+        description: applies independent stereo phasing and promotes mono input
+        depth and mix are normalised values from 0 to 1; frequencies are in Hz
+        output is optional and defaults to overwriting the input
+
+tremolo <input> <depth> <frequencyHz> <sine|triangle|square> [output]
+        description: applies shared gain modulation while preserving the stereo image
+        depth and mix are normalised values from 0 to 1; frequencies are in Hz
+        output is optional and defaults to overwriting the input
+
+vibrato-mono <input> <depth> <frequencyHz> [output]
+        description: applies fully wet chorus pitch modulation to every input channel
+        depth and mix are normalised values from 0 to 1; frequencies are in Hz
+        output is optional and defaults to overwriting the input
+
+vibrato-stereo <input> <leftDepth> <leftFrequencyHz> <rightDepth> <rightFrequencyHz> [output]
+        description: applies independent stereo pitch modulation and promotes mono input
+        depth and mix are normalised values from 0 to 1; frequencies are in Hz
+        output is optional and defaults to overwriting the input
 
 analog-delay-mono <input> <delayMilliseconds> <feedback> <mix> [output] [tailMilliseconds]
         description: applies a mono analog style delay to the specified wave file, with frequency rolloff in the feedback loop
@@ -390,7 +450,6 @@ white-noise <output> <sampleRate> <bitDepth> <length>
 
 ## Upcoming features
 * Test Mac support
-* Chorus, phaser, flanger and many more FX
 * Sample rate and bit rate (with dithering) conversion
 * Fades and ADSR
 * Dynamic processing (gate/compression)

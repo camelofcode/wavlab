@@ -27,9 +27,11 @@ set(WAVLAB_LIBRARY_SOURCES
     src/lib/ConversionHelpers.cpp
     src/lib/Delay.cpp
     src/lib/EQ.cpp
+    src/lib/FilterEffects.cpp
     src/lib/FX.cpp
     src/lib/Generators.cpp
     src/lib/LFO.cpp
+    src/lib/ModulationEffects.cpp
     src/lib/Tools.cpp
     src/lib/WavFile.cpp
 )
@@ -39,6 +41,7 @@ set(WAVLAB_CLI_SOURCES
     src/cli/EQCommands.cpp
     src/cli/FXCommands.cpp
     src/cli/GeneratorCommands.cpp
+    src/cli/ModulationCommands.cpp
     src/cli/StringHelpers.cpp
     src/cli/ToolsCommands.cpp
     src/cli/main.cpp
@@ -104,6 +107,7 @@ wavlab_add_developer_targets(
     include/wavlab/WavFile.h
     src/cli/Commands.cpp
     src/cli/Commands.h
+    src/cli/ModulationCommands.cpp
     src/cli/StringHelpers.cpp
     src/cli/StringHelpers.h
     src/cli/ToolsCommands.cpp
@@ -114,9 +118,11 @@ wavlab_add_developer_targets(
     src/lib/Delay.cpp
     src/lib/DspConversions.h
     src/lib/EQ.cpp
+    src/lib/FilterEffects.cpp
     src/lib/FX.cpp
     src/lib/Generators.cpp
     src/lib/LFO.cpp
+    src/lib/ModulationEffects.cpp
     src/lib/Tools.cpp
     src/lib/WavFile.cpp
     tests/binary_conversion_tests.cpp
@@ -124,7 +130,9 @@ wavlab_add_developer_targets(
     tests/editing_tools_tests.cpp
     tests/effects_tests.cpp
     tests/eq_tests.cpp
+    tests/filter_effects_tests.cpp
     tests/generator_tests.cpp
     tests/library_api_tests.cpp
+    tests/modulation_effects_tests.cpp
     tests/smoke/library_smoke.cpp
 )

@@ -67,6 +67,20 @@ target_link_libraries(wavlab_effects_tests PRIVATE wavlab::wavlab)
 wavlab_apply_project_options(wavlab_effects_tests)
 add_test(NAME wavlab.library.effects COMMAND wavlab_effects_tests)
 
+add_executable(wavlab_modulation_effects_tests modulation_effects_tests.cpp)
+set_target_properties(wavlab_modulation_effects_tests PROPERTIES CXX_EXTENSIONS OFF)
+target_compile_features(wavlab_modulation_effects_tests PRIVATE cxx_std_20)
+target_link_libraries(wavlab_modulation_effects_tests PRIVATE wavlab::wavlab)
+wavlab_apply_project_options(wavlab_modulation_effects_tests)
+add_test(NAME wavlab.library.modulation-effects COMMAND wavlab_modulation_effects_tests)
+
+add_executable(wavlab_filter_effects_tests filter_effects_tests.cpp)
+set_target_properties(wavlab_filter_effects_tests PROPERTIES CXX_EXTENSIONS OFF)
+target_compile_features(wavlab_filter_effects_tests PRIVATE cxx_std_20)
+target_link_libraries(wavlab_filter_effects_tests PRIVATE wavlab::wavlab)
+wavlab_apply_project_options(wavlab_filter_effects_tests)
+add_test(NAME wavlab.library.filter-effects COMMAND wavlab_filter_effects_tests)
+
 add_test(NAME wavlab.cli.help COMMAND wavlab_cli --help)
 set_tests_properties(
     wavlab.cli.help
@@ -85,6 +99,13 @@ add_test(
     COMMAND
         "${Python3_EXECUTABLE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/editing_cli_tests.py"
+        "$<TARGET_FILE:wavlab_cli>"
+)
+add_test(
+    NAME wavlab.cli.modulation-effects
+    COMMAND
+        "${Python3_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/modulation_cli_tests.py"
         "$<TARGET_FILE:wavlab_cli>"
 )
 add_test(

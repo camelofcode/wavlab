@@ -594,6 +594,35 @@ Port in dependency order:
 5. Phaser with configurable stages and independent stereo settings.
 6. LFO-modulated low-pass/high-pass filter.
 
+Phase 7 status: complete.
+
+Implementation notes:
+
+- Chorus and vibrato share the checked modulated-delay implementation. Common
+  settings preserve the input channel layout; independent stereo settings
+  promote mono input and maintain separate delay/LFO state.
+- Flanging uses a triangle LFO, a one-sample minimum delay, and signed
+  feedback limited to `[-0.95, 0.95]` so the feedback path remains stable.
+- Tremolo applies one gain LFO per frame to preserve the stereo image.
+  Autopan always emits stereo and supports mono duplication or independent
+  existing left/right input samples.
+- Phaser settings expose normalised depth, LFO frequency/waveform, centre
+  frequency, one to sixteen all-pass stages, and wet/dry mix. Biquad
+  coefficients can be updated without clearing filter history. The all-pass
+  coefficient calculation now evaluates stable normalised ratios near
+  Nyquist, avoiding an otherwise finite-sweep `sinh` overflow.
+- The modulated filter supports low-pass and high-pass responses with checked
+  frequency bounds and Q. Each channel owns independent LFO and biquad state.
+- Every operation validates settings and constructs output separately before
+  committing it. Mono-to-stereo allocations are overflow checked.
+- The CLI exposes the Rust command set and normalised units for all eleven
+  routes: mono/stereo chorus, vibrato, flanger and phaser, plus tremolo,
+  autopan, and modulated filter. Phaser accepts an optional `--stages N`.
+- `tests/modulation_effects_tests.cpp` and `tests/filter_effects_tests.cpp`
+  cover DSP contracts and failure preservation. The process-level
+  `tests/modulation_cli_tests.py` executes every new route and validates the
+  resulting WAV layout.
+
 For every effect:
 
 - introduce a settings struct with documented units and valid ranges;

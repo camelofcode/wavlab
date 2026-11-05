@@ -77,16 +77,10 @@ void validateGain(double gainDecibels)
     }
 }
 
-[[nodiscard]] BiquadCoefficients normaliseCoefficients(const RawCoefficients &raw)
+[[nodiscard]] BiquadCoefficients validateCoefficients(BiquadCoefficients coefficients)
 {
-    if (!std::isfinite(raw.a0) || raw.a0 == 0.0)
-    {
-        throw EqError(EqErrorCode::invalidCoefficients,
-                      "EQ settings produced invalid coefficients");
-    }
-    const BiquadCoefficients result{raw.b0 / raw.a0, raw.b1 / raw.a0, raw.b2 / raw.a0,
-                                    raw.a1 / raw.a0, raw.a2 / raw.a0};
-    for (const auto coefficient : {result.b0, result.b1, result.b2, result.a1, result.a2})
+    for (const auto coefficient :
+         {coefficients.b0, coefficients.b1, coefficients.b2, coefficients.a1, coefficients.a2})
     {
         if (!std::isfinite(coefficient))
         {
@@ -94,7 +88,18 @@ void validateGain(double gainDecibels)
                           "EQ settings produced invalid coefficients");
         }
     }
-    return result;
+    return coefficients;
+}
+
+[[nodiscard]] BiquadCoefficients normaliseCoefficients(const RawCoefficients &raw)
+{
+    if (!std::isfinite(raw.a0) || raw.a0 == 0.0)
+    {
+        throw EqError(EqErrorCode::invalidCoefficients,
+                      "EQ settings produced invalid coefficients");
+    }
+    return validateCoefficients(
+        {raw.b0 / raw.a0, raw.b1 / raw.a0, raw.b2 / raw.a0, raw.a1 / raw.a0, raw.a2 / raw.a0});
 }
 
 struct FrequencyTerms
@@ -162,11 +167,21 @@ EQInstance EQInstance::allPass(double centreFrequency, std::uint32_t sampleRate,
     validateBandwidth(bandwidthOctaves);
     const auto terms = frequencyTerms(centreFrequency, sampleRate);
     const auto alpha = alphaForBandwidth(terms, bandwidthOctaves);
-    auto raw = passDenominator(terms, alpha);
-    raw.b0 = 1.0 - alpha;
-    raw.b1 = -2.0 * terms.cosine;
-    raw.b2 = 1.0 + alpha;
-    return EQInstance(normaliseCoefficients(raw));
+    // Evaluate the normalised ratios directly. The cookbook's intermediate
+    // sinh can overflow very close to Nyquist even though the coefficient
+    // ratios have a finite, well-defined limit.
+    if (alpha > 1.0)
+    {
+        const auto inverseAlpha = 1.0 / alpha;
+        const auto scale = 1.0 / (1.0 + inverseAlpha);
+        const auto edge = (inverseAlpha - 1.0) * scale;
+        const auto middle = -2.0 * terms.cosine * inverseAlpha * scale;
+        return EQInstance(validateCoefficients({edge, middle, 1.0, middle, edge}));
+    }
+    const auto scale = 1.0 / (1.0 + alpha);
+    const auto edge = (1.0 - alpha) * scale;
+    const auto middle = -2.0 * terms.cosine * scale;
+    return EQInstance(validateCoefficients({edge, middle, 1.0, middle, edge}));
 }
 
 EQInstance EQInstance::bandPass(double centreFrequency, std::uint32_t sampleRate,
@@ -243,6 +258,22 @@ EQInstance EQInstance::highShelf(double centreFrequency, std::uint32_t sampleRat
          amplitude * ((amplitude + 1.0) + (amplitude - 1.0) * terms.cosine + betaSine),
          -2.0 * amplitude * ((amplitude - 1.0) + (amplitude + 1.0) * terms.cosine),
          amplitude * ((amplitude + 1.0) + (amplitude - 1.0) * terms.cosine - betaSine)}));
+}
+
+void EQInstance::setAllPass(double centreFrequency, std::uint32_t sampleRate,
+                            double bandwidthOctaves)
+{
+    coefficients_ = allPass(centreFrequency, sampleRate, bandwidthOctaves).coefficients_;
+}
+
+void EQInstance::setLowPass(double cutoffFrequency, std::uint32_t sampleRate, double q)
+{
+    coefficients_ = lowPass(cutoffFrequency, sampleRate, q).coefficients_;
+}
+
+void EQInstance::setHighPass(double cutoffFrequency, std::uint32_t sampleRate, double q)
+{
+    coefficients_ = highPass(cutoffFrequency, sampleRate, q).coefficients_;
 }
 
 double EQInstance::processSample(double input) noexcept

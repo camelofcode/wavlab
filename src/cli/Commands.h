@@ -120,6 +120,29 @@ int tapeDelayStereoCommand(const std::string &command, int argc, char *argv[]);
 void reverbHelp();
 int reverbCommand(const std::string &command, int argc, char *argv[]);
 
+void chorusMonoHelp();
+int chorusMonoCommand(const std::string &command, int argc, char *argv[]);
+void chorusStereoHelp();
+int chorusStereoCommand(const std::string &command, int argc, char *argv[]);
+void vibratoMonoHelp();
+int vibratoMonoCommand(const std::string &command, int argc, char *argv[]);
+void vibratoStereoHelp();
+int vibratoStereoCommand(const std::string &command, int argc, char *argv[]);
+void flangerMonoHelp();
+int flangerMonoCommand(const std::string &command, int argc, char *argv[]);
+void flangerStereoHelp();
+int flangerStereoCommand(const std::string &command, int argc, char *argv[]);
+void tremoloHelp();
+int tremoloCommand(const std::string &command, int argc, char *argv[]);
+void autoPanHelp();
+int autoPanCommand(const std::string &command, int argc, char *argv[]);
+void phaserMonoHelp();
+int phaserMonoCommand(const std::string &command, int argc, char *argv[]);
+void phaserStereoHelp();
+int phaserStereoCommand(const std::string &command, int argc, char *argv[]);
+void modulatedFilterHelp();
+int modulatedFilterCommand(const std::string &command, int argc, char *argv[]);
+
 /* Generators */
 
 void sineWaveHelp();

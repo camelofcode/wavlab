@@ -52,6 +52,20 @@ CommandsContainer::CommandsContainer()
                     &Commands::tapeDelayStereoCommand);
 
     registerCommand("reverb", &Commands::reverbHelp, &Commands::reverbCommand);
+    registerCommand("chorus-mono", &Commands::chorusMonoHelp, &Commands::chorusMonoCommand);
+    registerCommand("chorus-stereo", &Commands::chorusStereoHelp, &Commands::chorusStereoCommand);
+    registerCommand("vibrato-mono", &Commands::vibratoMonoHelp, &Commands::vibratoMonoCommand);
+    registerCommand("vibrato-stereo", &Commands::vibratoStereoHelp,
+                    &Commands::vibratoStereoCommand);
+    registerCommand("flanger-mono", &Commands::flangerMonoHelp, &Commands::flangerMonoCommand);
+    registerCommand("flanger-stereo", &Commands::flangerStereoHelp,
+                    &Commands::flangerStereoCommand);
+    registerCommand("tremolo", &Commands::tremoloHelp, &Commands::tremoloCommand);
+    registerCommand("autopan", &Commands::autoPanHelp, &Commands::autoPanCommand);
+    registerCommand("phaser-mono", &Commands::phaserMonoHelp, &Commands::phaserMonoCommand);
+    registerCommand("phaser-stereo", &Commands::phaserStereoHelp, &Commands::phaserStereoCommand);
+    registerCommand("modulated-filter", &Commands::modulatedFilterHelp,
+                    &Commands::modulatedFilterCommand);
 
     // Generators
     registerCommand("sine-wave", &Commands::sineWaveHelp, &Commands::sineWaveCommand);
