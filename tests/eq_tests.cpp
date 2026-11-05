@@ -153,7 +153,7 @@ void testStateAndNamedOperations()
                                     const std::function<void(WavFile &)> &operation,
                                     std::string_view message)
     {
-        std::array<double, input.size()> expected = input;
+        auto expected = input;
         for (auto &sample : expected)
         {
             sample = expectedFilter.processSample(sample);
