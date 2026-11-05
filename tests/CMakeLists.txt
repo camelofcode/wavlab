@@ -15,6 +15,18 @@ target_link_libraries(wavlab_api_tests PRIVATE wavlab::wavlab)
 wavlab_apply_project_options(wavlab_api_tests)
 add_test(NAME wavlab.library.api COMMAND wavlab_api_tests)
 
+add_executable(wavlab_binary_conversion_tests binary_conversion_tests.cpp)
+set_target_properties(wavlab_binary_conversion_tests PROPERTIES CXX_EXTENSIONS OFF)
+target_compile_features(wavlab_binary_conversion_tests PRIVATE cxx_std_20)
+target_include_directories(
+    wavlab_binary_conversion_tests
+    PRIVATE
+        "${PROJECT_SOURCE_DIR}/src/lib"
+)
+target_link_libraries(wavlab_binary_conversion_tests PRIVATE wavlab::wavlab)
+wavlab_apply_project_options(wavlab_binary_conversion_tests)
+add_test(NAME wavlab.library.binary-conversion COMMAND wavlab_binary_conversion_tests)
+
 add_test(NAME wavlab.cli.help COMMAND wavlab_cli --help)
 set_tests_properties(
     wavlab.cli.help

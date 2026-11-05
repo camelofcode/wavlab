@@ -1,139 +1,78 @@
 #include "ConversionHelpers.h"
 
-namespace wavlab
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+
+namespace wavlab::ConversionHelpers
 {
 
-double ConversionHelpers::eightBitToDouble(char input)
+namespace
 {
-	double min = 128.0;
-	double max = 127.0;
-	double sample;
 
-	if (input > 0)
-	{
-		sample = static_cast<double>(input) / max;
-	}
-	else
-	{
-		sample = static_cast<double>(input) / min;
-	}
-
-	return sample;
-}
-
-char ConversionHelpers::doubleToEightBit(double input)
+double clampNormalized(double input) noexcept
 {
-	double min = 128.0;
-	double max = 127.0;
-
-	double sample = safeScaleDouble(input, max, min);
-	return static_cast<char>(sample);
+    return std::isnan(input) ? 0.0 : std::clamp(input, -1.0, 1.0);
 }
 
-double ConversionHelpers::sixteenBitToDouble(short input)
+double signedToDouble(std::int64_t input, double negativeScale, double positiveScale) noexcept
 {
-	double min = 32768.0;
-	double max = 32767.0;
-	double sample;
-
-	if (input > 0)
-	{
-		sample = static_cast<double>(input) / max;
-	}
-	else
-	{
-		sample = static_cast<double>(input) / min;
-	}
-
-	return sample;
+    return static_cast<double>(input) / (input > 0 ? positiveScale : negativeScale);
 }
 
-short ConversionHelpers::doubleToSixteenBit(double input)
+std::int64_t doubleToSigned(double input, double negativeScale, double positiveScale) noexcept
 {
-	double min = 32768.0;
-	double max = 32767.0;
-
-	double sample = safeScaleDouble(input, max, min);
-	return static_cast<short>(sample);
+    const double sample = clampNormalized(input);
+    return static_cast<std::int64_t>(
+        std::round(sample * (sample >= 0.0 ? positiveScale : negativeScale)));
 }
 
-double ConversionHelpers::twentyFourBitToDouble(int input)
+} // namespace
+
+double eightBitToDouble(std::uint8_t input) noexcept
 {
-	double min = 8388608.0;
-	double max = 8388607.0;
-	double sample;
-
-	if (input > 0)
-	{
-		sample = static_cast<double>(input) / max;
-	}
-	else
-	{
-		sample = static_cast<double>(input) / min;
-	}
-
-	return sample;
+    constexpr std::int16_t silence = 128;
+    const auto centered = static_cast<std::int16_t>(input) - silence;
+    return static_cast<double>(centered) / (centered > 0 ? 127.0 : 128.0);
 }
 
-int ConversionHelpers::doubleToTwentyFourBit(double input)
+std::uint8_t doubleToEightBit(double input) noexcept
 {
-	double max = 8388607.0;
-	double min = 8388608.0;
-
-	double sample = safeScaleDouble(input, max, min);
-	return static_cast<int>(sample);
+    constexpr std::int16_t silence = 128;
+    const double sample = clampNormalized(input);
+    const double scale = sample >= 0.0 ? 127.0 : 128.0;
+    return static_cast<std::uint8_t>(static_cast<std::int16_t>(std::round(sample * scale)) +
+                                     silence);
 }
 
-
-double ConversionHelpers::thirtyTwoBitToDouble(int input)
+double sixteenBitToDouble(std::int16_t input) noexcept
 {
-	double min = 2147483648.0;
-	double max = 2147483647.0;
-	double sample;
-
-	if (input > 0)
-	{
-		sample = static_cast<double>(input) / max;
-	}
-	else
-	{
-		sample = static_cast<double>(input) / min;
-	}
-
-	return sample;
+    return signedToDouble(input, 32'768.0, 32'767.0);
 }
 
-int ConversionHelpers::doubleToThirtyTwoBit(double input)
+std::int16_t doubleToSixteenBit(double input) noexcept
 {
-	double max = 2147483647.0;
-	double min = 2147483648.0;
-	
-	double sample = safeScaleDouble(input, max, min);
-	return static_cast<int>(sample);
+    return static_cast<std::int16_t>(doubleToSigned(input, 32'768.0, 32'767.0));
 }
 
-double ConversionHelpers::safeScaleDouble(double input, double max, double min)
+double twentyFourBitToDouble(std::int32_t input) noexcept
 {
-	double sample;
-
-	if (input > 0)
-	{
-		sample = input * max;
-		if (sample > max)
-		{
-			sample = max;
-		}
-	}
-	else
-	{
-		sample = input * min;
-		if (sample < -min)
-		{
-			sample = -min;
-		}
-	}
-
-	return sample;
+    return signedToDouble(input, 8'388'608.0, 8'388'607.0);
 }
 
+std::int32_t doubleToTwentyFourBit(double input) noexcept
+{
+    return static_cast<std::int32_t>(doubleToSigned(input, 8'388'608.0, 8'388'607.0));
 }
+
+double thirtyTwoBitToDouble(std::int32_t input) noexcept
+{
+    return signedToDouble(input, 2'147'483'648.0, 2'147'483'647.0);
+}
+
+std::int32_t doubleToThirtyTwoBit(double input) noexcept
+{
+    return static_cast<std::int32_t>(doubleToSigned(input, 2'147'483'648.0, 2'147'483'647.0));
+}
+
+} // namespace wavlab::ConversionHelpers

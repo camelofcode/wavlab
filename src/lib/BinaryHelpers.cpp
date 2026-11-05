@@ -1,119 +1,157 @@
-#include <cstdint>
-#include <vector>
 #include "BinaryHelpers.h"
 
-namespace wavlab
+#include <array>
+#include <bit>
+#include <cstddef>
+#include <cstdint>
+#include <limits>
+#include <string>
+#include <vector>
+#include <wavlab/WavFile.h>
+
+namespace wavlab::BinaryHelpers
 {
 
-std::string BinaryHelpers::readString(std::ifstream& file, int16_t length)
+namespace
 {
-	std::vector<char> buffer;
-	buffer.resize(length);
-	file.read(&buffer[0], length);
-	std::string header(buffer.begin(), buffer.end());
-	return header;
-}
 
-int8_t BinaryHelpers::readInt8(std::ifstream& file)
+template <std::size_t Size> std::array<std::uint8_t, Size> readBytes(std::istream &stream)
 {
-	char b0;
-	file.read((char*)&b0, 1);
-	return b0;
+    std::array<std::uint8_t, Size> bytes{};
+    stream.read(reinterpret_cast<char *>(bytes.data()), static_cast<std::streamsize>(Size));
+    if (!stream)
+    {
+        throw WavError(WavErrorCode::io, "unexpected end of WAV input");
+    }
+    return bytes;
 }
 
-int16_t BinaryHelpers::readInt16(std::ifstream& file)
+void writeBytes(std::ostream &stream, const std::uint8_t *bytes, std::size_t size)
 {
-	union uni
-	{
-		short s;
-		struct bytes
-		{
-			char b0;
-			char b1;
-		} b;
-	} conversionUnion{};
-
-	file.read((char*)&conversionUnion.b.b0, 1);
-	file.read((char*)&conversionUnion.b.b1, 1);
-
-	return conversionUnion.s;
+    stream.write(reinterpret_cast<const char *>(bytes), static_cast<std::streamsize>(size));
+    if (!stream)
+    {
+        throw WavError(WavErrorCode::io, "failed while writing WAV output");
+    }
 }
 
-int32_t BinaryHelpers::readInt24(std::ifstream& file)
+} // namespace
+
+std::string readString(std::istream &stream, std::size_t length)
 {
-	char b0, b1, b2;
-	file.read((char*)&b0, 1);
-	file.read((char*)&b1, 1);
-	file.read((char*)&b2, 1);
-
-    int32_t sampleAsInt = ((b2 & 0xFF) << 16) | ((b1 & 0xFF) << 8) | (b0 & 0xFF);
-
-	//Convert sign of 24-bit number to sign of 32-bit number;
-	if (sampleAsInt & 0x800000)
-	{
-		sampleAsInt = sampleAsInt | ~0xFFFFFF;
-	}
-
-	return sampleAsInt;
+    std::string value(length, '\0');
+    stream.read(value.data(), static_cast<std::streamsize>(length));
+    if (!stream)
+    {
+        throw WavError(WavErrorCode::io, "unexpected end of WAV input");
+    }
+    return value;
 }
 
-int32_t BinaryHelpers::readInt32(std::ifstream& file)
+std::uint8_t readUInt8(std::istream &stream) { return readBytes<1>(stream)[0]; }
+
+std::uint16_t readUInt16(std::istream &stream)
 {
-	union uni
-	{
-		int32_t i;
-		struct bytes
-		{
-			char b0;
-			char b1;
-			char b2;
-			char b3;
-		} b;
-	} conversionUnion{};
-
-	file.read((char*)&conversionUnion.b.b0, 1);
-	file.read((char*)&conversionUnion.b.b1, 1);
-	file.read((char*)&conversionUnion.b.b2, 1);
-	file.read((char*)&conversionUnion.b.b3, 1);
-
-	return conversionUnion.i;
+    const auto bytes = readBytes<2>(stream);
+    return static_cast<std::uint16_t>(bytes[0]) |
+           static_cast<std::uint16_t>(static_cast<std::uint16_t>(bytes[1]) << 8U);
 }
 
-void BinaryHelpers::writeString(std::ofstream& file, const std::string& value)
+std::int16_t readInt16(std::istream &stream)
 {
-	file.write(value.c_str(), value.size()); // NOLINT(cppcoreguidelines-narrowing-conversions)
+    return std::bit_cast<std::int16_t>(readUInt16(stream));
 }
 
-void BinaryHelpers::writeString(std::ofstream& file, const std::string& value, size_t size)
+std::uint32_t readUInt32(std::istream &stream)
 {
-	file.write(value.c_str(), size); // NOLINT(cppcoreguidelines-narrowing-conversions)
+    const auto bytes = readBytes<4>(stream);
+    return static_cast<std::uint32_t>(bytes[0]) | (static_cast<std::uint32_t>(bytes[1]) << 8U) |
+           (static_cast<std::uint32_t>(bytes[2]) << 16U) |
+           (static_cast<std::uint32_t>(bytes[3]) << 24U);
 }
 
-void BinaryHelpers::writeInt8(std::ofstream& file, int8_t value)
+std::int32_t readInt24(std::istream &stream)
 {
-	file.write((char*)&value, 1);
+    const auto bytes = readBytes<3>(stream);
+    std::uint32_t value = static_cast<std::uint32_t>(bytes[0]) |
+                          (static_cast<std::uint32_t>(bytes[1]) << 8U) |
+                          (static_cast<std::uint32_t>(bytes[2]) << 16U);
+    if ((value & 0x0080'0000U) != 0)
+    {
+        value |= 0xFF00'0000U;
+    }
+    return std::bit_cast<std::int32_t>(value);
 }
 
-void BinaryHelpers::writeInt16(std::ofstream& file, int16_t value)
+std::int32_t readInt32(std::istream &stream)
 {
-	file.write((char*)&value, 2);
+    return std::bit_cast<std::int32_t>(readUInt32(stream));
 }
 
-void BinaryHelpers::writeInt24(std::ofstream& file, int32_t value)
+void writeString(std::ostream &stream, std::string_view value)
 {
-	uint8_t bytes[3];
-	bytes[2] = (uint8_t)(value >> 16) & 0xFF;
-	bytes[1] = (uint8_t)(value >> 8) & 0xFF;
-	bytes[0] = (uint8_t)value & 0xFF;
-
-	file.write((char*)&bytes[0], 1);
-	file.write((char*)&bytes[1], 1);
-	file.write((char*)&bytes[2], 1);
+    stream.write(value.data(), static_cast<std::streamsize>(value.size()));
+    if (!stream)
+    {
+        throw WavError(WavErrorCode::io, "failed while writing WAV output");
+    }
 }
 
-void BinaryHelpers::writeInt32(std::ofstream& file, int32_t value)
+void writeFixedString(std::ostream &stream, std::string_view value, std::size_t size)
 {
-	file.write((char*)&value, 4);
+    if (value.size() > size)
+    {
+        throw WavError(WavErrorCode::invalidFile, "fixed WAV text field is " +
+                                                      std::to_string(value.size()) +
+                                                      " bytes; maximum is " + std::to_string(size));
+    }
+    std::vector<std::uint8_t> bytes(size, 0);
+    for (std::size_t index = 0; index < value.size(); ++index)
+    {
+        bytes[index] = static_cast<std::uint8_t>(value[index]);
+    }
+    writeBytes(stream, bytes.data(), bytes.size());
 }
 
+void writeUInt8(std::ostream &stream, std::uint8_t value) { writeBytes(stream, &value, 1); }
+
+void writeUInt16(std::ostream &stream, std::uint16_t value)
+{
+    const std::array<std::uint8_t, 2> bytes{static_cast<std::uint8_t>(value),
+                                            static_cast<std::uint8_t>(value >> 8U)};
+    writeBytes(stream, bytes.data(), bytes.size());
 }
+
+void writeInt16(std::ostream &stream, std::int16_t value)
+{
+    writeUInt16(stream, std::bit_cast<std::uint16_t>(value));
+}
+
+void writeUInt32(std::ostream &stream, std::uint32_t value)
+{
+    const std::array<std::uint8_t, 4> bytes{
+        static_cast<std::uint8_t>(value), static_cast<std::uint8_t>(value >> 8U),
+        static_cast<std::uint8_t>(value >> 16U), static_cast<std::uint8_t>(value >> 24U)};
+    writeBytes(stream, bytes.data(), bytes.size());
+}
+
+void writeInt24(std::ostream &stream, std::int32_t value)
+{
+    if (value < -8'388'608 || value > 8'388'607)
+    {
+        throw WavError(WavErrorCode::invalidFile,
+                       std::to_string(value) + " does not fit in a signed 24-bit integer");
+    }
+    const auto unsignedValue = std::bit_cast<std::uint32_t>(value);
+    const std::array<std::uint8_t, 3> bytes{static_cast<std::uint8_t>(unsignedValue),
+                                            static_cast<std::uint8_t>(unsignedValue >> 8U),
+                                            static_cast<std::uint8_t>(unsignedValue >> 16U)};
+    writeBytes(stream, bytes.data(), bytes.size());
+}
+
+void writeInt32(std::ostream &stream, std::int32_t value)
+{
+    writeUInt32(stream, std::bit_cast<std::uint32_t>(value));
+}
+
+} // namespace wavlab::BinaryHelpers

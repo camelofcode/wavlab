@@ -1,26 +1,30 @@
 #pragma once
+
 #include <cstddef>
 #include <cstdint>
-#include <fstream>
+#include <istream>
+#include <ostream>
 #include <string>
+#include <string_view>
 
-namespace wavlab
+namespace wavlab::BinaryHelpers
 {
 
-namespace BinaryHelpers
-{
-	std::string readString(std::ifstream& file, int16_t length);
-    int8_t readInt8(std::ifstream& file);
-    int16_t readInt16(std::ifstream& file);
-	int32_t readInt24(std::ifstream& file);
-	int32_t readInt32(std::ifstream& file);
+std::string readString(std::istream &stream, std::size_t length);
+std::uint8_t readUInt8(std::istream &stream);
+std::uint16_t readUInt16(std::istream &stream);
+std::int16_t readInt16(std::istream &stream);
+std::uint32_t readUInt32(std::istream &stream);
+std::int32_t readInt24(std::istream &stream);
+std::int32_t readInt32(std::istream &stream);
 
-	void writeString(std::ofstream& file, const std::string& value);
-	void writeString(std::ofstream& file, const std::string& value, size_t size);
-	void writeInt8(std::ofstream& file, int8_t value);
-	void writeInt16(std::ofstream& file, int16_t value);
-	void writeInt24(std::ofstream& file, int32_t value);
-	void writeInt32(std::ofstream& file, int32_t value);
-}
+void writeString(std::ostream &stream, std::string_view value);
+void writeFixedString(std::ostream &stream, std::string_view value, std::size_t size);
+void writeUInt8(std::ostream &stream, std::uint8_t value);
+void writeUInt16(std::ostream &stream, std::uint16_t value);
+void writeInt16(std::ostream &stream, std::int16_t value);
+void writeUInt32(std::ostream &stream, std::uint32_t value);
+void writeInt24(std::ostream &stream, std::int32_t value);
+void writeInt32(std::ostream &stream, std::int32_t value);
 
-}
+} // namespace wavlab::BinaryHelpers

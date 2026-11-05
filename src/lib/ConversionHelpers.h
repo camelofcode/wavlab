@@ -1,21 +1,17 @@
 #pragma once
-#include <string>
 
-namespace wavlab
+#include <cstdint>
+
+namespace wavlab::ConversionHelpers
 {
 
-namespace ConversionHelpers
-{
-	double eightBitToDouble (char input);
-	char doubleToEightBit(double input);
-	double sixteenBitToDouble(short input);
-	short doubleToSixteenBit(double input);
-	double twentyFourBitToDouble(int input);
-	int doubleToTwentyFourBit(double input);
-	double thirtyTwoBitToDouble(int input);
-	int doubleToThirtyTwoBit(double input);
+double eightBitToDouble(std::uint8_t input) noexcept;
+std::uint8_t doubleToEightBit(double input) noexcept;
+double sixteenBitToDouble(std::int16_t input) noexcept;
+std::int16_t doubleToSixteenBit(double input) noexcept;
+double twentyFourBitToDouble(std::int32_t input) noexcept;
+std::int32_t doubleToTwentyFourBit(double input) noexcept;
+double thirtyTwoBitToDouble(std::int32_t input) noexcept;
+std::int32_t doubleToThirtyTwoBit(double input) noexcept;
 
-	double safeScaleDouble(double input, double max, double min);
-}
-
-}
+} // namespace wavlab::ConversionHelpers

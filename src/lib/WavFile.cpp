@@ -66,17 +66,17 @@ WavFile::WavFile(const std::filesystem::path &path, bool loadSamples)
     infile.seekg(0, std::ios::beg);
 
     fileChunkId = BinaryHelpers::readString(infile, 4);
-    fileChunkSize = BinaryHelpers::readInt32(infile);
+    fileChunkSize = BinaryHelpers::readUInt32(infile);
     format = BinaryHelpers::readString(infile, 4);
 
     formatChunkId = BinaryHelpers::readString(infile, 4);
-    formatChunkSize = BinaryHelpers::readInt32(infile);
-    audioFormat = BinaryHelpers::readInt16(infile);
-    numberOfChannels_ = BinaryHelpers::readInt16(infile);
-    sampleRate_ = BinaryHelpers::readInt32(infile);
-    byteRate = BinaryHelpers::readInt32(infile);
-    blockAlign = BinaryHelpers::readInt16(infile);
-    bitsPerSample_ = BinaryHelpers::readInt16(infile);
+    formatChunkSize = BinaryHelpers::readUInt32(infile);
+    audioFormat = BinaryHelpers::readUInt16(infile);
+    numberOfChannels_ = BinaryHelpers::readUInt16(infile);
+    sampleRate_ = BinaryHelpers::readUInt32(infile);
+    byteRate = BinaryHelpers::readUInt32(infile);
+    blockAlign = BinaryHelpers::readUInt16(infile);
+    bitsPerSample_ = BinaryHelpers::readUInt16(infile);
 
     auto nextChunk = BinaryHelpers::readString(infile, 4);
 
@@ -90,7 +90,7 @@ WavFile::WavFile(const std::filesystem::path &path, bool loadSamples)
 
     if (nextChunk == "JUNK" || nextChunk == "junk") // I've seen both........
     {
-        auto junkSize = BinaryHelpers::readInt32(infile);
+        auto junkSize = BinaryHelpers::readUInt32(infile);
         if (junkSize % 2 != 0)
         {
             junkSize += 1;
@@ -104,7 +104,7 @@ WavFile::WavFile(const std::filesystem::path &path, bool loadSamples)
     if (nextChunk == "data")
     {
         dataChunkId = nextChunk;
-        dataChunkSize = BinaryHelpers::readInt32(infile);
+        dataChunkSize = BinaryHelpers::readUInt32(infile);
         dataChunkStart = infile.tellg();
     }
 
@@ -142,7 +142,7 @@ WavFile::WavFile(const std::filesystem::path &path, bool loadSamples)
         {
             for (size_t i = 0; i < numberOfSamples; i++)
             {
-                samples_[i] = ConversionHelpers::eightBitToDouble(BinaryHelpers::readInt8(infile));
+                samples_[i] = ConversionHelpers::eightBitToDouble(BinaryHelpers::readUInt8(infile));
             }
         }
         if (bitsPerSample_ == 16)
@@ -365,32 +365,32 @@ void WavFile::save(const std::filesystem::path &path)
     }
 
     BinaryHelpers::writeString(outfile, fileChunkId);
-    BinaryHelpers::writeInt32(outfile, fileChunkSize);
+    BinaryHelpers::writeUInt32(outfile, fileChunkSize);
     BinaryHelpers::writeString(outfile, format);
 
     BinaryHelpers::writeString(outfile, formatChunkId);
-    BinaryHelpers::writeInt32(outfile, formatChunkSize);
-    BinaryHelpers::writeInt16(outfile, audioFormat);
-    BinaryHelpers::writeInt16(outfile, numberOfChannels_);
-    BinaryHelpers::writeInt32(outfile, sampleRate_);
-    BinaryHelpers::writeInt32(outfile, byteRate);
-    BinaryHelpers::writeInt16(outfile, blockAlign);
-    BinaryHelpers::writeInt16(outfile, bitsPerSample_);
+    BinaryHelpers::writeUInt32(outfile, formatChunkSize);
+    BinaryHelpers::writeUInt16(outfile, audioFormat);
+    BinaryHelpers::writeUInt16(outfile, numberOfChannels_);
+    BinaryHelpers::writeUInt32(outfile, sampleRate_);
+    BinaryHelpers::writeUInt32(outfile, byteRate);
+    BinaryHelpers::writeUInt16(outfile, blockAlign);
+    BinaryHelpers::writeUInt16(outfile, bitsPerSample_);
 
     if (isBroadcastWav)
     {
         BinaryHelpers::writeString(outfile, bextChunkId);
-        BinaryHelpers::writeInt32(outfile, bextChunkSize);
+        BinaryHelpers::writeUInt32(outfile, bextChunkSize);
 
-        BinaryHelpers::writeString(outfile, description, 256);
-        BinaryHelpers::writeString(outfile, originator, 32);
-        BinaryHelpers::writeString(outfile, originatorReference, 32);
-        BinaryHelpers::writeString(outfile, originationDate, 10);
-        BinaryHelpers::writeString(outfile, originationTime, 8);
+        BinaryHelpers::writeFixedString(outfile, description, 256);
+        BinaryHelpers::writeFixedString(outfile, originator, 32);
+        BinaryHelpers::writeFixedString(outfile, originatorReference, 32);
+        BinaryHelpers::writeFixedString(outfile, originationDate, 10);
+        BinaryHelpers::writeFixedString(outfile, originationTime, 8);
 
-        BinaryHelpers::writeInt32(outfile, timeReferenceLow);
-        BinaryHelpers::writeInt32(outfile, timeReferenceHigh);
-        BinaryHelpers::writeInt16(outfile, version);
+        BinaryHelpers::writeUInt32(outfile, timeReferenceLow);
+        BinaryHelpers::writeUInt32(outfile, timeReferenceHigh);
+        BinaryHelpers::writeUInt16(outfile, version);
 
         // Write reserved bytes. There should be 254 because we are not yet supporting v1 and v2
         // fields.
@@ -406,13 +406,13 @@ void WavFile::save(const std::filesystem::path &path)
     // writing RIFFs, JUNK chunks should not have odd number as Size."
 
     BinaryHelpers::writeString(outfile, dataChunkId);
-    BinaryHelpers::writeInt32(outfile, dataChunkSize);
+    BinaryHelpers::writeUInt32(outfile, dataChunkSize);
 
     if (bitsPerSample_ == 8)
     {
         for (size_t i = 0; i < numberOfSamples; i++)
         {
-            BinaryHelpers::writeInt8(outfile, ConversionHelpers::doubleToEightBit(samples_[i]));
+            BinaryHelpers::writeUInt8(outfile, ConversionHelpers::doubleToEightBit(samples_[i]));
         }
     }
     if (bitsPerSample_ == 16)
@@ -519,16 +519,16 @@ void WavFile::setSamples(std::vector<double> newSamples)
 void WavFile::readBextFields(std::ifstream &file, bool isFooter)
 {
     bextChunkId = "bext";
-    bextChunkSize = BinaryHelpers::readInt32(file);
+    bextChunkSize = BinaryHelpers::readUInt32(file);
 
     description = BinaryHelpers::readString(file, 256);
     originator = BinaryHelpers::readString(file, 32);
     originatorReference = BinaryHelpers::readString(file, 32);
     originationDate = BinaryHelpers::readString(file, 10);
     originationTime = BinaryHelpers::readString(file, 8);
-    timeReferenceLow = BinaryHelpers::readInt32(file);
-    timeReferenceHigh = BinaryHelpers::readInt32(file);
-    version = BinaryHelpers::readInt16(file);
+    timeReferenceLow = BinaryHelpers::readUInt32(file);
+    timeReferenceHigh = BinaryHelpers::readUInt32(file);
+    version = BinaryHelpers::readUInt16(file);
 
     if (isFooter)
     {

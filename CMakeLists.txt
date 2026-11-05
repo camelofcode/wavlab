@@ -98,7 +98,12 @@ wavlab_add_developer_targets(
     include/wavlab/FX.h
     include/wavlab/WavFile.h
     src/lib/FX.cpp
+    src/lib/BinaryHelpers.cpp
+    src/lib/BinaryHelpers.h
+    src/lib/ConversionHelpers.cpp
+    src/lib/ConversionHelpers.h
     src/lib/WavFile.cpp
+    tests/binary_conversion_tests.cpp
     tests/library_api_tests.cpp
     tests/smoke/library_smoke.cpp
 )
