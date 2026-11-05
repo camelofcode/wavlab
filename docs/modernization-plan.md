@@ -169,7 +169,10 @@ Progress recorded on 2026-11-05:
   [legacy-cli-contract.md](legacy-cli-contract.md).
 - Thirteen independently generated fixtures, their expected values, and a
   reproducibility manifest are checked in under `tests/fixtures/`.
-- License assignment remains pending explicit owner confirmation.
+- The repository now carries the same GPL-3.0-or-later license as `wavlab-rs`,
+  following explicit owner confirmation.
+
+Phase 0 status: complete.
 
 Exit criteria:
 

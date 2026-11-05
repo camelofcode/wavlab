@@ -25,7 +25,7 @@ formatting churn but retains its useful self-contained `<cstdint>` include.
 | Error behavior | Library constructors/functions print and call `exit` | Typed errors propagated to `main` | Typed C++ exceptions caught by CLI |
 | Documentation | Hand-maintained long README command list | Generated CLI reference plus library docs | Generated CLI reference and public C++ API docs |
 | Packaging | No install/export package | Cargo package model | Installable `wavlab::wavlab` CMake package |
-| License file | Absent | GPL-3.0-or-later | Confirm and add the intended C++ license |
+| License file | GPL-3.0-or-later added in Phase 0 | GPL-3.0-or-later | Keep license and notices aligned |
 
 ## Feature parity checklist
 

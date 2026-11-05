@@ -381,3 +381,10 @@ Why do command line utilities exist for anything a GUI exists for?
 * JUNK chunks are not written which may have as yet un-understood impact
 * If chunks are in some weird random order that doesn't match spec bad stuff will happen
 
+## License
+
+Copyright (C) 2026 Christopher Clayton.
+
+This project is free software licensed under the
+[GNU General Public License version 3 or later](LICENSE).
+
