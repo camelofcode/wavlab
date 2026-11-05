@@ -1,98 +1,143 @@
 #include <wavlab/Delay.h>
 
+#include "DspConversions.h"
+
+#include <cstddef>
+#include <cstdint>
+#include <string>
+#include <utility>
+
 namespace wavlab
 {
 
-Delay::Delay(uint32_t maxMilliseconds, uint32_t initialMilliseconds, uint32_t sampleRate) :
-	sampleRate(sampleRate),
-	inputPosition(1),
-	outputPosition(0)
+DelayError::DelayError(DelayErrorCode code, std::string message)
+    : std::invalid_argument(std::move(message)), code_(code)
 {
-	numberOfSamples = static_cast<uint32_t>(sampleRate * (maxMilliseconds / 1000.0));
-	delayBuffer.resize(numberOfSamples);
-    delaySamples = static_cast<uint32_t>(sampleRate * (initialMilliseconds / 1000.0));
-	setDelayTime(initialMilliseconds);
 }
 
-void Delay::setDelayTime(uint32_t milliseconds)
+DelayErrorCode DelayError::code() const noexcept { return code_; }
+
+namespace
 {
-	delaySamples = static_cast<uint32_t>(sampleRate * (milliseconds / 1000.0));
 
-	if (inputPosition > outputPosition)
-	{
-		outputPosition = inputPosition - delaySamples;
-	}
-
-	if (inputPosition < outputPosition)
-	{
-		outputPosition = (numberOfSamples + inputPosition) - delaySamples;
-	}
-
-	if (inputPosition == delaySamples)
-	{
-		outputPosition = numberOfSamples;
-	}
-
-	if (inputPosition <= (delaySamples - 1))
-	{
-		outputPosition = numberOfSamples - (delaySamples - inputPosition);
-	}
-
-	if (inputPosition == 0)
-	{
-		outputPosition = numberOfSamples - delaySamples;
-	}
-
-	if (outputPosition == numberOfSamples)
-	{
-		inputPosition = delaySamples;
-	}
-}
-
-double Delay::next(double sample, double feedback)
+[[noreturn]] void throwTimeError(DspConversions::TimeError error, double milliseconds,
+                                 std::uint32_t sampleRate)
 {
-	return Delay::next(sample, feedback, [](double in) { return in; }, 1.0);
+    switch (error)
+    {
+    case DspConversions::TimeError::invalidSampleRate:
+        throw DelayError(DelayErrorCode::invalidSampleRate,
+                         "delay sample rate must be greater than zero");
+    case DspConversions::TimeError::invalidMilliseconds:
+        throw DelayError(DelayErrorCode::invalidDelayTime,
+                         "delay time must be finite and greater than zero");
+    case DspConversions::TimeError::shorterThanOneSample:
+        throw DelayError(DelayErrorCode::delayTooShort,
+                         "delay time is shorter than one sample at " + std::to_string(sampleRate) +
+                             " Hz");
+    case DspConversions::TimeError::sizeOverflow:
+        throw DelayError(DelayErrorCode::sizeOverflow,
+                         "delay buffer is too large for this platform");
+    case DspConversions::TimeError::none:
+        break;
+    }
+    throw DelayError(DelayErrorCode::invalidDelayTime,
+                     "invalid delay time " + std::to_string(milliseconds));
 }
 
-double Delay::next(double sample, double feedback, const std::function<double(double input)>& feedbackProcessor, double mix)
+[[nodiscard]] std::size_t checkedSamples(double milliseconds, std::uint32_t sampleRate)
 {
-	double output = delayBuffer[outputPosition];
-	delayBuffer[inputPosition] = sample + feedbackProcessor((feedback * output));
-	movePositions();
-
-	double inverseMix = 1.0 - mix;
-	return (output * mix) + (sample * inverseMix);
+    const auto result = DspConversions::millisecondsToSamples(milliseconds, sampleRate);
+    if (!result)
+    {
+        throwTimeError(result.error, milliseconds, sampleRate);
+    }
+    return result.value;
 }
 
-double Delay::next(double sample, uint32_t lfo, double mix)
+[[nodiscard]] std::size_t checkedBufferSamples(double milliseconds, std::uint32_t sampleRate)
 {
-    uint32_t outputPositionLfo = outputPosition + lfo;
-	if (outputPositionLfo >= numberOfSamples)
-	{
-		outputPositionLfo = outputPositionLfo - numberOfSamples;
-	}
-
-	double output = delayBuffer[outputPositionLfo];
-	delayBuffer[inputPosition] = sample;
-	movePositions();
-
-	double inverseMix = 1.0 - mix;
-	return (output * mix) + (sample * inverseMix);
+    const auto samples = checkedSamples(milliseconds, sampleRate);
+    if (samples > std::vector<double>{}.max_size())
+    {
+        throw DelayError(DelayErrorCode::sizeOverflow,
+                         "delay buffer is too large for this platform");
+    }
+    return samples;
 }
 
-void Delay::movePositions()
+[[nodiscard]] double mixSamples(double input, double delayed, double mix) noexcept
 {
-	inputPosition++;
-	outputPosition++;
-
-	if (inputPosition == numberOfSamples)
-	{
-		inputPosition = 0;
-	}
-	if (outputPosition == numberOfSamples)
-	{
-		outputPosition = 0;
-	}
+    return delayed * mix + input * (1.0 - mix);
 }
 
+} // namespace
+
+Delay::Delay(double maximumMilliseconds, double initialMilliseconds, std::uint32_t sampleRate)
+    : sampleRate_(sampleRate), maximumMilliseconds_(maximumMilliseconds),
+      delaySamples_(checkedSamples(initialMilliseconds, sampleRate)),
+      buffer_(checkedBufferSamples(maximumMilliseconds, sampleRate), 0.0)
+{
+    if (initialMilliseconds > maximumMilliseconds || delaySamples_ > buffer_.size())
+    {
+        throw DelayError(DelayErrorCode::delayExceedsMaximum,
+                         "initial delay exceeds the configured maximum");
+    }
 }
+
+void Delay::setDelayTime(double milliseconds)
+{
+    const auto newDelaySamples = checkedSamples(milliseconds, sampleRate_);
+    if (milliseconds > maximumMilliseconds_ || newDelaySamples > buffer_.size())
+    {
+        throw DelayError(DelayErrorCode::delayExceedsMaximum,
+                         "delay time exceeds the configured maximum");
+    }
+    delaySamples_ = newDelaySamples;
+}
+
+double Delay::nextSample(double sample, double feedback, double mix) noexcept
+{
+    const auto output = delayedSample(0);
+    buffer_[writePosition_] = sample + feedback * output;
+    advance();
+    return mixSamples(sample, output, mix);
+}
+
+double Delay::nextSampleWith(double sample, double feedback, double mix,
+                             const FeedbackProcessor &feedbackProcessor)
+{
+    const auto output = delayedSample(0);
+    buffer_[writePosition_] = sample + feedbackProcessor(feedback * output);
+    advance();
+    return mixSamples(sample, output, mix);
+}
+
+double Delay::nextSampleWithOffset(double sample, std::size_t offsetSamples, double mix) noexcept
+{
+    return nextSampleWithOffsetAndFeedback(sample, offsetSamples, 0.0, mix);
+}
+
+double Delay::nextSampleWithOffsetAndFeedback(double sample, std::size_t offsetSamples,
+                                              double feedback, double mix) noexcept
+{
+    const auto output = delayedSample(offsetSamples);
+    buffer_[writePosition_] = sample + feedback * output;
+    advance();
+    return mixSamples(sample, output, mix);
+}
+
+std::size_t Delay::delaySamples() const noexcept { return delaySamples_; }
+
+std::size_t Delay::capacitySamples() const noexcept { return buffer_.size(); }
+
+double Delay::delayedSample(std::size_t offsetSamples) const noexcept
+{
+    const auto readPosition = (writePosition_ + buffer_.size() - delaySamples_) % buffer_.size();
+    const auto offset = offsetSamples % buffer_.size();
+    return buffer_[(readPosition + offset) % buffer_.size()];
+}
+
+void Delay::advance() noexcept { writePosition_ = (writePosition_ + 1) % buffer_.size(); }
+
+} // namespace wavlab

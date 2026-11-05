@@ -53,6 +53,20 @@ target_link_libraries(wavlab_eq_tests PRIVATE wavlab::wavlab)
 wavlab_apply_project_options(wavlab_eq_tests)
 add_test(NAME wavlab.library.eq COMMAND wavlab_eq_tests)
 
+add_executable(wavlab_delay_lfo_tests delay_lfo_tests.cpp)
+set_target_properties(wavlab_delay_lfo_tests PROPERTIES CXX_EXTENSIONS OFF)
+target_compile_features(wavlab_delay_lfo_tests PRIVATE cxx_std_20)
+target_link_libraries(wavlab_delay_lfo_tests PRIVATE wavlab::wavlab)
+wavlab_apply_project_options(wavlab_delay_lfo_tests)
+add_test(NAME wavlab.library.delay-lfo COMMAND wavlab_delay_lfo_tests)
+
+add_executable(wavlab_effects_tests effects_tests.cpp)
+set_target_properties(wavlab_effects_tests PROPERTIES CXX_EXTENSIONS OFF)
+target_compile_features(wavlab_effects_tests PRIVATE cxx_std_20)
+target_link_libraries(wavlab_effects_tests PRIVATE wavlab::wavlab)
+wavlab_apply_project_options(wavlab_effects_tests)
+add_test(NAME wavlab.library.effects COMMAND wavlab_effects_tests)
+
 add_test(NAME wavlab.cli.help COMMAND wavlab_cli --help)
 set_tests_properties(
     wavlab.cli.help

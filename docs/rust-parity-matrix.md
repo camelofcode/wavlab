@@ -77,13 +77,13 @@ Legend:
 
 | Capability | C++ | Rust behavior to port or decide | Status |
 |---|---|---|---|
-| Delay-line primitive | Present | Fractional ms, checked ring buffer, modulation offset | [ ] |
-| LFO | Partial sine-like absolute waveform | Sine/triangle/square with validated frequency | [ ] |
-| Tape saturation | Present | Drive expressed in dB; finite validation | [ ] |
-| Digital delay mono/stereo | Present | Signed feedback, normalised mix, additional tail | [ ] |
-| Analog delay mono/stereo | Present | Configurable feedback low-pass cutoff | [ ] |
-| Tape delay mono/stereo | Present | Configurable dB drive and cutoff | [ ] |
-| Schroeder reverb | Present, algorithm differs | Parallel combs plus series all-pass, RT60 seconds | [ ] |
+| Delay-line primitive | Checked ring buffer | Fractional ms, checked ring buffer, modulation offset | [x] |
+| LFO | Sine/triangle/square | Sine/triangle/square with validated frequency | [x] |
+| Tape saturation | dB drive | Drive expressed in dB; finite validation | [x] |
+| Digital delay mono/stereo | Validated | Signed feedback, normalised mix, additional tail | [x] |
+| Analog delay mono/stereo | Configurable cutoff | Configurable feedback low-pass cutoff | [x] |
+| Tape delay mono/stereo | Configurable drive/cutoff | Configurable dB drive and cutoff | [x] |
+| Schroeder reverb | Parallel combs plus series all-pass | Parallel combs plus series all-pass, RT60 seconds | [x] |
 | Chorus mono/stereo | Missing | Common or independent channel settings | [ ] |
 | Vibrato mono/stereo | Missing | Fully wet modulated delay | [ ] |
 | Flanger mono/stereo | Missing | Modulated short delay and signed feedback | [ ] |
@@ -99,7 +99,7 @@ focused failing test before changing the implementation.
 
 ### Build and portability
 
-- [ ] `BinaryHelpers.cpp` and `Delay.h` rely on transitive declarations of
+- [x] `BinaryHelpers.cpp` and `Delay.h` rely on transitive declarations of
   fixed-width integer types. Public/private headers must include what they use.
 - [ ] `CMAKE_EXE_LINKER_FLAGS` forces `-static` on every toolchain and target.
 - [ ] The GCC conditional tests the C compiler variable and global flags are
@@ -186,31 +186,31 @@ focused failing test before changing the implementation.
 
 ### Delay, saturation, and reverb
 
-- [ ] A zero or sub-sample delay can allocate an empty buffer and then index
+- [x] A zero or sub-sample delay can allocate an empty buffer and then index
   it. Delay times larger than the maximum can also produce invalid unsigned
   position arithmetic.
-- [ ] Delay setters do not validate settings or provide the strong guarantee
+- [x] Delay setters do not validate settings or provide the strong guarantee
   that state is unchanged on error.
-- [ ] Existing delays accept integer milliseconds only; the Rust API supports
+- [x] Existing delays accept integer milliseconds only; the Rust API supports
   fractional milliseconds rounded to samples.
-- [ ] Delay command units use 0-100 percentages while library internals use
+- [x] Delay command units use 0-100 percentages while library internals use
   0-1; validation is largely CLI-only and can be bypassed by library callers.
-- [ ] Delay/reverb tail input is described as a maximum output length, whereas
+- [x] Delay/reverb tail input is described as a maximum output length, whereas
   Rust uses an explicit additional tail. The current default also means no
   tail beyond the original duration.
-- [ ] Peak tracking for delay/reverb compares signed samples instead of
+- [x] Peak tracking for delay/reverb compares signed samples instead of
   absolute amplitude, so all-negative material produces the wrong reference.
-- [ ] Effects auto-normalise their output afterward, changing the requested
-  wet/dry behavior and hiding actual gain behavior.
-- [ ] Stereo analog/tape feedback processing multiplexes left/right state with
+- [x] Effects auto-normalise their output afterward, changing the requested
+  wet/dry behaviour and hiding actual gain behaviour.
+- [x] Stereo analog/tape feedback processing multiplexes left/right state with
   a shared call counter rather than binding a processor directly to each
   channel; this is fragile when channel routing changes.
-- [ ] The LFO uses `abs(sin(...))`, resets its phase counter once per second,
+- [x] The LFO uses `abs(sin(...))`, resets its phase counter once per second,
   and derives frequency from an opaque input formula rather than a documented
   Hz setting.
-- [ ] Reverb divides by zero at zero time and its final two stages are feedback
+- [x] Reverb divides by zero at zero time and its final two stages are feedback
   comb delays rather than Schroeder all-pass filters.
-- [ ] Reverb's final stages are shared by both stereo channels, causing channel
+- [x] Reverb's final stages are shared by both stereo channels, causing channel
   crosstalk/state coupling.
 
 ### CLI and maintainability
@@ -239,8 +239,8 @@ copying implementation details.
 | Split/combine/mix/join | Padding, promotion, validation, boundaries | `tests/editing_tools_tests.cpp` | [x] |
 | Generators | Shapes, duration, channels, invalid settings | `tests/generator_tests.cpp` | [x] |
 | EQ | Coefficients, state, impulse behaviour | `tests/eq_tests.cpp` | [x] |
-| Delay/LFO primitives | Timing, wrap, feedback, waveforms, validation | focused DSP primitive tests | [ ] |
-| Existing effects | Saturation, three delays, reverb | focused effect tests | [ ] |
+| Delay/LFO primitives | Timing, wrap, feedback, waveforms, validation | `tests/delay_lfo_tests.cpp` | [x] |
+| Existing effects | Saturation, three delays, reverb | `tests/effects_tests.cpp` | [x] |
 | New effects | Chorus, vibrato, flanger, tremolo, autopan, phaser, modulated filter | focused effect tests | [ ] |
 | CLI parsing | Every command and argument shape | parser unit tests | [ ] |
 | CLI execution | Output samples, overwrite/default paths, errors | process-level integration tests | [ ] |

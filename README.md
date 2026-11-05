@@ -46,8 +46,8 @@ checked-in configuration. Static libraries are the default; configure with
 * Various signal processing functions including
 	* Peaking, shelving and all/band/low/pass filters/EQs
 	* Tape saturation effect
-	* Digital, Analog style and Tape style delays
-	* A fairly awful sounding algorithmic reverb
+	* Digital, analogue-style and tape-style delays
+	* Schroeder algorithmic reverb with independent channel state
 
 ## Usage
 run `wavlab [command]` using one of the following commands:
@@ -56,49 +56,49 @@ run `wavlab [command]` using one of the following commands:
 help
         description: shows the command list
 
-analog-delay-mono <input> <delayMilliseconds> <feedback> <mix> [output] [maxOutputLengthMs]
+analog-delay-mono <input> <delayMilliseconds> <feedback> <mix> [output] [tailMilliseconds]
         description: applies a mono analog style delay to the specified wave file, with frequency rolloff in the feedback loop
         parameters:
                 input: path to wave file
                 delayMilliseconds: delay time in milliseconds
-                feedback: feedback of the delay effect, from 0-100%
+                feedback: signed feedback, greater than -100% and less than 100%
                 mix: mix of the delay effect vs dry signal, from 0-100%
                 output: path to output file. Optional, if not specified input will be overwritten
-                maxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail
+                tailMilliseconds: additional output duration for the feedback tail
 
-analog-delay-stereo <input> <delayMillisecondsLeft> <feedbackLeft> <delayMillisecondsRight> <feedbackRight> <mix> [output] [maxOutputLengthMs]
+analog-delay-stereo <input> <delayMillisecondsLeft> <feedbackLeft> <delayMillisecondsRight> <feedbackRight> <mix> [output] [tailMilliseconds]
         description: applies a stereo analog style delay to the specified wave file, with frequency rolloff in the feedback loop
         parameters:
                 input: path to wave file
                 delayMillisecondsLeft: delay time in milliseconds for the left channel
-                feedbackLeft: feedback of the delay effect, from 0-100% for the left channel
+                feedbackLeft: signed feedback, greater than -100% and less than 100%, for the left channel
                 delayMillisecondsRight: delay time in milliseconds for the right channel
-                feedbackRight: feedback of the delay effect, from 0-100% for the right channel
+                feedbackRight: signed feedback, greater than -100% and less than 100%, for the right channel
                 mix: mix of the delay effect vs dry signal, from 0-100%
                 output: path to output file. Optional, if not specified input will be overwritten
-                maxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail
+                tailMilliseconds: additional output duration for the feedback tail
 
-digital-delay-mono <input> <delayMilliseconds> <feedback> <mix> [output] [maxOutputLengthMs]
+digital-delay-mono <input> <delayMilliseconds> <feedback> <mix> [output] [tailMilliseconds]
         description: applies a mono digital delay to the specified wave file
         parameters:
                 input: path to wave file
                 delayMilliseconds: delay time in milliseconds
-                feedback: feedback of the delay effect, from 0-100%
+                feedback: signed feedback, greater than -100% and less than 100%
                 mix: mix of the delay effect vs dry signal, from 0-100%
                 output: path to output file. Optional, if not specified input will be overwritten
-                maxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail
+                tailMilliseconds: additional output duration for the feedback tail
 
-digital-delay-stereo <input> <delayMillisecondsLeft> <feedbackLeft> <delayMillisecondsRight> <feedbackRight> <mix> [output] [maxOutputLengthMs]
+digital-delay-stereo <input> <delayMillisecondsLeft> <feedbackLeft> <delayMillisecondsRight> <feedbackRight> <mix> [output] [tailMilliseconds]
         description: applies a stereo digital delay to the specified wave file
         parameters:
                 input: path to wave file
                 delayMillisecondsLeft: delay time in milliseconds for the left channel
-                feedbackLeft: feedback of the delay effect, from 0-100% for the left channel
+                feedbackLeft: signed feedback, greater than -100% and less than 100%, for the left channel
                 delayMillisecondsRight: delay time in milliseconds for the right channel
-                feedbackRight: feedback of the delay effect, from 0-100% for the right channel
+                feedbackRight: signed feedback, greater than -100% and less than 100%, for the right channel
                 mix: mix of the delay effect vs dry signal, from 0-100%
                 output: path to output file. Optional, if not specified input will be overwritten
-                maxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail
+                tailMilliseconds: additional output duration for the feedback tail
 
 eq-allpass <input> <frequency> <bandwidth> [output]
         description: applies an all pass filter to a wave file
@@ -239,15 +239,15 @@ pink-noise <output> <sampleRate> <bitDepth> <length>
                 bitDepth: bit depth of the output wave file
                 length: length of the output file in milliseconds
 				
-reverb <input> <size> <time> <mix> [output] [maxOutputLengthMs]
+reverb <input> <size> <time> <mix> [output] [tailMilliseconds]
         description: applies a basic algorithmic reverb effect to a wave file
         parameters:
                 input: path to wave file
                 size: size of the reverb effect, from 0-100%
-                time: time of the reverb effect, from 0-100%
+                time: legacy RT60 scale, greater than 0% and no more than 100% (100% is three seconds)
                 mix: mix of the reverb effect, from 0-100%
                 output: path to output file. Optional, if not specified input will be overwritten
-                maxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail
+                tailMilliseconds: additional output duration for the reverb tail
 
 reverse <input> [output]
         description: reverses a wave file
@@ -259,7 +259,7 @@ saturate <input> <drive> [output]
         description: applies a tape saturation effect to a wave file
         parameters:
                 input: path to wave file
-                drive: increase for dirtier sound
+                drive: pre-saturation input gain in dB
                 output: path to output file. Optional, if not specified input will be overwritten
 
 sawtooth-wave <output> <frequency> <sampleRate> <bitDepth> <length>
@@ -338,27 +338,27 @@ swap-channels <input> [output]
                 input: path to wave file
                 output: path to output file. Optional, if not specified input will be overwritten
 
-tape-delay-mono <input> <delayMilliseconds> <feedback> <mix> [output] [maxOutputLengthMs]
-        description: applies a mono tape style delay to the specified wave file, with frequency rolloff and tape saturation in the feedback loop. Warning: extremely prone to self oscilliation at higher feedbacks :)
+tape-delay-mono <input> <delayMilliseconds> <feedback> <mix> [output] [tailMilliseconds]
+        description: applies a mono tape-style delay with low-pass filtering and saturation in the feedback loop
         parameters:
                 input: path to wave file
                 delayMilliseconds: delay time in milliseconds
-                feedback: feedback of the delay effect, from 0-100%
+                feedback: signed feedback, greater than -100% and less than 100%
                 mix: mix of the delay effect vs dry signal, from 0-100%
                 output: path to output file. Optional, if not specified input will be overwritten
-                maxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail
+                tailMilliseconds: additional output duration for the feedback tail
 
-tape-delay-stereo <input> <delayMillisecondsLeft> <feedbackLeft> <delayMillisecondsRight> <feedbackRight> <mix> [output] [maxOutputLengthMs]
-        description: applies a stereo tape style delay to the specified wave file, with frequency rolloff and tape saturation in the feedback loop. Warning: extremely prone to self oscilliation at higher feedbacks :)
+tape-delay-stereo <input> <delayMillisecondsLeft> <feedbackLeft> <delayMillisecondsRight> <feedbackRight> <mix> [output] [tailMilliseconds]
+        description: applies a stereo tape-style delay with low-pass filtering and saturation in the feedback loop
         parameters:
                 input: path to wave file
                 delayMillisecondsLeft: delay time in milliseconds for the left channel
-                feedbackLeft: feedback of the delay effect, from 0-100% for the left channel
+                feedbackLeft: signed feedback, greater than -100% and less than 100%, for the left channel
                 delayMillisecondsRight: delay time in milliseconds for the right channel
-                feedbackRight: feedback of the delay effect, from 0-100% for the right channel
+                feedbackRight: signed feedback, greater than -100% and less than 100%, for the right channel
                 mix: mix of the delay effect vs dry signal, from 0-100%
                 output: path to output file. Optional, if not specified input will be overwritten
-                maxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail
+                tailMilliseconds: additional output duration for the feedback tail
 
 triangle-wave <output> <frequency> <sampleRate> <bitDepth> <length>
         description: writes a triangle wave to the specified output file

@@ -508,7 +508,7 @@ Exit criteria:
 - Invalid settings leave the input unchanged.
 - Mono and stereo EQ results prove independent per-channel state.
 
-### Phase 6 — Replace DSP primitives and stabilize existing effects
+### Phase 6 — Replace DSP primitives and stabilise existing effects
 
 Goal: give delays, saturation, and reverb validated reusable foundations.
 
@@ -539,10 +539,44 @@ Tasks:
    operation.
 8. Validate all settings before mutation and make failure preserve input.
 
+Phase 6 status: complete.
+
+Implementation notes:
+
+- `Delay` now uses a checked ring buffer. Fractional milliseconds round to the
+  nearest sample, zero/sub-sample and oversized delays are rejected, changing
+  the delay retains buffered samples, and failed changes retain the previous
+  setting.
+- The delay API has explicit wet/dry, feedback-processor, modulation-offset,
+  and modulation-with-feedback operations. Shared conversion helpers provide
+  checked millisecond/sample/frame conversion and dB-to-amplitude conversion.
+- `LFO` provides sine, triangle, and square waveforms in a configured output
+  range with stable phase progression. A zero frequency is intentionally
+  supported as a stationary modulation value, matching the Rust library;
+  negative and non-finite frequencies are rejected.
+- The public effect API uses normalised mix and feedback, fractional delay
+  times, dB tape drive, RT60 seconds, configurable feedback-filter cutoffs,
+  and an explicit additional tail. Feedback magnitude must remain below one.
+- The legacy CLI continues to accept percentage mix/feedback values until the
+  thin-CLI phase, converting them explicitly at the library boundary. Its last
+  delay/reverb positional now has documented additional-tail semantics.
+- Digital, analogue, and tape delays allocate independent delay/filter state
+  for every channel. Stereo settings promote mono input without sharing left
+  and right feedback state.
+- Reverb uses the conventional 29.7/37.1/41.1/43.7 ms parallel comb set and
+  5.0/1.7 ms series Schroeder all-pass set. Comb feedback derives from the
+  requested RT60, and every channel owns all of its state.
+- Effects no longer auto-normalise their output. Complete validation and
+  output construction happen before the input sample buffer is replaced.
+- `tests/delay_lfo_tests.cpp` covers primitive timing, feedback, offsets,
+  rounding, waveforms, and validation. `tests/effects_tests.cpp` covers
+  saturation, all three delay colours, tails, channel independence, reverb
+  topology, and the strong failure guarantee.
+
 Exit criteria:
 
 - Impulse-response tests demonstrate expected delay positions, feedback
-  decay, stereo independence, reverb comb/all-pass behavior, and tail length.
+  decay, stereo independence, reverb comb/all-pass behaviour, and tail length.
 - Delay and reverb tests pass under sanitizers for zero/very short/large
   settings without invalid allocation or indexing.
 

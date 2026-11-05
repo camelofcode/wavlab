@@ -1,5 +1,4 @@
 #include <wavlab/FX.h>
-#include <wavlab/EQ.h>
 
 #include "Commands.h"
 #include <cmath>
@@ -13,7 +12,7 @@ void Commands::saturateHelp()
 	std::cout << "\tdescription: applies a tape saturation effect to a wave file" << std::endl;
 	std::cout << "\tparameters:" << std::endl;
 	std::cout << "\t\tinput: path to wave file" << std::endl;
-	std::cout << "\t\tdrive: increase for dirtier sound" << std::endl;
+	std::cout << "\t\tdrive: pre-saturation input gain in dB" << std::endl;
 	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
 }
 
@@ -43,15 +42,15 @@ int Commands::saturateCommand(const std::string& command, int argc, char* argv[]
 
 void Commands::digitalDelayMonoHelp()
 {
-	std::cout << "digital-delay-mono <input> <delayMilliseconds> <feedback> <mix> [output] [maxOutputLengthMs]" << std::endl;
+	std::cout << "digital-delay-mono <input> <delayMilliseconds> <feedback> <mix> [output] [tailMilliseconds]" << std::endl;
 	std::cout << "\tdescription: applies a mono digital delay to the specified wave file" << std::endl;
 	std::cout << "\tparameters:" << std::endl;
 	std::cout << "\t\tinput: path to wave file" << std::endl;
 	std::cout << "\t\tdelayMilliseconds: delay time in milliseconds" << std::endl;
-	std::cout << "\t\tfeedback: feedback of the delay effect, from 0-100%" << std::endl;
+	std::cout << "\t\tfeedback: signed feedback of the delay effect, greater than -100% and less than 100%" << std::endl;
 	std::cout << "\t\tmix: mix of the delay effect vs dry signal, from 0-100%" << std::endl;
 	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
-	std::cout << "\t\tmaxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail" << std::endl;
+	std::cout << "\t\ttailMilliseconds: additional output duration for the feedback tail" << std::endl;
 }
 
 int Commands::digitalDelayMonoCommand(const std::string& command, int argc, char* argv[])
@@ -63,7 +62,7 @@ int Commands::digitalDelayMonoCommand(const std::string& command, int argc, char
 	}
 	std::string input = static_cast<std::string>(argv[2]);
 
-	uint32_t delayMilliseconds = 0;
+	double delayMilliseconds = 0.0;
 	if (!tryParse(argv[3], delayMilliseconds))
 	{
 		std::cerr << "Parameter 'delayMilliseconds' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
@@ -76,9 +75,9 @@ int Commands::digitalDelayMonoCommand(const std::string& command, int argc, char
 		std::cerr << "Parameter 'feedback' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
-	if (feedback < 0 || feedback > 100)
+	if (feedback <= -100 || feedback >= 100)
 	{
-		std::cerr << "Parameter 'feedback' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
+		std::cerr << "Parameter 'feedback' must be greater than -100 and less than 100. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -96,18 +95,18 @@ int Commands::digitalDelayMonoCommand(const std::string& command, int argc, char
 
 	std::string output = argc == 7 || argc == 8 ? static_cast<std::string>(argv[6]) : input;
 
-	uint32_t maxFileLengthMs = 0;
+	uint32_t tailMilliseconds = 0;
 	if (argc == 8)
 	{
-		if (!tryParse(argv[7], maxFileLengthMs))
+		if (!tryParse(argv[7], tailMilliseconds))
 		{
-			std::cerr << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
+			std::cerr << "Parameter 'tailMilliseconds' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
 			return EXIT_FAILURE;
 		}
 	}
 
 	auto wav = WavFile::open(input);
-	FX::delay(wav, DelaySettings{{delayMilliseconds, feedback}, mix, maxFileLengthMs});
+	FX::digitalDelay(wav, DelaySettings{{delayMilliseconds, feedback / 100.0}, mix / 100.0, tailMilliseconds});
 	wav.save(output);
 	return EXIT_SUCCESS;
 }
@@ -115,17 +114,17 @@ int Commands::digitalDelayMonoCommand(const std::string& command, int argc, char
 /* digital-delay-stereo command*/
 void Commands::digitalDelayStereoHelp()
 {
-	std::cout << "digital-delay-stereo <input> <delayMillisecondsLeft> <feedbackLeft> <delayMillisecondsRight> <feedbackRight> <mix> [output] [maxOutputLengthMs]" << std::endl;
+	std::cout << "digital-delay-stereo <input> <delayMillisecondsLeft> <feedbackLeft> <delayMillisecondsRight> <feedbackRight> <mix> [output] [tailMilliseconds]" << std::endl;
 	std::cout << "\tdescription: applies a stereo digital delay to the specified wave file" << std::endl;
 	std::cout << "\tparameters:" << std::endl;
 	std::cout << "\t\tinput: path to wave file" << std::endl;
 	std::cout << "\t\tdelayMillisecondsLeft: delay time in milliseconds for the left channel" << std::endl;
-	std::cout << "\t\tfeedbackLeft: feedback of the delay effect, from 0-100% for the left channel" << std::endl;
+	std::cout << "\t\tfeedbackLeft: signed feedback, greater than -100% and less than 100%, for the left channel" << std::endl;
 	std::cout << "\t\tdelayMillisecondsRight: delay time in milliseconds for the right channel" << std::endl;
-	std::cout << "\t\tfeedbackRight: feedback of the delay effect, from 0-100% for the right channel" << std::endl;
+	std::cout << "\t\tfeedbackRight: signed feedback, greater than -100% and less than 100%, for the right channel" << std::endl;
 	std::cout << "\t\tmix: mix of the delay effect vs dry signal, from 0-100%" << std::endl;
 	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
-	std::cout << "\t\tmaxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail" << std::endl;
+	std::cout << "\t\ttailMilliseconds: additional output duration for the feedback tail" << std::endl;
 }
 
 int Commands::digitalDelayStereoCommand(const std::string& command, int argc, char* argv[])
@@ -137,7 +136,7 @@ int Commands::digitalDelayStereoCommand(const std::string& command, int argc, ch
 	}
 	std::string input = static_cast<std::string>(argv[2]);
 
-	uint32_t delayMillisecondsLeft = 0;
+	double delayMillisecondsLeft = 0.0;
 	if (!tryParse(argv[3], delayMillisecondsLeft))
 	{
 		std::cerr << "Parameter 'delayMillisecondsLeft' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
@@ -150,13 +149,13 @@ int Commands::digitalDelayStereoCommand(const std::string& command, int argc, ch
 		std::cerr << "Parameter 'feedbackLeft' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
-	if (feedbackLeft < 0 || feedbackLeft > 100)
+	if (feedbackLeft <= -100 || feedbackLeft >= 100)
 	{
-		std::cerr << "Parameter 'feedbackLeft' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
+		std::cerr << "Parameter 'feedbackLeft' must be greater than -100 and less than 100. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
 
-	uint32_t delayMillisecondsRight = 0;
+	double delayMillisecondsRight = 0.0;
 	if (!tryParse(argv[5], delayMillisecondsRight))
 	{
 		std::cerr << "Parameter 'delayMillisecondsRight' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
@@ -169,9 +168,9 @@ int Commands::digitalDelayStereoCommand(const std::string& command, int argc, ch
 		std::cerr << "Parameter 'feedbackRight' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
 		return EXIT_FAILURE;
 	}
-	if (feedbackRight < 0 || feedbackRight > 100)
+	if (feedbackRight <= -100 || feedbackRight >= 100)
 	{
-		std::cerr << "Parameter 'feedbackRight' must be between 0 and 100. Provided value: " << argv[6] << std::endl;
+		std::cerr << "Parameter 'feedbackRight' must be greater than -100 and less than 100. Provided value: " << argv[6] << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -189,24 +188,24 @@ int Commands::digitalDelayStereoCommand(const std::string& command, int argc, ch
 
 	std::string output = argc == 9 || argc == 10 ? static_cast<std::string>(argv[8]) : input;
 
-	uint32_t maxFileLengthMs = 0;
+	uint32_t tailMilliseconds = 0;
 	if (argc == 10)
 	{
-		if (!tryParse(argv[9], maxFileLengthMs))
+		if (!tryParse(argv[9], tailMilliseconds))
 		{
-			std::cerr << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[9] << std::endl;
+			std::cerr << "Parameter 'tailMilliseconds' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[9] << std::endl;
 			return EXIT_FAILURE;
 		}
 	}
 
 	auto wav = WavFile::open(input);
-	FX::delay(
+	FX::digitalDelay(
 		wav,
 		StereoDelaySettings{
-			{delayMillisecondsLeft, feedbackLeft},
-			{delayMillisecondsRight, feedbackRight},
-			mix,
-			maxFileLengthMs});
+			{delayMillisecondsLeft, feedbackLeft / 100.0},
+			{delayMillisecondsRight, feedbackRight / 100.0},
+			mix / 100.0,
+			tailMilliseconds});
 	wav.save(output);
 	return EXIT_SUCCESS;
 }
@@ -214,15 +213,15 @@ int Commands::digitalDelayStereoCommand(const std::string& command, int argc, ch
 /* analog-delay-mono command*/
 void Commands::analogDelayMonoHelp()
 {
-	std::cout << "analog-delay-mono <input> <delayMilliseconds> <feedback> <mix> [output] [maxOutputLengthMs]" << std::endl;
+	std::cout << "analog-delay-mono <input> <delayMilliseconds> <feedback> <mix> [output] [tailMilliseconds]" << std::endl;
 	std::cout << "\tdescription: applies a mono analog style delay to the specified wave file, with frequency rolloff in the feedback loop" << std::endl;
 	std::cout << "\tparameters:" << std::endl;
 	std::cout << "\t\tinput: path to wave file" << std::endl;
 	std::cout << "\t\tdelayMilliseconds: delay time in milliseconds" << std::endl;
-	std::cout << "\t\tfeedback: feedback of the delay effect, from 0-100%" << std::endl;
+	std::cout << "\t\tfeedback: signed feedback of the delay effect, greater than -100% and less than 100%" << std::endl;
 	std::cout << "\t\tmix: mix of the delay effect vs dry signal, from 0-100%" << std::endl;
 	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
-	std::cout << "\t\tmaxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail" << std::endl;
+	std::cout << "\t\ttailMilliseconds: additional output duration for the feedback tail" << std::endl;
 }
 
 int Commands::analogDelayMonoCommand(const std::string& command, int argc, char* argv[])
@@ -234,7 +233,7 @@ int Commands::analogDelayMonoCommand(const std::string& command, int argc, char*
 	}
 	std::string input = static_cast<std::string>(argv[2]);
 
-	uint32_t delayMilliseconds = 0;
+	double delayMilliseconds = 0.0;
 	if (!tryParse(argv[3], delayMilliseconds))
 	{
 		std::cerr << "Parameter 'delayMilliseconds' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
@@ -247,9 +246,9 @@ int Commands::analogDelayMonoCommand(const std::string& command, int argc, char*
 		std::cerr << "Parameter 'feedback' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
-	if (feedback < 0 || feedback > 100)
+	if (feedback <= -100 || feedback >= 100)
 	{
-		std::cerr << "Parameter 'feedback' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
+		std::cerr << "Parameter 'feedback' must be greater than -100 and less than 100. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -267,25 +266,19 @@ int Commands::analogDelayMonoCommand(const std::string& command, int argc, char*
 
 	std::string output = argc == 7 || argc == 8 ? static_cast<std::string>(argv[6]) : input;
 
-	uint32_t maxFileLengthMs = 0;
+	uint32_t tailMilliseconds = 0;
 	if (argc == 8)
 	{
-		if (!tryParse(argv[7], maxFileLengthMs))
+		if (!tryParse(argv[7], tailMilliseconds))
 		{
-			std::cerr << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
+			std::cerr << "Parameter 'tailMilliseconds' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
 			return EXIT_FAILURE;
 		}
 	}
 
 	auto wav = WavFile::open(input);
-	auto lowPass = EQInstance::lowPass(2000, wav.sampleRate(), 1);
-
-	auto feedbackProcessor = [&lowPass](double in) { return lowPass.processSample(in); };
-
-	FX::delay(
-		wav,
-		DelaySettings{{delayMilliseconds, feedback}, mix, maxFileLengthMs},
-		feedbackProcessor);
+	FX::analogDelay(
+		wav, DelaySettings{{delayMilliseconds, feedback / 100.0}, mix / 100.0, tailMilliseconds});
 	wav.save(output);
 	return EXIT_SUCCESS;
 }
@@ -293,17 +286,17 @@ int Commands::analogDelayMonoCommand(const std::string& command, int argc, char*
 /* analog-delay-stereo command*/
 void Commands::analogDelayStereoHelp()
 {
-	std::cout << "analog-delay-stereo <input> <delayMillisecondsLeft> <feedbackLeft> <delayMillisecondsRight> <feedbackRight> <mix> [output] [maxOutputLengthMs]" << std::endl;
+	std::cout << "analog-delay-stereo <input> <delayMillisecondsLeft> <feedbackLeft> <delayMillisecondsRight> <feedbackRight> <mix> [output] [tailMilliseconds]" << std::endl;
 	std::cout << "\tdescription: applies a stereo analog style delay to the specified wave file, with frequency rolloff in the feedback loop" << std::endl;
 	std::cout << "\tparameters:" << std::endl;
 	std::cout << "\t\tinput: path to wave file" << std::endl;
 	std::cout << "\t\tdelayMillisecondsLeft: delay time in milliseconds for the left channel" << std::endl;
-	std::cout << "\t\tfeedbackLeft: feedback of the delay effect, from 0-100% for the left channel" << std::endl;
+	std::cout << "\t\tfeedbackLeft: signed feedback, greater than -100% and less than 100%, for the left channel" << std::endl;
 	std::cout << "\t\tdelayMillisecondsRight: delay time in milliseconds for the right channel" << std::endl;
-	std::cout << "\t\tfeedbackRight: feedback of the delay effect, from 0-100% for the right channel" << std::endl;
+	std::cout << "\t\tfeedbackRight: signed feedback, greater than -100% and less than 100%, for the right channel" << std::endl;
 	std::cout << "\t\tmix: mix of the delay effect vs dry signal, from 0-100%" << std::endl;
 	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
-	std::cout << "\t\tmaxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail" << std::endl;
+	std::cout << "\t\ttailMilliseconds: additional output duration for the feedback tail" << std::endl;
 }
 
 int Commands::analogDelayStereoCommand(const std::string& command, int argc, char* argv[])
@@ -315,7 +308,7 @@ int Commands::analogDelayStereoCommand(const std::string& command, int argc, cha
 	}
 	std::string input = static_cast<std::string>(argv[2]);
 
-	uint32_t delayMillisecondsLeft = 0;
+	double delayMillisecondsLeft = 0.0;
 	if (!tryParse(argv[3], delayMillisecondsLeft))
 	{
 		std::cerr << "Parameter 'delayMillisecondsLeft' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
@@ -328,13 +321,13 @@ int Commands::analogDelayStereoCommand(const std::string& command, int argc, cha
 		std::cerr << "Parameter 'feedbackLeft' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
-	if (feedbackLeft < 0 || feedbackLeft > 100)
+	if (feedbackLeft <= -100 || feedbackLeft >= 100)
 	{
-		std::cerr << "Parameter 'feedbackLeft' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
+		std::cerr << "Parameter 'feedbackLeft' must be greater than -100 and less than 100. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
 
-	uint32_t delayMillisecondsRight = 0;
+	double delayMillisecondsRight = 0.0;
 	if (!tryParse(argv[5], delayMillisecondsRight))
 	{
 		std::cerr << "Parameter 'delayMillisecondsRight' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
@@ -347,9 +340,9 @@ int Commands::analogDelayStereoCommand(const std::string& command, int argc, cha
 		std::cerr << "Parameter 'feedbackRight' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
 		return EXIT_FAILURE;
 	}
-	if (feedbackRight < 0 || feedbackRight > 100)
+	if (feedbackRight <= -100 || feedbackRight >= 100)
 	{
-		std::cerr << "Parameter 'feedbackRight' must be between 0 and 100. Provided value: " << argv[6] << std::endl;
+		std::cerr << "Parameter 'feedbackRight' must be greater than -100 and less than 100. Provided value: " << argv[6] << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -367,46 +360,24 @@ int Commands::analogDelayStereoCommand(const std::string& command, int argc, cha
 
 	std::string output = argc == 9 || argc == 10 ? static_cast<std::string>(argv[8]) : input;
 
-	uint32_t maxFileLengthMs = 0;
+	uint32_t tailMilliseconds = 0;
 	if (argc == 10)
 	{
-		if (!tryParse(argv[9], maxFileLengthMs))
+		if (!tryParse(argv[9], tailMilliseconds))
 		{
-			std::cerr << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[9] << std::endl;
+			std::cerr << "Parameter 'tailMilliseconds' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[9] << std::endl;
 			return EXIT_FAILURE;
 		}
 	}
 
 	auto wav = WavFile::open(input);
-	auto lowPassL = EQInstance::lowPass(2000, wav.sampleRate(), 1);
-	auto lowPassR = EQInstance::lowPass(2000, wav.sampleRate(), 1);
-
-	int count = 0;
-
-	auto feedbackProcessor = [&lowPassL, &lowPassR, &count](double in)
-	{
-		double out = 0.0;
-		if (count % 2 == 0)
-		{
-			out = lowPassL.processSample(in);
-		}
-		else
-		{
-			out = lowPassR.processSample(in);
-		}
-
-		count++;
-		return out;
-	};
-
-	FX::delay(
+	FX::analogDelay(
 		wav,
 		StereoDelaySettings{
-			{delayMillisecondsLeft, feedbackLeft},
-			{delayMillisecondsRight, feedbackRight},
-			mix,
-			maxFileLengthMs},
-		feedbackProcessor);
+			{delayMillisecondsLeft, feedbackLeft / 100.0},
+			{delayMillisecondsRight, feedbackRight / 100.0},
+			mix / 100.0,
+			tailMilliseconds});
 	wav.save(output);
 	return EXIT_SUCCESS;
 }
@@ -414,15 +385,15 @@ int Commands::analogDelayStereoCommand(const std::string& command, int argc, cha
 /* tape-delay-mono command*/
 void Commands::tapeDelayMonoHelp()
 {
-	std::cout << "tape-delay-mono <input> <delayMilliseconds> <feedback> <mix> [output] [maxOutputLengthMs]" << std::endl;
-	std::cout << "\tdescription: applies a mono tape style delay to the specified wave file, with frequency rolloff and tape saturation in the feedback loop. Warning: extremely prone to self oscilliation at higher feedbacks :)" << std::endl;
+	std::cout << "tape-delay-mono <input> <delayMilliseconds> <feedback> <mix> [output] [tailMilliseconds]" << std::endl;
+	std::cout << "\tdescription: applies a mono tape-style delay with low-pass filtering and saturation in the feedback loop" << std::endl;
 	std::cout << "\tparameters:" << std::endl;
 	std::cout << "\t\tinput: path to wave file" << std::endl;
 	std::cout << "\t\tdelayMilliseconds: delay time in milliseconds" << std::endl;
-	std::cout << "\t\tfeedback: feedback of the delay effect, from 0-100%" << std::endl;
+	std::cout << "\t\tfeedback: signed feedback of the delay effect, greater than -100% and less than 100%" << std::endl;
 	std::cout << "\t\tmix: mix of the delay effect vs dry signal, from 0-100%" << std::endl;
 	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
-	std::cout << "\t\tmaxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail" << std::endl;
+	std::cout << "\t\ttailMilliseconds: additional output duration for the feedback tail" << std::endl;
 }
 
 int Commands::tapeDelayMonoCommand(const std::string& command, int argc, char* argv[])
@@ -434,7 +405,7 @@ int Commands::tapeDelayMonoCommand(const std::string& command, int argc, char* a
 	}
 	std::string input = static_cast<std::string>(argv[2]);
 
-	uint32_t delayMilliseconds = 0;
+	double delayMilliseconds = 0.0;
 	if (!tryParse(argv[3], delayMilliseconds))
 	{
 		std::cerr << "Parameter 'delayMilliseconds' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
@@ -447,9 +418,9 @@ int Commands::tapeDelayMonoCommand(const std::string& command, int argc, char* a
 		std::cerr << "Parameter 'feedback' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
-	if (feedback < 0 || feedback > 100)
+	if (feedback <= -100 || feedback >= 100)
 	{
-		std::cerr << "Parameter 'feedback' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
+		std::cerr << "Parameter 'feedback' must be greater than -100 and less than 100. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -467,25 +438,19 @@ int Commands::tapeDelayMonoCommand(const std::string& command, int argc, char* a
 
 	std::string output = argc == 7 || argc == 8 ? static_cast<std::string>(argv[6]) : input;
 
-	uint32_t maxFileLengthMs = 0;
+	uint32_t tailMilliseconds = 0;
 	if (argc == 8)
 	{
-		if (!tryParse(argv[7], maxFileLengthMs))
+		if (!tryParse(argv[7], tailMilliseconds))
 		{
-			std::cerr << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
+			std::cerr << "Parameter 'tailMilliseconds' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
 			return EXIT_FAILURE;
 		}
 	}
 
 	auto wav = WavFile::open(input);
-	auto lowPass = EQInstance::lowPass(1000, wav.sampleRate(), 1);
-
-	auto feedbackProcessor = [&lowPass](double in) { return lowPass.processSample(FX::saturateSample(in, 0.55)); };
-
-	FX::delay(
-		wav,
-		DelaySettings{{delayMilliseconds, feedback}, mix, maxFileLengthMs},
-		feedbackProcessor);
+	FX::tapeDelay(
+		wav, DelaySettings{{delayMilliseconds, feedback / 100.0}, mix / 100.0, tailMilliseconds});
 	wav.save(output);
 	return EXIT_SUCCESS;
 }
@@ -493,17 +458,17 @@ int Commands::tapeDelayMonoCommand(const std::string& command, int argc, char* a
 /* tape-delay-stereo command*/
 void Commands::tapeDelayStereoHelp()
 {
-	std::cout << "tape-delay-stereo <input> <delayMillisecondsLeft> <feedbackLeft> <delayMillisecondsRight> <feedbackRight> <mix> [output] [maxOutputLengthMs]" << std::endl;
-	std::cout << "\tdescription: applies a stereo tape style delay to the specified wave file, with frequency rolloff and tape saturation in the feedback loop. Warning: extremely prone to self oscilliation at higher feedbacks :)" << std::endl;
+	std::cout << "tape-delay-stereo <input> <delayMillisecondsLeft> <feedbackLeft> <delayMillisecondsRight> <feedbackRight> <mix> [output] [tailMilliseconds]" << std::endl;
+	std::cout << "\tdescription: applies a stereo tape-style delay with low-pass filtering and saturation in the feedback loop" << std::endl;
 	std::cout << "\tparameters:" << std::endl;
 	std::cout << "\t\tinput: path to wave file" << std::endl;
 	std::cout << "\t\tdelayMillisecondsLeft: delay time in milliseconds for the left channel" << std::endl;
-	std::cout << "\t\tfeedbackLeft: feedback of the delay effect, from 0-100% for the left channel" << std::endl;
+	std::cout << "\t\tfeedbackLeft: signed feedback, greater than -100% and less than 100%, for the left channel" << std::endl;
 	std::cout << "\t\tdelayMillisecondsRight: delay time in milliseconds for the right channel" << std::endl;
-	std::cout << "\t\tfeedbackRight: feedback of the delay effect, from 0-100% for the right channel" << std::endl;
+	std::cout << "\t\tfeedbackRight: signed feedback, greater than -100% and less than 100%, for the right channel" << std::endl;
 	std::cout << "\t\tmix: mix of the delay effect vs dry signal, from 0-100%" << std::endl;
 	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
-	std::cout << "\t\tmaxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail" << std::endl;
+	std::cout << "\t\ttailMilliseconds: additional output duration for the feedback tail" << std::endl;
 }
 
 int Commands::tapeDelayStereoCommand(const std::string& command, int argc, char* argv[])
@@ -515,7 +480,7 @@ int Commands::tapeDelayStereoCommand(const std::string& command, int argc, char*
 	}
 	std::string input = static_cast<std::string>(argv[2]);
 
-	uint32_t delayMillisecondsLeft = 0;
+	double delayMillisecondsLeft = 0.0;
 	if (!tryParse(argv[3], delayMillisecondsLeft))
 	{
 		std::cerr << "Parameter 'delayMillisecondsLeft' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[3] << std::endl;
@@ -528,13 +493,13 @@ int Commands::tapeDelayStereoCommand(const std::string& command, int argc, char*
 		std::cerr << "Parameter 'feedbackLeft' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
-	if (feedbackLeft < 0 || feedbackLeft > 100)
+	if (feedbackLeft <= -100 || feedbackLeft >= 100)
 	{
-		std::cerr << "Parameter 'feedbackLeft' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
+		std::cerr << "Parameter 'feedbackLeft' must be greater than -100 and less than 100. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
 
-	uint32_t delayMillisecondsRight = 0;
+	double delayMillisecondsRight = 0.0;
 	if (!tryParse(argv[5], delayMillisecondsRight))
 	{
 		std::cerr << "Parameter 'delayMillisecondsRight' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
@@ -547,9 +512,9 @@ int Commands::tapeDelayStereoCommand(const std::string& command, int argc, char*
 		std::cerr << "Parameter 'feedbackRight' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
 		return EXIT_FAILURE;
 	}
-	if (feedbackRight < 0 || feedbackRight > 100)
+	if (feedbackRight <= -100 || feedbackRight >= 100)
 	{
-		std::cerr << "Parameter 'feedbackRight' must be between 0 and 100. Provided value: " << argv[6] << std::endl;
+		std::cerr << "Parameter 'feedbackRight' must be greater than -100 and less than 100. Provided value: " << argv[6] << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -567,46 +532,24 @@ int Commands::tapeDelayStereoCommand(const std::string& command, int argc, char*
 
 	std::string output = argc == 9 || argc == 10 ? static_cast<std::string>(argv[8]) : input;
 
-	uint32_t maxFileLengthMs = 0;
+	uint32_t tailMilliseconds = 0;
 	if (argc == 10)
 	{
-		if (!tryParse(argv[9], maxFileLengthMs))
+		if (!tryParse(argv[9], tailMilliseconds))
 		{
-			std::cerr << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[9] << std::endl;
+			std::cerr << "Parameter 'tailMilliseconds' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[9] << std::endl;
 			return EXIT_FAILURE;
 		}
 	}
 
 	auto wav = WavFile::open(input);
-	auto lowPassL = EQInstance::lowPass(1000, wav.sampleRate(), 1);
-	auto lowPassR = EQInstance::lowPass(1000, wav.sampleRate(), 1);
-
-	int count = 0;
-
-	auto feedbackProcessor = [&lowPassL, &lowPassR, &count](double in)
-	{
-		double out = 0.0;
-		if (count % 2 == 0)
-		{
-			out = lowPassL.processSample(FX::saturateSample(in, 0.55));
-		}
-		else
-		{
-			out = lowPassR.processSample(FX::saturateSample(in, 0.55));
-		}
-
-		count++;
-		return out;
-	};
-
-	FX::delay(
+	FX::tapeDelay(
 		wav,
 		StereoDelaySettings{
-			{delayMillisecondsLeft, feedbackLeft},
-			{delayMillisecondsRight, feedbackRight},
-			mix,
-			maxFileLengthMs},
-		feedbackProcessor);
+			{delayMillisecondsLeft, feedbackLeft / 100.0},
+			{delayMillisecondsRight, feedbackRight / 100.0},
+			mix / 100.0,
+			tailMilliseconds});
 	wav.save(output);
 	return EXIT_SUCCESS;
 }
@@ -615,15 +558,15 @@ int Commands::tapeDelayStereoCommand(const std::string& command, int argc, char*
 
 void Commands::reverbHelp()
 {
-	std::cout << "reverb <input> <size> <time> <mix> [output] [maxOutputLengthMs]" << std::endl;
+	std::cout << "reverb <input> <size> <time> <mix> [output] [tailMilliseconds]" << std::endl;
 	std::cout << "\tdescription: applies a basic algorithmic reverb effect to a wave file" << std::endl;
 	std::cout << "\tparameters:" << std::endl;
 	std::cout << "\t\tinput: path to wave file" << std::endl;
 	std::cout << "\t\tsize: size of the reverb effect, from 0-100%" << std::endl;
-	std::cout << "\t\ttime: time of the reverb effect, from 0-100%" << std::endl;
+	std::cout << "\t\ttime: legacy RT60 scale, greater than 0% and no more than 100% (100% is three seconds)" << std::endl;
 	std::cout << "\t\tmix: mix of the reverb effect, from 0-100%" << std::endl;
 	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
-	std::cout << "\t\tmaxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail" << std::endl;
+	std::cout << "\t\ttailMilliseconds: additional output duration for the reverb tail" << std::endl;
 }
 
 int Commands::reverbCommand(const std::string& command, int argc, char* argv[])
@@ -653,9 +596,9 @@ int Commands::reverbCommand(const std::string& command, int argc, char* argv[])
 		std::cerr << "Parameter 'time' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
-	if (time < 0 || time > 100)
+	if (time <= 0 || time > 100)
 	{
-		std::cerr << "Parameter 'time' must be between 0 and 100. Provided value: " << argv[4] << std::endl;
+		std::cerr << "Parameter 'time' must be greater than 0 and no more than 100. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -673,18 +616,18 @@ int Commands::reverbCommand(const std::string& command, int argc, char* argv[])
 
 	std::string output = argc == 7 || argc == 8 ? static_cast<std::string>(argv[6]) : input;
 
-	uint32_t maxFileLengthMs = 0;
+	uint32_t tailMilliseconds = 0;
 	if (argc == 8)
 	{
-		if (!tryParse(argv[7], maxFileLengthMs))
+		if (!tryParse(argv[7], tailMilliseconds))
 		{
-			std::cerr << "Parameter 'maxFileLengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
+			std::cerr << "Parameter 'tailMilliseconds' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[7] << std::endl;
 			return EXIT_FAILURE;
 		}
 	}
 
 	auto wav = WavFile::open(input);
-	FX::reverb(wav, ReverbSettings{size, time, mix, maxFileLengthMs});
+	FX::reverb(wav, ReverbSettings{size / 100.0, time * 3.0 / 100.0, mix / 100.0, tailMilliseconds});
 	wav.save(output);
 	return EXIT_SUCCESS;
 }
