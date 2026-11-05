@@ -109,6 +109,36 @@ the build-tree target is currently the supported library-consumer interface.
 - Sample-rate and bit-depth conversion, dynamics, fades, and ADSR processing
   are not implemented yet.
 
+## References
+
+The following technical publications and resources informed algorithm
+implementations in this project. They are cited as background material and do
+not represent bundled third-party source code.
+
+- Robert Bristow-Johnson, “[Cookbook formulae for audio equalizer biquad filter
+  coefficients](https://webaudio.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html),”
+  adapted for the Web Audio specification by Raymond Toy and Doug Schepers.
+- MusicDSP.org, “[C++ class implementation of RBJ
+  Filters](https://www.musicdsp.org/en/latest/Filters/128-c-class-implementation-of-rbj-filters.html),”
+  13 December 2002.
+- Robin Whittle, “[DSP generation of Pink (1/f)
+  Noise](https://www.firstpr.com.au/dsp/pink-noise/),” including Paul Kellet's
+  pinking-filter coefficients, 18 October 1999.
+- TAP-plugins, “[TAP Sigmoid
+  Booster](https://tomscii.sig7.se/tap-plugins/ladspa/sigmoid.html),” describing
+  the nonlinear transfer curve used for tape-style saturation.
+- Manfred R. Schroeder, “[Natural Sounding Artificial
+  Reverberation](https://aes.org/publications/elibrary/elibrary-page/?id=849),”
+  *Journal of the Audio Engineering Society*, volume 10, issue 3, pages 219–223,
+  July 1962. The reverb follows its parallel-comb, series-all-pass design.
+- AudioKit, “[Modulated Delay
+  Effects](https://www.audiokit.io/DunneAudioKit/documentation/dunneaudiokit/modulateddelayeffects),”
+  describing the delay ranges, LFO rates, wet/dry mixing, and feedback used by
+  chorus, flanger, and vibrato effects.
+- JUCE, “[Phaser](https://docs.juce.com/master/classjuce_1_1dsp_1_1Phaser.html),”
+  describing a multi-stage, LFO-modulated all-pass phaser and its standard
+  depth, centre-frequency, feedback, rate, and mix controls.
+
 ## Licence
 
 Copyright (C) 2026 Christopher Clayton.
