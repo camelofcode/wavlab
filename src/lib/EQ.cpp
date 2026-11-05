@@ -2,9 +2,12 @@
 //See https://webaudio.github.io/Audio-EQ-Cookbook/Audio-EQ-Cookbook.txt , https://webaudio.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html
 //My implementation is however taken mostly from https://www.musicdsp.org/en/latest/Filters/128-c-class-implementation-of-rbj-filters.html
 
-#include "EQ.h"
+#include <wavlab/EQ.h>
 #include "Constants.h"
 #include <cmath>
+
+namespace wavlab
+{
 
 EQInstance::EQInstance(FilterType type, double gainDecibels, double centreFrequency, double q, uint32_t sampleRate)
 {
@@ -148,3 +151,5 @@ void EQ::process(WavFile& wave, FilterType type, double gainDecibels, double cen
 }
 
 /* Commands */
+
+}

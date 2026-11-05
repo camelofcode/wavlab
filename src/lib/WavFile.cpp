@@ -4,7 +4,10 @@
 #include <vector>
 #include "BinaryHelpers.h"
 #include "ConversionHelpers.h"
-#include "WavFile.h"
+#include <wavlab/WavFile.h>
+
+namespace wavlab
+{
 
 WavFile::WavFile(const std::string& path, bool loadSamples)
 {
@@ -451,4 +454,6 @@ void WavFile::setDefaultBextFields()
 	timeReferenceLow = 0;
 	timeReferenceHigh = 0;
 	version = 0;
+}
+
 }

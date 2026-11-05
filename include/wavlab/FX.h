@@ -1,7 +1,10 @@
 #pragma once
-#include "WavFile.h"
+#include <wavlab/WavFile.h>
 #include <cstdint>
 #include <functional>
+
+namespace wavlab
+{
 
 namespace FX
 {
@@ -47,4 +50,6 @@ namespace FX
 	/// Applies a basic algorithmic reverb to the specified wave file
 	/// </summary>
 	void reverb(WavFile& wave, double size, double time, double mix, uint32_t maxFileLengthMs);
+}
+
 }

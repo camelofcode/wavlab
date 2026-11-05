@@ -29,7 +29,7 @@ foreach(header IN LISTS WAVLAB_PUBLIC_HEADERS)
     file(
         GENERATE
         OUTPUT "${generated_source}"
-        CONTENT "#include \"${header_name}.h\"\n"
+        CONTENT "#include <wavlab/${header_name}.h>\n"
     )
     list(APPEND WAVLAB_HEADER_SMOKE_SOURCES "${generated_source}")
 endforeach()

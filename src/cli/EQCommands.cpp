@@ -2,9 +2,12 @@
 //See https://webaudio.github.io/Audio-EQ-Cookbook/Audio-EQ-Cookbook.txt , https://webaudio.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html
 //My implementation is however taken mostly from https://www.musicdsp.org/en/latest/Filters/128-c-class-implementation-of-rbj-filters.html
 
-#include "EQ.h"
+#include <wavlab/EQ.h>
+
 #include "Commands.h"
-#include "Constants.h"
+
+using namespace wavlab;
+
 void Commands::eqPeakHelp()
 {
 	std::cout << "eq-peak <input> <frequency> <gain> <q> [output]" << std::endl;

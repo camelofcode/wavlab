@@ -4,6 +4,9 @@
 #include <fstream>
 #include <string>
 
+namespace wavlab
+{
+
 namespace BinaryHelpers
 {
 	std::string readString(std::ifstream& file, int16_t length);
@@ -18,4 +21,6 @@ namespace BinaryHelpers
 	void writeInt16(std::ofstream& file, int16_t value);
 	void writeInt24(std::ofstream& file, int32_t value);
 	void writeInt32(std::ofstream& file, int32_t value);
+}
+
 }

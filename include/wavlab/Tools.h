@@ -1,5 +1,8 @@
 #pragma once
-#include "WavFile.h"
+#include <wavlab/WavFile.h>
+
+namespace wavlab
+{
 
 namespace Tools
 {
@@ -111,4 +114,6 @@ namespace Tools
 	/// <param name="inputs">The wave files to join</param>
 	/// <param name="output">The output wave</param>
 	void join(std::vector<WavFile>& inputs, WavFile& output);
+}
+
 }

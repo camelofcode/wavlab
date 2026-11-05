@@ -1,7 +1,10 @@
-#include "Tools.h"
+#include <wavlab/Tools.h>
 #include <algorithm>
 #include "Constants.h"
 #include <cmath>
+
+namespace wavlab
+{
 
 /* stat command */
 
@@ -390,4 +393,6 @@ void Tools::join(std::vector<WavFile>& inputs, WavFile& output)
         joinedSamples.insert(joinedSamples.end(), wavSamples.begin(), wavSamples.end());
     }
     output.setSamples(joinedSamples);
+}
+
 }

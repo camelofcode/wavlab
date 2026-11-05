@@ -1,5 +1,8 @@
 #pragma once
-#include "WavFile.h"
+#include <wavlab/WavFile.h>
+
+namespace wavlab
+{
 
 namespace Generators
 {
@@ -75,4 +78,6 @@ namespace Generators
 	/// <param name="wave">The wave file to write to</param>
 	/// <param name="lengthMs">The length in ms of the generated wave</param>
 	void pinkNoise(WavFile& wave, int lengthMs);
+}
+
 }

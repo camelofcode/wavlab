@@ -1,5 +1,8 @@
 #pragma once
-#include "WavFile.h"
+#include <wavlab/WavFile.h>
+
+namespace wavlab
+{
 
 enum class FilterType
 {
@@ -29,3 +32,5 @@ private:
 	double b0a0, b1a0, b2a0, a1a0, a2a0;
 	double in1 = 0.0, in2 = 0.0, out1 = 0.0, out2 = 0.0;
 };
+
+}

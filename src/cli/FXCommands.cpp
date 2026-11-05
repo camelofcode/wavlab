@@ -1,10 +1,10 @@
-#include "FX.h"
+#include <wavlab/FX.h>
+#include <wavlab/EQ.h>
+
 #include "Commands.h"
-#include "Constants.h"
-#include "Delay.h"
-#include "Tools.h"
-#include "EQ.h"
 #include <cmath>
+
+using namespace wavlab;
 
 /* saturate command */
 void Commands::saturateHelp()

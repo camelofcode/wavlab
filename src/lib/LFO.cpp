@@ -1,6 +1,9 @@
-#include "LFO.h"
+#include <wavlab/LFO.h>
 #include <cmath>
 #include "Constants.h"
+
+namespace wavlab
+{
 
 LFO::LFO(uint32_t sampleRate) :
     count(0),
@@ -21,4 +24,6 @@ double LFO::next(double input)
 	}
 
 	return output;
+}
+
 }

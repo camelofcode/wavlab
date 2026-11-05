@@ -1,9 +1,12 @@
-#include "FX.h"
+#include <wavlab/FX.h>
 #include "Constants.h"
-#include "Delay.h"
-#include "Tools.h"
-#include "EQ.h"
+#include <wavlab/Delay.h>
+#include <wavlab/Tools.h>
+#include <wavlab/EQ.h>
 #include <cmath>
+
+namespace wavlab
+{
 
 /* saturate command */
 void FX::saturate(WavFile& wave, double drive)
@@ -243,4 +246,6 @@ void FX::reverb(WavFile& wave, double size, double time, double mix, uint32_t ma
 
 	//Ensures input and output are the same level when mix = 50%
 	Tools::normalise(wave, maxSample);
+}
+
 }

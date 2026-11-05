@@ -1,8 +1,9 @@
-#include "Tools.h"
+#include <wavlab/Tools.h>
 #include <algorithm>
 #include "Commands.h"
-#include "Constants.h"
 #include <cmath>
+
+using namespace wavlab;
 
 /* stat command */
 

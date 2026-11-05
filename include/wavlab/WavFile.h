@@ -6,6 +6,9 @@
 #include <string>
 #include <vector>
 
+namespace wavlab
+{
+
 class WavFile
 {
 public:
@@ -130,4 +133,6 @@ private:
 	size_t numberOfSamples{};
 	std::vector<double> samples;
 };
+
+}
 

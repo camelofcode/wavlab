@@ -1,7 +1,10 @@
-#include "Generators.h"
+#include <wavlab/Generators.h>
 #include "Constants.h"
-#include "Tools.h"
+#include <wavlab/Tools.h>
 #include <cmath>
+
+namespace wavlab
+{
 
 /* sine-wave command */
 
@@ -231,4 +234,6 @@ void Generators::pinkNoise(WavFile& wave, int lengthMs)
     }
     wave.setSamples(samples);
     Tools::normalise(wave);
+}
+
 }

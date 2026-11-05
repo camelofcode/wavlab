@@ -1,5 +1,8 @@
 #include "ConversionHelpers.h"
 
+namespace wavlab
+{
+
 double ConversionHelpers::eightBitToDouble(char input)
 {
 	double min = 128.0;
@@ -131,4 +134,6 @@ double ConversionHelpers::safeScaleDouble(double input, double max, double min)
 	}
 
 	return sample;
+}
+
 }

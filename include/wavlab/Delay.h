@@ -3,6 +3,9 @@
 #include <vector>
 #include <functional>
 
+namespace wavlab
+{
+
 class Delay
 {
 public:
@@ -62,3 +65,5 @@ private:
 
 	void movePositions();
 };
+
+}

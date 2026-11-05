@@ -2,6 +2,9 @@
 #include <vector>
 #include "BinaryHelpers.h"
 
+namespace wavlab
+{
+
 std::string BinaryHelpers::readString(std::ifstream& file, int16_t length)
 {
 	std::vector<char> buffer;
@@ -111,4 +114,6 @@ void BinaryHelpers::writeInt24(std::ofstream& file, int32_t value)
 void BinaryHelpers::writeInt32(std::ofstream& file, int32_t value)
 {
 	file.write((char*)&value, 4);
+}
+
 }

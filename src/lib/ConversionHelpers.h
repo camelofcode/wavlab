@@ -1,6 +1,9 @@
 #pragma once
 #include <string>
 
+namespace wavlab
+{
+
 namespace ConversionHelpers
 {
 	double eightBitToDouble (char input);
@@ -13,4 +16,6 @@ namespace ConversionHelpers
 	int doubleToThirtyTwoBit(double input);
 
 	double safeScaleDouble(double input, double max, double min);
+}
+
 }

@@ -1,6 +1,9 @@
 #pragma once
 #include <cstdint>
 
+namespace wavlab
+{
+
 class LFO
 {
 public:
@@ -11,3 +14,5 @@ private:
 	uint32_t count;
 	uint32_t sampleRate;
 };
+
+}

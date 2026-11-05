@@ -1,8 +1,8 @@
-#include "Generators.h"
+#include <wavlab/Generators.h>
 #include "Commands.h"
-#include "Constants.h"
-#include "Tools.h"
 #include <cmath>
+
+using namespace wavlab;
 
 /* sine-wave command */
 

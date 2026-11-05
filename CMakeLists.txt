@@ -13,30 +13,25 @@ include(WavLabProjectOptions)
 option(BUILD_SHARED_LIBS "Build wavlab as a shared library" OFF)
 
 set(WAVLAB_PUBLIC_HEADERS
-    WavLab/BinaryHelpers.h
-    WavLab/Constants.h
-    WavLab/ConversionHelpers.h
-    WavLab/Delay.h
-    WavLab/EQ.h
-    WavLab/FX.h
-    WavLab/Generators.h
-    WavLab/LFO.h
-    WavLab/StringHelpers.h
-    WavLab/Tools.h
-    WavLab/WavFile.h
+    include/wavlab/Delay.h
+    include/wavlab/EQ.h
+    include/wavlab/FX.h
+    include/wavlab/Generators.h
+    include/wavlab/LFO.h
+    include/wavlab/Tools.h
+    include/wavlab/WavFile.h
 )
 
 set(WAVLAB_LIBRARY_SOURCES
-    WavLab/BinaryHelpers.cpp
-    WavLab/ConversionHelpers.cpp
-    WavLab/Delay.cpp
-    WavLab/EQ.cpp
-    WavLab/FX.cpp
-    WavLab/Generators.cpp
-    WavLab/LFO.cpp
-    WavLab/StringHelpers.cpp
-    WavLab/Tools.cpp
-    WavLab/WavFile.cpp
+    src/lib/BinaryHelpers.cpp
+    src/lib/ConversionHelpers.cpp
+    src/lib/Delay.cpp
+    src/lib/EQ.cpp
+    src/lib/FX.cpp
+    src/lib/Generators.cpp
+    src/lib/LFO.cpp
+    src/lib/Tools.cpp
+    src/lib/WavFile.cpp
 )
 
 set(WAVLAB_CLI_SOURCES
@@ -44,6 +39,7 @@ set(WAVLAB_CLI_SOURCES
     src/cli/EQCommands.cpp
     src/cli/FXCommands.cpp
     src/cli/GeneratorCommands.cpp
+    src/cli/StringHelpers.cpp
     src/cli/ToolsCommands.cpp
     src/cli/main.cpp
 )
@@ -65,8 +61,10 @@ target_compile_features(wavlab_lib PUBLIC cxx_std_20)
 target_include_directories(
     wavlab_lib
     PUBLIC
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/WavLab>"
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
         "$<INSTALL_INTERFACE:include>"
+    PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/lib"
 )
 wavlab_apply_project_options(wavlab_lib)
 

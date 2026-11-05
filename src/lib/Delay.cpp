@@ -1,4 +1,7 @@
-#include "Delay.h"
+#include <wavlab/Delay.h>
+
+namespace wavlab
+{
 
 Delay::Delay(uint32_t maxMilliseconds, uint32_t initialMilliseconds, uint32_t sampleRate) :
 	sampleRate(sampleRate),
@@ -90,4 +93,6 @@ void Delay::movePositions()
 	{
 		outputPosition = 0;
 	}
+}
+
 }
