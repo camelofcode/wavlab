@@ -63,15 +63,15 @@ Legend:
 
 | Capability | C++ | Rust behavior to port or decide | Status |
 |---|---|---|---|
-| Sine | Present | Checked sub-second duration and frequency validation | [ ] |
-| Direct square/triangle/sawtooth | Present | Defined phase/shape; reject invalid frequency | [ ] |
-| Additive square/triangle/sawtooth | Present | Reject zero harmonics; omit harmonics at/above Nyquist | [ ] |
-| White/pink noise | Present | Correct duration/channels; modern injectable RNG | [ ] |
-| Peak EQ | Present | Bandwidth in octaves and validated settings | [ ] |
-| Low/high shelf | Present | Q and validated settings | [ ] |
-| All/band pass | Present | Bandwidth in octaves and validated settings | [ ] |
-| Low/high pass | Present | Q and cutoff below Nyquist | [ ] |
-| Reusable per-sample biquad | Present as `EQInstance` | Public documented processor with independent state | [ ] |
+| Sine | Checked | Checked sub-second duration and frequency validation | [x] |
+| Direct square/triangle/sawtooth | Phase-based | Defined phase/shape; reject invalid frequency | [x] |
+| Additive square/triangle/sawtooth | Band-limited | Reject zero harmonics; omit harmonics at/above Nyquist | [x] |
+| White/pink noise | Injectable RNG | Correct duration/channels; modern injectable RNG | [x] |
+| Peak EQ | Validated | Bandwidth in octaves and validated settings | [x] |
+| Low/high shelf | Validated | Q and validated settings | [x] |
+| All/band pass | Validated | Bandwidth in octaves and validated settings | [x] |
+| Low/high pass | Validated | Q and cutoff below Nyquist | [x] |
+| Reusable per-sample biquad | Public `EQInstance` | Documented processor with independent state | [x] |
 
 ### Effects and DSP primitives
 
@@ -170,18 +170,18 @@ focused failing test before changing the implementation.
 
 ### Generators and filters
 
-- [ ] All generators calculate frames with integer `lengthMs / 1000`, so
+- [x] All generators calculate frames with integer `lengthMs / 1000`, so
   durations below 1000 ms produce no samples and other durations truncate to
   whole seconds.
-- [ ] Frequency, sample rate, length, bit depth, and harmonic counts are not
+- [x] Frequency, sample rate, length, bit depth, and harmonic counts are not
   comprehensively validated before constructing or mutating output.
-- [ ] Direct waveforms can divide by zero for zero/too-high frequencies or
+- [x] Direct waveforms can divide by zero for zero/too-high frequencies or
   degenerate period sizes.
-- [ ] Additive generators calculate harmonics beyond Nyquist and normalise
+- [x] Additive generators calculate harmonics beyond Nyquist and normalise
   even if output is silent/empty.
-- [ ] Filter constructors accept zero/non-finite Q, invalid frequency, and
+- [x] Filter constructors accept zero/non-finite Q, invalid frequency, and
   non-finite gain, which can create NaN/Inf coefficients.
-- [ ] Peak/all-pass/band-pass parameters are called Q even though the formula
+- [x] Peak/all-pass/band-pass parameters are called Q even though the formula
   treats them as bandwidth in octaves; the public contract is ambiguous.
 
 ### Delay, saturation, and reverb
@@ -237,8 +237,8 @@ copying implementation details.
 | Level/gain/normalise | Sign, silence, dB, clipping policy | `tests/editing_tools_tests.cpp` | [x] |
 | Frame transforms | Reverse, flip, swap | `tests/editing_tools_tests.cpp` | [x] |
 | Split/combine/mix/join | Padding, promotion, validation, boundaries | `tests/editing_tools_tests.cpp` | [x] |
-| Generators | Shapes, duration, channels, invalid settings | focused generator tests | [ ] |
-| EQ | Coefficients, state, impulse behavior | focused EQ tests | [ ] |
+| Generators | Shapes, duration, channels, invalid settings | `tests/generator_tests.cpp` | [x] |
+| EQ | Coefficients, state, impulse behaviour | `tests/eq_tests.cpp` | [x] |
 | Delay/LFO primitives | Timing, wrap, feedback, waveforms, validation | focused DSP primitive tests | [ ] |
 | Existing effects | Saturation, three delays, reverb | focused effect tests | [ ] |
 | New effects | Chorus, vibrato, flanger, tremolo, autopan, phaser, modulated filter | focused effect tests | [ ] |

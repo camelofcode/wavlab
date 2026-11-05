@@ -100,20 +100,20 @@ digital-delay-stereo <input> <delayMillisecondsLeft> <feedbackLeft> <delayMillis
                 output: path to output file. Optional, if not specified input will be overwritten
                 maxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail
 
-eq-allpass <input> <frequency> <q> [output]
+eq-allpass <input> <frequency> <bandwidth> [output]
         description: applies an all pass filter to a wave file
         parameters:
                 input: path to wave file
                 frequency: centre frequency of the filter in Hz
-                q: q factor of the filter
+                bandwidth: width of the phase transition in octaves
                 output: path to output file. Optional, if not specified input will be overwritten
 
-eq-bandpass <input> <frequency> <q> [output]
+eq-bandpass <input> <frequency> <bandwidth> [output]
         description: applies a band pass filter to a wave file
         parameters:
                 input: path to wave file
                 frequency: centre frequency of the filter in Hz
-                q: q factor of the filter
+                bandwidth: width of the pass band in octaves
                 output: path to output file. Optional, if not specified input will be overwritten
 
 eq-highpass <input> <frequency> <q> [output]
@@ -150,13 +150,13 @@ eq-lowshelf <input> <frequency> <gain> <q> [output]
                 q: q factor of the filter
                 output: path to output file. Optional, if not specified input will be overwritten
 
-eq-peak <input> <frequency> <gain> <q> [output]
+eq-peak <input> <frequency> <gain> <bandwidth> [output]
         description: applies a positive or negative peak EQ to a wave file
         parameters:
                 input: path to wave file
                 frequency: frequency in Hz of the cut/boost
                 gain: gain in dB to cut/boost
-                q: q factor of the filter
+                bandwidth: width of the affected band in octaves
                 output: path to output file. Optional, if not specified input will be overwritten
 
 flip-phase <input> [output]

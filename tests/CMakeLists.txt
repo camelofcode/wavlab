@@ -39,6 +39,20 @@ target_link_libraries(wavlab_editing_tools_tests PRIVATE wavlab::wavlab)
 wavlab_apply_project_options(wavlab_editing_tools_tests)
 add_test(NAME wavlab.library.editing-tools COMMAND wavlab_editing_tools_tests)
 
+add_executable(wavlab_generator_tests generator_tests.cpp)
+set_target_properties(wavlab_generator_tests PROPERTIES CXX_EXTENSIONS OFF)
+target_compile_features(wavlab_generator_tests PRIVATE cxx_std_20)
+target_link_libraries(wavlab_generator_tests PRIVATE wavlab::wavlab)
+wavlab_apply_project_options(wavlab_generator_tests)
+add_test(NAME wavlab.library.generators COMMAND wavlab_generator_tests)
+
+add_executable(wavlab_eq_tests eq_tests.cpp)
+set_target_properties(wavlab_eq_tests PROPERTIES CXX_EXTENSIONS OFF)
+target_compile_features(wavlab_eq_tests PRIVATE cxx_std_20)
+target_link_libraries(wavlab_eq_tests PRIVATE wavlab::wavlab)
+wavlab_apply_project_options(wavlab_eq_tests)
+add_test(NAME wavlab.library.eq COMMAND wavlab_eq_tests)
+
 add_test(NAME wavlab.cli.help COMMAND wavlab_cli --help)
 set_tests_properties(
     wavlab.cli.help

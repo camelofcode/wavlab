@@ -10,13 +10,13 @@ using namespace wavlab;
 
 void Commands::eqPeakHelp()
 {
-	std::cout << "eq-peak <input> <frequency> <gain> <q> [output]" << std::endl;
+	std::cout << "eq-peak <input> <frequency> <gain> <bandwidth> [output]" << std::endl;
 	std::cout << "\tdescription: applies a positive or negative peak EQ to a wave file" << std::endl;
 	std::cout << "\tparameters:" << std::endl;
 	std::cout << "\t\tinput: path to wave file" << std::endl;
 	std::cout << "\t\tfrequency: frequency in Hz of the cut/boost" << std::endl;
 	std::cout << "\t\tgain: gain in dB to cut/boost" << std::endl;
-	std::cout << "\t\tq: q factor of the filter" << std::endl;
+	std::cout << "\t\tbandwidth: width of the affected band in octaves" << std::endl;
 	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
 }
 void Commands::eqLowShelfHelp()
@@ -67,10 +67,10 @@ int Commands::eqWithGainCommand(const std::string& command, int argc, char* argv
 		return EXIT_FAILURE;
 	}
 
-	double q = 1;
-	if (!tryParse(argv[5], q))
+	double shape = 1;
+	if (!tryParse(argv[5], shape))
 	{
-		std::cerr << "Parameter 'q' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
+		std::cerr << "Parameter 'q/bandwidth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -82,7 +82,7 @@ int Commands::eqWithGainCommand(const std::string& command, int argc, char* argv
 	if (command == "eq-highshelf") type = FilterType::HighShelf;
 
 	auto wav = WavFile::open(input);
-	EQ::process(wav, type, gain, frequency, q);
+	EQ::process(wav, type, gain, frequency, shape);
 	wav.save(output);
 
 	return EXIT_SUCCESS;
@@ -90,23 +90,23 @@ int Commands::eqWithGainCommand(const std::string& command, int argc, char* argv
 
 void Commands::eqAllPassHelp()
 {
-	std::cout << "eq-allpass <input> <frequency> <q> [output]" << std::endl;
+	std::cout << "eq-allpass <input> <frequency> <bandwidth> [output]" << std::endl;
 	std::cout << "\tdescription: applies an all pass filter to a wave file" << std::endl;
 	std::cout << "\tparameters:" << std::endl;
 	std::cout << "\t\tinput: path to wave file" << std::endl;
 	std::cout << "\t\tfrequency: centre frequency of the filter in Hz" << std::endl;
-	std::cout << "\t\tq: q factor of the filter" << std::endl;
+	std::cout << "\t\tbandwidth: width of the phase transition in octaves" << std::endl;
 	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
 }
 
 void Commands::eqBandPassHelp()
 {
-	std::cout << "eq-bandpass <input> <frequency> <q> [output]" << std::endl;
+	std::cout << "eq-bandpass <input> <frequency> <bandwidth> [output]" << std::endl;
 	std::cout << "\tdescription: applies a band pass filter to a wave file" << std::endl;
 	std::cout << "\tparameters:" << std::endl;
 	std::cout << "\t\tinput: path to wave file" << std::endl;
 	std::cout << "\t\tfrequency: centre frequency of the filter in Hz" << std::endl;
-	std::cout << "\t\tq: q factor of the filter" << std::endl;
+	std::cout << "\t\tbandwidth: width of the pass band in octaves" << std::endl;
 	std::cout << "\t\toutput: path to output file. Optional, if not specified input will be overwritten" << std::endl;
 }
 
@@ -149,10 +149,10 @@ int Commands::eqPassCommand(const std::string& command, int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	double q = 1;
-	if (!tryParse(argv[4], q))
+	double shape = 1;
+	if (!tryParse(argv[4], shape))
 	{
-		std::cerr << "Parameter 'q' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
+		std::cerr << "Parameter 'q/bandwidth' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[4] << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -165,7 +165,7 @@ int Commands::eqPassCommand(const std::string& command, int argc, char* argv[])
 	if (command == "eq-highpass") type = FilterType::HighPass;
 
 	auto wav = WavFile::open(input);
-	EQ::process(wav, type, 0, frequency, q);
+	EQ::process(wav, type, 0, frequency, shape);
 	wav.save(output);
 
 	return EXIT_SUCCESS;

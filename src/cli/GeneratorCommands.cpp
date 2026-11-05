@@ -1,6 +1,7 @@
 #include <wavlab/Generators.h>
 #include "Commands.h"
 #include <cmath>
+#include <cstdint>
 
 using namespace wavlab;
 
@@ -48,7 +49,7 @@ int Commands::sineWaveCommand(const std::string& command, int argc, char* argv[]
         return EXIT_FAILURE;
     }
 
-    int lengthMs = 1000;
+    std::uint64_t lengthMs = 1000;
     if (!tryParse(argv[6], lengthMs))
     {
         std::cerr << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
@@ -104,7 +105,7 @@ int Commands::squareWaveCommand(const std::string& command, int argc, char* argv
         return EXIT_FAILURE;
     }
 
-    int lengthMs = 1000;
+    std::uint64_t lengthMs = 1000;
     if (!tryParse(argv[6], lengthMs))
     {
         std::cerr << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
@@ -161,14 +162,14 @@ int Commands::squareWaveAdditiveCommand(const std::string& command, int argc, ch
         return EXIT_FAILURE;
     }
 
-    int lengthMs = 1000;
+    std::uint64_t lengthMs = 1000;
     if (!tryParse(argv[6], lengthMs))
     {
         std::cerr << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
         return EXIT_FAILURE;
     }
 
-    int harmonics = 1000;
+    std::uint32_t harmonics = 1000;
     if (argc == 8)
     {
         if (!tryParse(argv[7], harmonics))
@@ -227,7 +228,7 @@ int Commands::triangleWaveCommand(const std::string& command, int argc, char* ar
         return EXIT_FAILURE;
     }
 
-    int lengthMs = 1000;
+    std::uint64_t lengthMs = 1000;
     if (!tryParse(argv[6], lengthMs))
     {
         std::cerr << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
@@ -284,14 +285,14 @@ int Commands::triangleWaveAdditiveCommand(const std::string& command, int argc, 
         return EXIT_FAILURE;
     }
 
-    int lengthMs = 1000;
+    std::uint64_t lengthMs = 1000;
     if (!tryParse(argv[6], lengthMs))
     {
         std::cerr << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
         return EXIT_FAILURE;
     }
 
-    int harmonics = 1000;
+    std::uint32_t harmonics = 1000;
     if (argc == 8)
     {
         if (!tryParse(argv[7], harmonics))
@@ -350,7 +351,7 @@ int Commands::sawtoothWaveCommand(const std::string& command, int argc, char* ar
         return EXIT_FAILURE;
     }
 
-    int lengthMs = 1000;
+    std::uint64_t lengthMs = 1000;
     if (!tryParse(argv[6], lengthMs))
     {
         std::cerr << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
@@ -407,14 +408,14 @@ int Commands::sawtoothWaveAdditiveCommand(const std::string& command, int argc, 
         return EXIT_FAILURE;
     }
 
-    int lengthMs = 1000;
+    std::uint64_t lengthMs = 1000;
     if (!tryParse(argv[6], lengthMs))
     {
         std::cerr << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[6] << std::endl;
         return EXIT_FAILURE;
     }
 
-    int harmonics = 1000;
+    std::uint32_t harmonics = 1000;
     if (argc == 8)
     {
         if (!tryParse(argv[7], harmonics))
@@ -466,7 +467,7 @@ int Commands::whiteNoiseCommand(const std::string& command, int argc, char* argv
         return EXIT_FAILURE;
     }
 
-    int lengthMs = 1000;
+    std::uint64_t lengthMs = 1000;
     if (!tryParse(argv[5], lengthMs))
     {
         std::cerr << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;
@@ -515,7 +516,7 @@ int Commands::pinkNoiseCommand(const std::string& command, int argc, char* argv[
         return EXIT_FAILURE;
     }
 
-    int lengthMs = 1000;
+    std::uint64_t lengthMs = 1000;
     if (!tryParse(argv[5], lengthMs))
     {
         std::cerr << "Parameter 'lengthMs' could not be parsed. Please ensure it is a numeric value. Provided value: " << argv[5] << std::endl;

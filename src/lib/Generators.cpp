@@ -1,239 +1,290 @@
 #include <wavlab/Generators.h>
+
 #include "Constants.h"
+
 #include <wavlab/Tools.h>
+
+#include <array>
 #include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <limits>
+#include <numbers>
+#include <random>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace wavlab
 {
 
-/* sine-wave command */
-
-void Generators::sineWave(WavFile& wave, int lengthMs, double frequency)
+GeneratorError::GeneratorError(GeneratorErrorCode code, std::string message)
+    : std::invalid_argument(std::move(message)), code_(code)
 {
-	std::vector<double> samples;
-	uint32_t numberOfSamples = wave.sampleRate() * (lengthMs / 1000);
-	for (uint32_t i = 0; i < numberOfSamples; i++)
-	{
-		double value = sin(Constants::TAU * i * (frequency / static_cast<double>(wave.sampleRate())));
-		for (size_t j = 0; j < wave.numberOfChannels(); j++)
-		{
-			samples.push_back(value);
-		}
-	}
-	wave.setSamples(samples);
 }
 
-/* square-wave command */
+GeneratorErrorCode GeneratorError::code() const noexcept { return code_; }
 
-void Generators::squareWave(WavFile& wave, int lengthMs, double frequency)
+namespace
 {
-    std::vector<double> samples;
-    uint32_t numberOfSamples = wave.sampleRate() * (lengthMs / 1000);
-    auto periodSamples = static_cast<int>(wave.sampleRate() / frequency);
-    int periodSamplesCounter = 0;
-    bool positive = true;
-    for (size_t i = 0; i < numberOfSamples; i++)
+
+void validateFrequency(const WavFile &wave, double frequency)
+{
+    const auto nyquist = static_cast<double>(wave.sampleRate()) / 2.0;
+    if (!std::isfinite(frequency) || frequency <= 0.0 || frequency >= nyquist)
     {
-        for (size_t j = 0; j < wave.numberOfChannels(); j++)
-        {
-            samples.push_back(positive ? 1.0 : -1.0);
-        }
-        periodSamplesCounter++;
-        if (periodSamplesCounter > periodSamples / 2)
-        {
-            positive = !positive;
-            periodSamplesCounter = 0;
-        }
+        throw GeneratorError(
+            GeneratorErrorCode::invalidFrequency,
+            "invalid frequency " + std::to_string(frequency) +
+                "; it must be finite, greater than zero, and below the Nyquist frequency");
     }
-    wave.setSamples(samples);
 }
 
-/* square-wave-additive */
-
-void Generators::squareWaveAdditive(WavFile& wave, int lengthMs, double frequency, int harmonics)
+void validateHarmonics(std::uint32_t harmonics)
 {
-    std::vector<double> samples;
-    uint32_t numberOfSamples = wave.sampleRate() * (lengthMs / 1000);
-    for (uint32_t i = 0; i < numberOfSamples; i++)
+    if (harmonics == 0)
     {
-        double sample = 0.0;
-        for (int j = 1; j < (harmonics * 2 + 2); j = j + 2)
-        {
-            double harmonicFrequency = frequency * j;
-            double harmonicAmplitude = 1.0 / j;
-            sample += sin(Constants::TAU * i * (harmonicFrequency / static_cast<double>(wave.sampleRate()))) * harmonicAmplitude;
+        throw GeneratorError(GeneratorErrorCode::invalidHarmonicCount,
+                             "the harmonic count must be greater than zero");
+    }
+}
 
-        }
-        for (uint16_t k = 0; k < wave.numberOfChannels(); k++)
+[[nodiscard]] std::size_t frameCount(const WavFile &wave, std::uint64_t lengthMilliseconds)
+{
+    if (lengthMilliseconds > std::numeric_limits<std::uint64_t>::max() / wave.sampleRate())
+    {
+        throw GeneratorError(GeneratorErrorCode::sizeOverflow,
+                             "generated frame count is too large");
+    }
+
+    const auto frames = lengthMilliseconds * wave.sampleRate() / 1'000;
+    if (frames > std::numeric_limits<std::size_t>::max())
+    {
+        throw GeneratorError(GeneratorErrorCode::sizeOverflow,
+                             "generated frame count is too large");
+    }
+    return static_cast<std::size_t>(frames);
+}
+
+template <typename GenerateFrame>
+void generateSamples(WavFile &wave, std::uint64_t lengthMilliseconds, GenerateFrame generateFrame)
+{
+    const auto frames = frameCount(wave, lengthMilliseconds);
+    const auto channels = static_cast<std::size_t>(wave.numberOfChannels());
+    std::vector<double> samples;
+    if (frames > samples.max_size() / channels)
+    {
+        throw GeneratorError(GeneratorErrorCode::sizeOverflow,
+                             "generated sample count is too large");
+    }
+    samples.reserve(frames * channels);
+
+    for (std::size_t frame = 0; frame < frames; ++frame)
+    {
+        const auto sample = generateFrame(frame);
+        for (std::size_t channel = 0; channel < channels; ++channel)
         {
             samples.push_back(sample);
         }
-
     }
-    wave.setSamples(samples);
+
+    wave.setSamples(std::move(samples));
+}
+
+using Harmonic = std::pair<double, double>;
+
+[[nodiscard]] std::vector<Harmonic> oddHarmonics(double frequency, double nyquist,
+                                                 std::uint32_t count, bool alternating,
+                                                 bool squaredAmplitude)
+{
+    std::vector<Harmonic> coefficients;
+    for (std::uint32_t index = 0; index < count; ++index)
+    {
+        const auto harmonic = 2.0 * static_cast<double>(index) + 1.0;
+        if (frequency * harmonic >= nyquist)
+        {
+            break;
+        }
+        auto amplitude = 1.0 / harmonic;
+        if (squaredAmplitude)
+        {
+            amplitude /= harmonic;
+        }
+        if (alternating && index % 2 != 0)
+        {
+            amplitude = -amplitude;
+        }
+        coefficients.emplace_back(harmonic, amplitude);
+    }
+    return coefficients;
+}
+
+template <typename Engine> [[nodiscard]] double randomSample(Engine &engine)
+{
+    std::uniform_real_distribution<double> distribution(-1.0, 1.0);
+    return distribution(engine);
+}
+
+} // namespace
+
+namespace Generators
+{
+
+void sineWave(WavFile &wave, std::uint64_t lengthMilliseconds, double frequency)
+{
+    validateFrequency(wave, frequency);
+    const auto radiansPerFrame = Constants::TAU * frequency / wave.sampleRate();
+    generateSamples(wave, lengthMilliseconds, [radiansPerFrame](std::size_t frame)
+                    { return std::sin(static_cast<double>(frame) * radiansPerFrame); });
+}
+
+void squareWave(WavFile &wave, std::uint64_t lengthMilliseconds, double frequency)
+{
+    validateFrequency(wave, frequency);
+    const auto cyclesPerFrame = frequency / wave.sampleRate();
+    generateSamples(
+        wave, lengthMilliseconds, [cyclesPerFrame](std::size_t frame)
+        { return std::fmod(static_cast<double>(frame) * cyclesPerFrame, 1.0) < 0.5 ? 1.0 : -1.0; });
+}
+
+void squareWaveAdditive(WavFile &wave, std::uint64_t lengthMilliseconds, double frequency,
+                        std::uint32_t harmonics)
+{
+    validateFrequency(wave, frequency);
+    validateHarmonics(harmonics);
+    const auto radiansPerFrame = Constants::TAU * frequency / wave.sampleRate();
+    const auto coefficients =
+        oddHarmonics(frequency, wave.sampleRate() / 2.0, harmonics, false, false);
+    generateSamples(wave, lengthMilliseconds,
+                    [&](std::size_t frame)
+                    {
+                        const auto phase = static_cast<double>(frame) * radiansPerFrame;
+                        double sample = 0.0;
+                        for (const auto &[harmonic, amplitude] : coefficients)
+                        {
+                            sample += std::sin(phase * harmonic) * amplitude;
+                        }
+                        return sample;
+                    });
     Tools::normalise(wave);
 }
 
-/* triangle-wave command */
-
-void Generators::triangleWave(WavFile& wave, int lengthMs, double frequency)
+void triangleWave(WavFile &wave, std::uint64_t lengthMilliseconds, double frequency)
 {
-    std::vector<double> samples;
-    uint32_t numberOfSamples = wave.sampleRate() * (lengthMs / 1000);
-    int periodSamples = static_cast<int>(wave.sampleRate() / frequency);
-    int rampSamples = periodSamples / 4;
-    double increment = 1.0 / rampSamples;
-    bool positive = true;
-    double sample = 0.0;
-    for (size_t i = 0; i < numberOfSamples; i++)
-    {
-        for (size_t j = 0; j < wave.numberOfChannels(); j++)
-        {
-            samples.push_back(sample);
-        }
-
-        if(positive)
-        {
-            sample += increment;
-        } else
-        {
-            sample -= increment;
-        }
-
-        if (fabs(sample) >= 1.0) 
-        {
-            positive = !positive;
-        }
-    }
-    wave.setSamples(samples);
+    validateFrequency(wave, frequency);
+    const auto radiansPerFrame = Constants::TAU * frequency / wave.sampleRate();
+    generateSamples(wave, lengthMilliseconds,
+                    [radiansPerFrame](std::size_t frame)
+                    {
+                        return (2.0 / std::numbers::pi) *
+                               std::asin(std::sin(static_cast<double>(frame) * radiansPerFrame));
+                    });
 }
 
-/* triangle-wave-additive */
-
-void Generators::triangleWaveAdditive(WavFile& wave, int lengthMs, double frequency, int harmonics)
+void triangleWaveAdditive(WavFile &wave, std::uint64_t lengthMilliseconds, double frequency,
+                          std::uint32_t harmonics)
 {
-    std::vector<double> samples;
-    uint32_t numberOfSamples = wave.sampleRate() * (lengthMs / 1000);
-    for (uint32_t i = 0; i < numberOfSamples; i++)
-    {
-        double sample = 0.0;
-        for (int j = 1; j < (harmonics * 2 + 2); j = j + 2)
-        {
-            double harmonicFrequency = frequency * j;
-            double harmonicAmplitude = 1.0 / (j * j);
-            sample += sin(Constants::TAU * i * (harmonicFrequency / static_cast<double>(wave.sampleRate()))) * harmonicAmplitude;
-
-        }
-        for (uint16_t k = 0; k < wave.numberOfChannels(); k++)
-        {
-            samples.push_back(sample);
-        }
-
-    }
-    wave.setSamples(samples);
+    validateFrequency(wave, frequency);
+    validateHarmonics(harmonics);
+    const auto radiansPerFrame = Constants::TAU * frequency / wave.sampleRate();
+    const auto coefficients =
+        oddHarmonics(frequency, wave.sampleRate() / 2.0, harmonics, true, true);
+    generateSamples(wave, lengthMilliseconds,
+                    [&](std::size_t frame)
+                    {
+                        const auto phase = static_cast<double>(frame) * radiansPerFrame;
+                        double sample = 0.0;
+                        for (const auto &[harmonic, amplitude] : coefficients)
+                        {
+                            sample += std::sin(phase * harmonic) * amplitude;
+                        }
+                        return sample;
+                    });
     Tools::normalise(wave);
 }
 
-/* sawtooth-wave command */
-
-void Generators::sawtoothWave(WavFile& wave, int lengthMs, double frequency)
+void sawtoothWave(WavFile &wave, std::uint64_t lengthMilliseconds, double frequency)
 {
-    std::vector<double> samples;
-    uint32_t numberOfSamples = wave.sampleRate() * (lengthMs / 1000);
-    int periodSamples = static_cast<int>(wave.sampleRate() / frequency);
-    int rampSamples = periodSamples / 2;
-    double increment = 1.0 / rampSamples;
-    double sample = 0.0;
-    for (size_t i = 0; i < numberOfSamples; i++)
-    {
-        for (size_t j = 0; j < wave.numberOfChannels(); j++)
-        {
-            samples.push_back(sample);
-        }
-
-        sample += increment;
-
-        if (sample > 1.0)
-        {
-            sample = -1.0;
-        }
-    }
-    wave.setSamples(samples);
+    validateFrequency(wave, frequency);
+    const auto cyclesPerFrame = frequency / wave.sampleRate();
+    generateSamples(wave, lengthMilliseconds,
+                    [cyclesPerFrame](std::size_t frame)
+                    {
+                        const auto cycles = static_cast<double>(frame) * cyclesPerFrame;
+                        return 2.0 * (cycles - std::floor(cycles + 0.5));
+                    });
 }
 
-/* sawtooth-wave-additive */
-
-void Generators::sawtoothWaveAdditive(WavFile& wave, int lengthMs, double frequency, int harmonics)
+void sawtoothWaveAdditive(WavFile &wave, std::uint64_t lengthMilliseconds, double frequency,
+                          std::uint32_t harmonics)
 {
-    std::vector<double> samples;
-    uint32_t numberOfSamples = wave.sampleRate() * (lengthMs / 1000);
-    for (uint32_t i = 0; i < numberOfSamples; i++)
+    validateFrequency(wave, frequency);
+    validateHarmonics(harmonics);
+    const auto radiansPerFrame = Constants::TAU * frequency / wave.sampleRate();
+    const auto nyquist = wave.sampleRate() / 2.0;
+    std::vector<Harmonic> coefficients;
+    for (std::uint32_t harmonic = 1; harmonic <= harmonics; ++harmonic)
     {
-        double sample = 0.0;
-        for (int j = 1; j < harmonics + 1; j++)
+        const auto harmonicValue = static_cast<double>(harmonic);
+        if (frequency * harmonicValue >= nyquist)
         {
-            double harmonicFrequency = frequency * j;
-            double harmonicAmplitude = 1.0 / j;
-            sample += sin(Constants::TAU * i * (harmonicFrequency / static_cast<double>(wave.sampleRate()))) * harmonicAmplitude;
-
+            break;
         }
-        for (uint16_t k = 0; k < wave.numberOfChannels(); k++)
-        {
-            samples.push_back(sample);
-        }
-
+        coefficients.emplace_back(harmonicValue, 1.0 / harmonicValue);
     }
-    wave.setSamples(samples);
+    generateSamples(wave, lengthMilliseconds,
+                    [&](std::size_t frame)
+                    {
+                        const auto phase = static_cast<double>(frame) * radiansPerFrame;
+                        double sample = 0.0;
+                        for (const auto &[harmonic, amplitude] : coefficients)
+                        {
+                            sample += std::sin(phase * harmonic) * amplitude;
+                        }
+                        return sample;
+                    });
     Tools::normalise(wave);
 }
 
-/* white-noise command */
-
-void Generators::whiteNoise(WavFile& wave, int lengthMs)
+void whiteNoise(WavFile &wave, std::uint64_t lengthMilliseconds)
 {
-    std::vector<double> samples;
-    uint32_t numberOfSamples = wave.sampleRate() * (lengthMs / 1000);
-    for (size_t i = 0; i < numberOfSamples; i++)
-    {
-        double sample = (rand() / (RAND_MAX / 2.0)) - 1.0; // NOLINT(cert-msc50-cpp) - It's random enough for purpose
-        for (size_t j = 0; j < wave.numberOfChannels(); j++)
-        {
-            samples.push_back(sample);
-        }
-    }
-    wave.setSamples(samples);
+    std::mt19937_64 engine(std::random_device{}());
+    whiteNoise(wave, lengthMilliseconds, engine);
 }
 
-/* pink-noise command */
-
-void Generators::pinkNoise(WavFile& wave, int lengthMs)
+void whiteNoise(WavFile &wave, std::uint64_t lengthMilliseconds, std::mt19937_64 &engine)
 {
-    //https://www.firstpr.com.au/dsp/pink-noise/
+    generateSamples(wave, lengthMilliseconds, [&](std::size_t) { return randomSample(engine); });
+}
 
-    double buf0, buf1, buf2, buf3, buf4, buf5, buf6;
-    buf0 = buf1 = buf2 = buf3 = buf4 = buf5 = buf6 = 0.0;
-    double amplitude = 0.129;
-    std::vector<double> samples;
-    uint32_t numberOfSamples = wave.sampleRate() * (lengthMs / 1000);
-    for (size_t i = 0; i < numberOfSamples; i++)
-    {
-        double white = (rand() / (RAND_MAX / 2.0)) - 1.0; // NOLINT(cert-msc50-cpp) - It's random enough for purpose
-        buf0 = 0.99886f * buf0 + 0.0555179f * white;
-        buf1 = 0.99332f * buf1 + 0.0750759f * white;
-        buf2 = 0.96900f * buf2 + 0.1538520f * white;
-        buf3 = 0.86650f * buf3 + 0.3104856f * white;
-        buf4 = 0.55000f * buf4 + 0.5329522f * white;
-        buf5 = -0.7616f * buf5 - 0.0168980f * white;
-        double sample = amplitude * (buf0 + buf1 + buf2 + buf3 + buf4 + buf5 + buf6 + white * 0.5362);
-        buf6 = white * 0.115926;
+void pinkNoise(WavFile &wave, std::uint64_t lengthMilliseconds)
+{
+    std::mt19937_64 engine(std::random_device{}());
+    pinkNoise(wave, lengthMilliseconds, engine);
+}
 
-        for (size_t j = 0; j < wave.numberOfChannels(); j++)
-        {
-            samples.push_back(sample);
-        }
-    }
-    wave.setSamples(samples);
+void pinkNoise(WavFile &wave, std::uint64_t lengthMilliseconds, std::mt19937_64 &engine)
+{
+    std::array<double, 7> buffers{};
+    generateSamples(wave, lengthMilliseconds,
+                    [&](std::size_t)
+                    {
+                        const auto white = randomSample(engine);
+                        buffers[0] = 0.998860 * buffers[0] + 0.0555179 * white;
+                        buffers[1] = 0.993320 * buffers[1] + 0.0750759 * white;
+                        buffers[2] = 0.969000 * buffers[2] + 0.1538520 * white;
+                        buffers[3] = 0.866500 * buffers[3] + 0.3104856 * white;
+                        buffers[4] = 0.550000 * buffers[4] + 0.5329522 * white;
+                        buffers[5] = -0.76160 * buffers[5] - 0.0168980 * white;
+                        const auto sample =
+                            0.129 * (buffers[0] + buffers[1] + buffers[2] + buffers[3] +
+                                     buffers[4] + buffers[5] + buffers[6] + 0.5362 * white);
+                        buffers[6] = 0.115926 * white;
+                        return sample;
+                    });
     Tools::normalise(wave);
 }
 
-}
+} // namespace Generators
+
+} // namespace wavlab

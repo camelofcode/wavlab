@@ -472,6 +472,36 @@ EQ tasks:
 5. Port coefficient and impulse-response tests for all-pass, band-pass,
    low/high-pass, low/high-shelf, and peak filters.
 
+Phase 5 status: complete.
+
+Implementation notes:
+
+- Every generator uses one checked 64-bit millisecond-to-frame path, builds a
+  complete temporary sample buffer, and commits it only after successful
+  validation and allocation.
+- Tonal generators require finite frequencies strictly between zero and
+  Nyquist. Additive generators require at least one harmonic and omit every
+  component at or above Nyquist before synthesis.
+- Direct square, triangle, and sawtooth functions use continuous phase rather
+  than truncated integer periods. Sub-second and fractional-second durations
+  retain every complete frame.
+- White and pink noise use `std::mt19937_64`; overloads accept an injected
+  engine for deterministic structural tests without relying on a particular
+  standard-library random sequence.
+- `GeneratorError` reports invalid frequency, harmonic-count, and output-size
+  failures. Existing samples remain unchanged on every validated failure.
+- `EQInstance` is a reusable Direct Form I biquad with named factories for all
+  seven filter types and inspectable normalised coefficients. Peak, band-pass,
+  and all-pass APIs explicitly take octave bandwidth; pass and shelf filters
+  explicitly take Q.
+- EQ construction validates sample rate, centre/cutoff frequency, Q,
+  bandwidth, gain, and the resulting coefficients before sample mutation.
+  In-place operations allocate one independent filter per channel.
+- `tests/generator_tests.cpp` covers shapes, duration, channels, harmonic
+  limiting, injected noise, and invalid settings. `tests/eq_tests.cpp` covers
+  frequency responses, impulse state, all named operations, validation, and
+  independent stereo state. The CLI smoke test now verifies a 250 ms file.
+
 Exit criteria:
 
 - Sub-second generation has the correct frame count.

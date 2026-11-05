@@ -278,7 +278,7 @@ int Commands::analogDelayMonoCommand(const std::string& command, int argc, char*
 	}
 
 	auto wav = WavFile::open(input);
-	EQInstance lowPass(FilterType::LowPass, -24, 2000, 1, wav.sampleRate());
+	auto lowPass = EQInstance::lowPass(2000, wav.sampleRate(), 1);
 
 	auto feedbackProcessor = [&lowPass](double in) { return lowPass.processSample(in); };
 
@@ -378,8 +378,8 @@ int Commands::analogDelayStereoCommand(const std::string& command, int argc, cha
 	}
 
 	auto wav = WavFile::open(input);
-	EQInstance lowPassL(FilterType::LowPass, -24, 2000, 1, wav.sampleRate());
-	EQInstance lowPassR(FilterType::LowPass, -24, 2000, 1, wav.sampleRate());
+	auto lowPassL = EQInstance::lowPass(2000, wav.sampleRate(), 1);
+	auto lowPassR = EQInstance::lowPass(2000, wav.sampleRate(), 1);
 
 	int count = 0;
 
@@ -478,7 +478,7 @@ int Commands::tapeDelayMonoCommand(const std::string& command, int argc, char* a
 	}
 
 	auto wav = WavFile::open(input);
-	EQInstance lowPass(FilterType::LowPass, -24, 1000, 1, wav.sampleRate());
+	auto lowPass = EQInstance::lowPass(1000, wav.sampleRate(), 1);
 
 	auto feedbackProcessor = [&lowPass](double in) { return lowPass.processSample(FX::saturateSample(in, 0.55)); };
 
@@ -578,8 +578,8 @@ int Commands::tapeDelayStereoCommand(const std::string& command, int argc, char*
 	}
 
 	auto wav = WavFile::open(input);
-	EQInstance lowPassL(FilterType::LowPass, -24, 1000, 1, wav.sampleRate());
-	EQInstance lowPassR(FilterType::LowPass, -24, 1000, 1, wav.sampleRate());
+	auto lowPassL = EQInstance::lowPass(1000, wav.sampleRate(), 1);
+	auto lowPassR = EQInstance::lowPass(1000, wav.sampleRate(), 1);
 
 	int count = 0;
 

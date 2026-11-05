@@ -95,7 +95,9 @@ endif()
 
 wavlab_add_developer_targets(
     examples/normalise.cpp
+    include/wavlab/EQ.h
     include/wavlab/FX.h
+    include/wavlab/Generators.h
     include/wavlab/Tools.h
     include/wavlab/WavFile.h
     src/cli/Commands.cpp
@@ -108,10 +110,14 @@ wavlab_add_developer_targets(
     src/lib/BinaryHelpers.h
     src/lib/ConversionHelpers.cpp
     src/lib/ConversionHelpers.h
+    src/lib/EQ.cpp
+    src/lib/Generators.cpp
     src/lib/Tools.cpp
     src/lib/WavFile.cpp
     tests/binary_conversion_tests.cpp
     tests/editing_tools_tests.cpp
+    tests/eq_tests.cpp
+    tests/generator_tests.cpp
     tests/library_api_tests.cpp
     tests/smoke/library_smoke.cpp
 )

@@ -1,156 +1,342 @@
-//This file is an implementation of the praiseworthy "Cookbook formulae for audio EQ biquad filter coefficients" by Robert Bristow-Johnson <rbj@audioimagination.com>
-//See https://webaudio.github.io/Audio-EQ-Cookbook/Audio-EQ-Cookbook.txt , https://webaudio.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html
-//My implementation is however taken mostly from https://www.musicdsp.org/en/latest/Filters/128-c-class-implementation-of-rbj-filters.html
+// Robert Bristow-Johnson's Audio EQ Cookbook biquad formulae.
+// https://webaudio.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html
 
 #include <wavlab/EQ.h>
+
 #include "Constants.h"
+
+#include <array>
 #include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <numbers>
+#include <span>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace wavlab
 {
 
-EQInstance::EQInstance(FilterType type, double gainDecibels, double centreFrequency, double q, uint32_t sampleRate)
+EqError::EqError(EqErrorCode code, std::string message)
+    : std::invalid_argument(std::move(message)), code_(code)
 {
-	double alpha, a0 = 0.0, a1 = 0.0, a2 = 0.0, b0 = 0.0, b1 = 0.0, b2 = 0.0;
-
-	bool qIsBandwidth = type == FilterType::Peak || type == FilterType::BandPass || type == FilterType::AllPass;
-
-	double const omega = Constants::TAU * centreFrequency / sampleRate;
-	double const sinOmega = sin(omega);
-	double const cosOmega = cos(omega);
-
-	alpha = qIsBandwidth ? sinOmega * sinh(log(2.0) / 2.0 * q * omega / sinOmega) : sinOmega / (2.0 * q);
-
-	if (type == FilterType::Peak || type == FilterType::LowShelf || type == FilterType::HighShelf)
-	{
-		double const amplitude = pow(10.0, (gainDecibels / 40.0));
-		double const beta = sqrt(amplitude) / q;
-
-		if (type == FilterType::Peak)
-		{
-			b0 = float(1.0 + alpha * amplitude);
-			b1 = float(-2.0 * cosOmega);
-			b2 = float(1.0 - alpha * amplitude);
-			a0 = float(1.0 + alpha / amplitude);
-			a1 = float(-2.0 * cosOmega);
-			a2 = float(1.0 - alpha / amplitude);
-		}		
-		if (type == FilterType::LowShelf)
-		{
-			b0 = float(amplitude * ((amplitude + 1.0) - (amplitude - 1.0) * cosOmega + beta * sinOmega));
-			b1 = float(2.0 * amplitude * ((amplitude - 1.0) - (amplitude + 1.0) * cosOmega));
-			b2 = float(amplitude * ((amplitude + 1.0) - (amplitude - 1.0) * cosOmega - beta * sinOmega));
-			a0 = float((amplitude + 1.0) + (amplitude - 1.0) * cosOmega + beta * sinOmega);
-			a1 = float(-2.0 * ((amplitude - 1.0) + (amplitude + 1.0) * cosOmega));
-			a2 = float((amplitude + 1.0) + (amplitude - 1.0) * cosOmega - beta * sinOmega);
-		}
-		else if (type == FilterType::HighShelf)
-		{
-			b0 = float(amplitude * ((amplitude + 1.0) + (amplitude - 1.0) * cosOmega + beta * sinOmega));
-			b1 = float(-2.0 * amplitude * ((amplitude - 1.0) + (amplitude + 1.0) * cosOmega));
-			b2 = float(amplitude * ((amplitude + 1.0) + (amplitude - 1.0) * cosOmega - beta * sinOmega));
-			a0 = float((amplitude + 1.0) - (amplitude - 1.0) * cosOmega + beta * sinOmega);
-			a1 = float(2.0 * ((amplitude - 1.0) - (amplitude + 1.0) * cosOmega));
-			a2 = float((amplitude + 1.0) - (amplitude - 1.0) * cosOmega - beta * sinOmega);
-		}
-	}
-	else 
-	{
-		if (type == FilterType::LowPass)
-		{
-			b0 = (1.0 - cosOmega) / 2.0;
-			b1 = 1.0 - cosOmega;
-			b2 = (1.0 - cosOmega) / 2.0;
-			a0 = 1.0 + alpha;
-			a1 = -2.0 * cosOmega;
-			a2 = 1.0 - alpha;
-		}
-		if (type == FilterType::HighPass)
-		{
-			b0 = (1.0 + cosOmega) / 2.0;
-			b1 = -(1.0 + cosOmega);
-			b2 = (1.0 + cosOmega) / 2.0;
-			a0 = 1.0 + alpha;
-			a1 = -2.0 * cosOmega;
-			a2 = 1.0 - alpha;
-		}
-		if (type == FilterType::BandPass)
-		{
-			b0 = sinOmega / 2.0;
-			b1 = 0.0;
-			b2 = -sinOmega / 2;
-			a0 = 1.0 + alpha;
-			a1 = -2.0 * cosOmega;
-			a2 = 1.0 - alpha;
-		}
-		if (type == FilterType::AllPass)
-		{
-			b0 = 1.0 - alpha;
-			b1 = -2.0 * cosOmega;
-			b2 = 1.0 + alpha;
-			a0 = 1.0 + alpha;
-			a1 = -2.0 * cosOmega;
-			a2 = 1.0 - alpha;
-		}
-	}
-
-	b0a0 = double(b0 / a0);
-	b1a0 = double(b1 / a0);
-	b2a0 = double(b2 / a0);
-	a1a0 = double(a1 / a0);
-	a2a0 = double(a2 / a0);
 }
 
-double EQInstance::processSample(double in)
+EqErrorCode EqError::code() const noexcept { return code_; }
+
+namespace
 {
-	double yn = b0a0 * in + b1a0 * in1 + b2a0 * in2 - a1a0 * out1 - a2a0 * out2;
 
-	// push in/out buffers
-	in2 = in1;
-	in1 = in;
-	out2 = out1;
-	out1 = yn;
-
-	// return output
-	return yn;
-}
-
-void EQ::process(WavFile& wave, FilterType type, double gainDecibels, double centreFrequency, double q)
+struct RawCoefficients
 {
-	if (wave.numberOfChannels() == 1)
-	{
-		EQInstance eqMono(type, gainDecibels, centreFrequency, q, wave.sampleRate());
+    double a0{};
+    double a1{};
+    double a2{};
+    double b0{};
+    double b1{};
+    double b2{};
+};
 
-		std::vector<double> newSamples;
-
-		for (auto& sample : wave.samples())
-		{
-			newSamples.push_back(eqMono.processSample(sample));
-		}
-		wave.setSamples(newSamples);
-		return;
-	}
-	else if (wave.numberOfChannels() == 2)
-	{
-		EQInstance eqLeft(type, gainDecibels, centreFrequency, q, wave.sampleRate());
-		EQInstance eqRight(type, gainDecibels, centreFrequency, q, wave.sampleRate());
-
-		const auto sourceSamples = wave.samples();
-		std::vector<double> original(sourceSamples.begin(), sourceSamples.end());
-		std::vector<double> newSamples;
-
-		for (size_t i = 0; i < original.size() - 1; i = i + 2)
-		{
-			double left = original[i];
-			double right = original[i + 1];
-
-			newSamples.push_back(eqLeft.processSample(left));
-			newSamples.push_back(eqRight.processSample(right));
-		}
-		wave.setSamples(newSamples);
-	}
+void validateCommon(double frequency, std::uint32_t sampleRate)
+{
+    if (sampleRate == 0)
+    {
+        throw EqError(EqErrorCode::invalidSampleRate, "the EQ sample rate must be non-zero");
+    }
+    const auto nyquist = static_cast<double>(sampleRate) / 2.0;
+    if (!std::isfinite(frequency) || frequency <= 0.0 || frequency >= nyquist)
+    {
+        throw EqError(EqErrorCode::invalidFrequency,
+                      "EQ frequency must be finite, greater than zero, and below Nyquist");
+    }
 }
 
-/* Commands */
-
+void validateQ(double q)
+{
+    if (!std::isfinite(q) || q <= 0.0)
+    {
+        throw EqError(EqErrorCode::invalidQ, "EQ Q must be finite and greater than zero");
+    }
 }
+
+void validateBandwidth(double bandwidth)
+{
+    if (!std::isfinite(bandwidth) || bandwidth <= 0.0)
+    {
+        throw EqError(EqErrorCode::invalidBandwidth,
+                      "EQ bandwidth must be finite and greater than zero");
+    }
+}
+
+void validateGain(double gainDecibels)
+{
+    if (!std::isfinite(gainDecibels))
+    {
+        throw EqError(EqErrorCode::invalidGain, "EQ gain must be finite");
+    }
+}
+
+[[nodiscard]] BiquadCoefficients normaliseCoefficients(const RawCoefficients &raw)
+{
+    if (!std::isfinite(raw.a0) || raw.a0 == 0.0)
+    {
+        throw EqError(EqErrorCode::invalidCoefficients,
+                      "EQ settings produced invalid coefficients");
+    }
+    const BiquadCoefficients result{raw.b0 / raw.a0, raw.b1 / raw.a0, raw.b2 / raw.a0,
+                                    raw.a1 / raw.a0, raw.a2 / raw.a0};
+    for (const auto coefficient : {result.b0, result.b1, result.b2, result.a1, result.a2})
+    {
+        if (!std::isfinite(coefficient))
+        {
+            throw EqError(EqErrorCode::invalidCoefficients,
+                          "EQ settings produced invalid coefficients");
+        }
+    }
+    return result;
+}
+
+struct FrequencyTerms
+{
+    double omega;
+    double sine;
+    double cosine;
+};
+
+[[nodiscard]] FrequencyTerms frequencyTerms(double frequency, std::uint32_t sampleRate)
+{
+    const auto omega = Constants::TAU * frequency / sampleRate;
+    return {omega, std::sin(omega), std::cos(omega)};
+}
+
+[[nodiscard]] double alphaForBandwidth(const FrequencyTerms &terms, double bandwidth)
+{
+    return terms.sine * std::sinh(std::numbers::ln2 / 2.0 * bandwidth * terms.omega / terms.sine);
+}
+
+[[nodiscard]] RawCoefficients passDenominator(const FrequencyTerms &terms, double alpha)
+{
+    return {1.0 + alpha, -2.0 * terms.cosine, 1.0 - alpha, 0.0, 0.0, 0.0};
+}
+
+template <typename Factory> void apply(WavFile &wave, Factory factory)
+{
+    const auto channels = static_cast<std::size_t>(wave.numberOfChannels());
+    std::vector<EQInstance> filters;
+    filters.reserve(channels);
+    for (std::size_t channel = 0; channel < channels; ++channel)
+    {
+        filters.push_back(factory(wave.sampleRate()));
+    }
+
+    auto samples = wave.samples();
+    for (std::size_t index = 0; index < samples.size(); ++index)
+    {
+        samples[index] = filters[index % channels].processSample(samples[index]);
+    }
+}
+
+} // namespace
+
+EQInstance::EQInstance(BiquadCoefficients coefficients) : coefficients_(coefficients) {}
+
+EQInstance EQInstance::peak(double centreFrequency, std::uint32_t sampleRate,
+                            double bandwidthOctaves, double gainDecibels)
+{
+    validateCommon(centreFrequency, sampleRate);
+    validateBandwidth(bandwidthOctaves);
+    validateGain(gainDecibels);
+    const auto terms = frequencyTerms(centreFrequency, sampleRate);
+    const auto alpha = alphaForBandwidth(terms, bandwidthOctaves);
+    const auto amplitude = std::pow(10.0, gainDecibels / 40.0);
+    return EQInstance(normaliseCoefficients({1.0 + alpha / amplitude, -2.0 * terms.cosine,
+                                             1.0 - alpha / amplitude, 1.0 + alpha * amplitude,
+                                             -2.0 * terms.cosine, 1.0 - alpha * amplitude}));
+}
+
+EQInstance EQInstance::allPass(double centreFrequency, std::uint32_t sampleRate,
+                               double bandwidthOctaves)
+{
+    validateCommon(centreFrequency, sampleRate);
+    validateBandwidth(bandwidthOctaves);
+    const auto terms = frequencyTerms(centreFrequency, sampleRate);
+    const auto alpha = alphaForBandwidth(terms, bandwidthOctaves);
+    auto raw = passDenominator(terms, alpha);
+    raw.b0 = 1.0 - alpha;
+    raw.b1 = -2.0 * terms.cosine;
+    raw.b2 = 1.0 + alpha;
+    return EQInstance(normaliseCoefficients(raw));
+}
+
+EQInstance EQInstance::bandPass(double centreFrequency, std::uint32_t sampleRate,
+                                double bandwidthOctaves)
+{
+    validateCommon(centreFrequency, sampleRate);
+    validateBandwidth(bandwidthOctaves);
+    const auto terms = frequencyTerms(centreFrequency, sampleRate);
+    const auto alpha = alphaForBandwidth(terms, bandwidthOctaves);
+    auto raw = passDenominator(terms, alpha);
+    raw.b0 = terms.sine / 2.0;
+    raw.b1 = 0.0;
+    raw.b2 = -terms.sine / 2.0;
+    return EQInstance(normaliseCoefficients(raw));
+}
+
+EQInstance EQInstance::lowPass(double cutoffFrequency, std::uint32_t sampleRate, double q)
+{
+    validateCommon(cutoffFrequency, sampleRate);
+    validateQ(q);
+    const auto terms = frequencyTerms(cutoffFrequency, sampleRate);
+    const auto alpha = terms.sine / (2.0 * q);
+    auto raw = passDenominator(terms, alpha);
+    raw.b0 = (1.0 - terms.cosine) / 2.0;
+    raw.b1 = 1.0 - terms.cosine;
+    raw.b2 = raw.b0;
+    return EQInstance(normaliseCoefficients(raw));
+}
+
+EQInstance EQInstance::highPass(double cutoffFrequency, std::uint32_t sampleRate, double q)
+{
+    validateCommon(cutoffFrequency, sampleRate);
+    validateQ(q);
+    const auto terms = frequencyTerms(cutoffFrequency, sampleRate);
+    const auto alpha = terms.sine / (2.0 * q);
+    auto raw = passDenominator(terms, alpha);
+    raw.b0 = (1.0 + terms.cosine) / 2.0;
+    raw.b1 = -(1.0 + terms.cosine);
+    raw.b2 = raw.b0;
+    return EQInstance(normaliseCoefficients(raw));
+}
+
+EQInstance EQInstance::lowShelf(double centreFrequency, std::uint32_t sampleRate, double q,
+                                double gainDecibels)
+{
+    validateCommon(centreFrequency, sampleRate);
+    validateQ(q);
+    validateGain(gainDecibels);
+    const auto terms = frequencyTerms(centreFrequency, sampleRate);
+    const auto amplitude = std::pow(10.0, gainDecibels / 40.0);
+    const auto betaSine = std::sqrt(amplitude) / q * terms.sine;
+    return EQInstance(normaliseCoefficients(
+        {(amplitude + 1.0) + (amplitude - 1.0) * terms.cosine + betaSine,
+         -2.0 * ((amplitude - 1.0) + (amplitude + 1.0) * terms.cosine),
+         (amplitude + 1.0) + (amplitude - 1.0) * terms.cosine - betaSine,
+         amplitude * ((amplitude + 1.0) - (amplitude - 1.0) * terms.cosine + betaSine),
+         2.0 * amplitude * ((amplitude - 1.0) - (amplitude + 1.0) * terms.cosine),
+         amplitude * ((amplitude + 1.0) - (amplitude - 1.0) * terms.cosine - betaSine)}));
+}
+
+EQInstance EQInstance::highShelf(double centreFrequency, std::uint32_t sampleRate, double q,
+                                 double gainDecibels)
+{
+    validateCommon(centreFrequency, sampleRate);
+    validateQ(q);
+    validateGain(gainDecibels);
+    const auto terms = frequencyTerms(centreFrequency, sampleRate);
+    const auto amplitude = std::pow(10.0, gainDecibels / 40.0);
+    const auto betaSine = std::sqrt(amplitude) / q * terms.sine;
+    return EQInstance(normaliseCoefficients(
+        {(amplitude + 1.0) - (amplitude - 1.0) * terms.cosine + betaSine,
+         2.0 * ((amplitude - 1.0) - (amplitude + 1.0) * terms.cosine),
+         (amplitude + 1.0) - (amplitude - 1.0) * terms.cosine - betaSine,
+         amplitude * ((amplitude + 1.0) + (amplitude - 1.0) * terms.cosine + betaSine),
+         -2.0 * amplitude * ((amplitude - 1.0) + (amplitude + 1.0) * terms.cosine),
+         amplitude * ((amplitude + 1.0) + (amplitude - 1.0) * terms.cosine - betaSine)}));
+}
+
+double EQInstance::processSample(double input) noexcept
+{
+    const auto output = coefficients_.b0 * input + coefficients_.b1 * input1_ +
+                        coefficients_.b2 * input2_ - coefficients_.a1 * output1_ -
+                        coefficients_.a2 * output2_;
+    input2_ = input1_;
+    input1_ = input;
+    output2_ = output1_;
+    output1_ = output;
+    return output;
+}
+
+const BiquadCoefficients &EQInstance::coefficients() const noexcept { return coefficients_; }
+
+namespace EQ
+{
+
+void peak(WavFile &wave, double centreFrequency, double bandwidthOctaves, double gainDecibels)
+{
+    apply(
+        wave, [&](std::uint32_t sampleRate)
+        { return EQInstance::peak(centreFrequency, sampleRate, bandwidthOctaves, gainDecibels); });
+}
+
+void allPass(WavFile &wave, double centreFrequency, double bandwidthOctaves)
+{
+    apply(wave, [&](std::uint32_t sampleRate)
+          { return EQInstance::allPass(centreFrequency, sampleRate, bandwidthOctaves); });
+}
+
+void bandPass(WavFile &wave, double centreFrequency, double bandwidthOctaves)
+{
+    apply(wave, [&](std::uint32_t sampleRate)
+          { return EQInstance::bandPass(centreFrequency, sampleRate, bandwidthOctaves); });
+}
+
+void lowPass(WavFile &wave, double cutoffFrequency, double q)
+{
+    apply(wave, [&](std::uint32_t sampleRate)
+          { return EQInstance::lowPass(cutoffFrequency, sampleRate, q); });
+}
+
+void highPass(WavFile &wave, double cutoffFrequency, double q)
+{
+    apply(wave, [&](std::uint32_t sampleRate)
+          { return EQInstance::highPass(cutoffFrequency, sampleRate, q); });
+}
+
+void lowShelf(WavFile &wave, double centreFrequency, double q, double gainDecibels)
+{
+    apply(wave, [&](std::uint32_t sampleRate)
+          { return EQInstance::lowShelf(centreFrequency, sampleRate, q, gainDecibels); });
+}
+
+void highShelf(WavFile &wave, double centreFrequency, double q, double gainDecibels)
+{
+    apply(wave, [&](std::uint32_t sampleRate)
+          { return EQInstance::highShelf(centreFrequency, sampleRate, q, gainDecibels); });
+}
+
+void process(WavFile &wave, FilterType type, double gainDecibels, double centreFrequency,
+             double shape)
+{
+    switch (type)
+    {
+    case FilterType::Peak:
+        peak(wave, centreFrequency, shape, gainDecibels);
+        return;
+    case FilterType::AllPass:
+        allPass(wave, centreFrequency, shape);
+        return;
+    case FilterType::BandPass:
+        bandPass(wave, centreFrequency, shape);
+        return;
+    case FilterType::LowPass:
+        lowPass(wave, centreFrequency, shape);
+        return;
+    case FilterType::HighPass:
+        highPass(wave, centreFrequency, shape);
+        return;
+    case FilterType::LowShelf:
+        lowShelf(wave, centreFrequency, shape, gainDecibels);
+        return;
+    case FilterType::HighShelf:
+        highShelf(wave, centreFrequency, shape, gainDecibels);
+        return;
+    case FilterType::None:
+        throw EqError(EqErrorCode::invalidFilterType, "an EQ filter type is required");
+    }
+    throw EqError(EqErrorCode::invalidFilterType, "unknown EQ filter type");
+}
+
+} // namespace EQ
+
+} // namespace wavlab
