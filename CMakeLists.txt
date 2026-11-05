@@ -48,8 +48,10 @@ add_library(wavlab::wavlab ALIAS wavlab_lib)
 set_target_properties(
     wavlab_lib
     PROPERTIES
+        COMPILE_PDB_NAME wavlab_lib
         CXX_EXTENSIONS OFF
         OUTPUT_NAME wavlab
+        PDB_NAME wavlab_lib
         WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
 
@@ -63,7 +65,14 @@ target_include_directories(
 wavlab_apply_project_options(wavlab_lib)
 
 add_executable(wavlab_cli WavLab/WavLab.cpp)
-set_target_properties(wavlab_cli PROPERTIES CXX_EXTENSIONS OFF OUTPUT_NAME wavlab)
+set_target_properties(
+    wavlab_cli
+    PROPERTIES
+        COMPILE_PDB_NAME wavlab_cli
+        CXX_EXTENSIONS OFF
+        OUTPUT_NAME wavlab
+        PDB_NAME wavlab_cli
+)
 target_compile_features(wavlab_cli PRIVATE cxx_std_20)
 target_link_libraries(wavlab_cli PRIVATE wavlab::wavlab)
 wavlab_apply_project_options(wavlab_cli)
