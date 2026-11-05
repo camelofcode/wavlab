@@ -1,0 +1,283 @@
+{
+  "generator": "tests/fixtures/generate_fixtures.py",
+  "schema_version": 1,
+  "fixtures": [
+    {
+      "name": "pcm_u8_mono.wav",
+      "purpose": "unsigned 8-bit PCM boundaries and silence at 128",
+      "channels": 1,
+      "sample_rate": 8000,
+      "bits_per_sample": 8,
+      "frames": 5,
+      "interleaved_integer_samples": [
+        0,
+        64,
+        128,
+        192,
+        255
+      ],
+      "chunk_order": [
+        "fmt ",
+        "data"
+      ],
+      "size_bytes": 50,
+      "sha256": "5d70f6bb7f366f6019387c297954c8a2bfc6a49f7f9c6fe7f4a292ad1d0df507"
+    },
+    {
+      "name": "pcm_s16_mono.wav",
+      "purpose": "signed 16-bit PCM boundaries and values around zero",
+      "channels": 1,
+      "sample_rate": 8000,
+      "bits_per_sample": 16,
+      "frames": 5,
+      "interleaved_integer_samples": [
+        -32768,
+        -1,
+        0,
+        1,
+        32767
+      ],
+      "chunk_order": [
+        "fmt ",
+        "data"
+      ],
+      "size_bytes": 54,
+      "sha256": "19720469d8ea90b29b143393c9138abc454576338bd507d992fc654c56909692"
+    },
+    {
+      "name": "pcm_s24_mono.wav",
+      "purpose": "signed 24-bit PCM boundaries and values around zero",
+      "channels": 1,
+      "sample_rate": 8000,
+      "bits_per_sample": 24,
+      "frames": 5,
+      "interleaved_integer_samples": [
+        -8388608,
+        -1,
+        0,
+        1,
+        8388607
+      ],
+      "chunk_order": [
+        "fmt ",
+        "data"
+      ],
+      "size_bytes": 60,
+      "sha256": "d3c0e5097b8670d6117d50aa449815a4444d525a99d0afc494885e5712c0d5b2"
+    },
+    {
+      "name": "pcm_s32_mono.wav",
+      "purpose": "signed 32-bit PCM boundaries and values around zero",
+      "channels": 1,
+      "sample_rate": 8000,
+      "bits_per_sample": 32,
+      "frames": 5,
+      "interleaved_integer_samples": [
+        -2147483648,
+        -1,
+        0,
+        1,
+        2147483647
+      ],
+      "chunk_order": [
+        "fmt ",
+        "data"
+      ],
+      "size_bytes": 64,
+      "sha256": "c2c84cd4a3c825c62e4d0327e942478bc814d9e300b914a421d6fc1cf72c5dee"
+    },
+    {
+      "name": "pcm_s16_stereo.wav",
+      "purpose": "stereo frame layout with distinct left and right samples",
+      "channels": 2,
+      "sample_rate": 8000,
+      "bits_per_sample": 16,
+      "frames": 3,
+      "interleaved_integer_samples": [
+        1000,
+        -1000,
+        2000,
+        -2000,
+        3000,
+        -3000
+      ],
+      "chunk_order": [
+        "fmt ",
+        "data"
+      ],
+      "size_bytes": 56,
+      "sha256": "c20d591295b425a9e5ae405d90aef055984fabf6a027d9485ffbb4a2beceb502"
+    },
+    {
+      "name": "empty_pcm_s16_mono.wav",
+      "purpose": "valid PCM structure with an empty data chunk",
+      "channels": 1,
+      "sample_rate": 8000,
+      "bits_per_sample": 16,
+      "frames": 0,
+      "interleaved_integer_samples": [],
+      "chunk_order": [
+        "fmt ",
+        "data"
+      ],
+      "size_bytes": 44,
+      "sha256": "4f8734c5e13ac599e168cf247a51c1dd0758537ce00bf16d7fed1a3d14d07041"
+    },
+    {
+      "name": "unknown_odd_chunk.wav",
+      "purpose": "unknown odd-sized RIFF chunk and required padding",
+      "channels": 1,
+      "sample_rate": 8000,
+      "bits_per_sample": 16,
+      "frames": 2,
+      "interleaved_integer_samples": [
+        1234,
+        -1234
+      ],
+      "chunk_order": [
+        "fmt ",
+        "XTRA",
+        "data"
+      ],
+      "size_bytes": 62,
+      "sha256": "ebc87ed728230b41acadd6f60af62f888d5224bfa1a2e6609ea91e0ad743a12c"
+    },
+    {
+      "name": "bext_before_data.wav",
+      "purpose": "BEXT metadata located before the audio data chunk",
+      "channels": 1,
+      "sample_rate": 8000,
+      "bits_per_sample": 16,
+      "frames": 3,
+      "interleaved_integer_samples": [
+        111,
+        -222,
+        333
+      ],
+      "chunk_order": [
+        "fmt ",
+        "bext",
+        "data"
+      ],
+      "size_bytes": 660,
+      "sha256": "376f0f139af05436e273164048c3f5ad42043c061b471ff88b279409df036c8f"
+    },
+    {
+      "name": "bext_after_data.wav",
+      "purpose": "BEXT metadata located after the audio data chunk",
+      "channels": 1,
+      "sample_rate": 8000,
+      "bits_per_sample": 16,
+      "frames": 3,
+      "interleaved_integer_samples": [
+        444,
+        -555,
+        666
+      ],
+      "chunk_order": [
+        "fmt ",
+        "data",
+        "bext"
+      ],
+      "size_bytes": 660,
+      "sha256": "34e825c034122d9a4012ff20019db6f43a3c960b2e6bf3a561c6e32921e8907d"
+    },
+    {
+      "name": "signal_impulse_mono_s16.wav",
+      "purpose": "short full-scale impulse followed by silence",
+      "channels": 1,
+      "sample_rate": 1000,
+      "bits_per_sample": 16,
+      "frames": 8,
+      "interleaved_integer_samples": [
+        32767,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "chunk_order": [
+        "fmt ",
+        "data"
+      ],
+      "size_bytes": 60,
+      "sha256": "6ef88e4902a193d54c1ed7605328745fe0311992b509f4ae3016dca43ebc99d9"
+    },
+    {
+      "name": "signal_constant_mono_s16.wav",
+      "purpose": "short constant-amplitude signal",
+      "channels": 1,
+      "sample_rate": 1000,
+      "bits_per_sample": 16,
+      "frames": 8,
+      "interleaved_integer_samples": [
+        8192,
+        8192,
+        8192,
+        8192,
+        8192,
+        8192,
+        8192,
+        8192
+      ],
+      "chunk_order": [
+        "fmt ",
+        "data"
+      ],
+      "size_bytes": 60,
+      "sha256": "505c414c73d9840f1eac64322e8c912bdcee858eafe030533be9c890a8f1bf91"
+    },
+    {
+      "name": "signal_ramp_mono_s16.wav",
+      "purpose": "ordered values for reversal, splitting, and gain tests",
+      "channels": 1,
+      "sample_rate": 1000,
+      "bits_per_sample": 16,
+      "frames": 9,
+      "interleaved_integer_samples": [
+        -32768,
+        -24576,
+        -16384,
+        -8192,
+        0,
+        8192,
+        16384,
+        24576,
+        32767
+      ],
+      "chunk_order": [
+        "fmt ",
+        "data"
+      ],
+      "size_bytes": 62,
+      "sha256": "9d91ea97ea3c94b82a85cee0e390d1165971f166a50b21808636c0acc1992543"
+    },
+    {
+      "name": "signal_channel_identity_stereo_s16.wav",
+      "purpose": "opposite-sign channels for routing and state-isolation tests",
+      "channels": 2,
+      "sample_rate": 1000,
+      "bits_per_sample": 16,
+      "frames": 4,
+      "interleaved_integer_samples": [
+        1000,
+        -1000,
+        2000,
+        -2000,
+        3000,
+        -3000,
+        4000,
+        -4000
+      ],
+      "chunk_order": [
+        "fmt ",
+        "data"
+      ],
+      "size_bytes": 60,
+      "sha256": "dd4ad02bda5bd8862c7b3524894318aa1dda2c243c1b6d5890ddc0c4099062b1"
+    }
+  ]
+}

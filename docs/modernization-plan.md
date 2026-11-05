@@ -159,6 +159,18 @@ Tasks:
 7. Add `LICENSE` after confirming that the C++ repository should use the same
    GPL-3.0-or-later license as the Rust repository.
 
+Progress recorded on 2026-11-05:
+
+- CLI compatibility is decided in
+  [ADR 0001](decisions/0001-cli-compatibility.md).
+- Reference revisions and numeric tolerances are pinned in
+  [parity-baseline.md](parity-baseline.md).
+- Historical command syntax and semantics are frozen in
+  [legacy-cli-contract.md](legacy-cli-contract.md).
+- Thirteen independently generated fixtures, their expected values, and a
+  reproducibility manifest are checked in under `tests/fixtures/`.
+- License assignment remains pending explicit owner confirmation.
+
 Exit criteria:
 
 - The parity revision, fixture provenance, tolerances, and compatibility
