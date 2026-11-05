@@ -1,383 +1,178 @@
-# wavlab #
-wavlab is a command line utility for processing wave format audio files written in C++.
+# wavlab
 
-It has been made to re-familiarise myself with C++ after over a decade without using it, as such I'm sure I've reinvented the wheel several times, but I've learnt a lot. 🙂 
+[![C++ build and test](https://github.com/camelofcode/wavlab/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/camelofcode/wavlab/actions/workflows/ci.yml)
 
-It currently supports PCM wave files, with or without bext/broadcast wave extensions (v0 only currently) at 8, 16, 24 and 32 bit depths.
+WavLab is a C++20 library and command-line utility for inspecting, generating,
+editing, and applying effects to PCM WAV files. It supports ordinary WAV files
+and version-0 BWF/BEXT metadata with 8-, 16-, 24-, and 32-bit integer samples.
 
-Uses C++14 and compiles in Visual Studio 2022 and CLion (with CMake).
-It has been tested on Windows 10 and 11, as well as Ubuntu 20.04. Next step is to find a Mac owning friend to give it a bash...
+The project began as a way to become familiar with C++ again after more than a
+decade away from the language. It deliberately implements the WAV and DSP
+logic directly rather than wrapping a general audio library.
+
+## Build and test
+
+The recommended local workflow requires a C++20 compiler, CMake 3.24 or later,
+Ninja, and Python 3. CLI11 is found from an installed CMake package when
+available, otherwise CMake fetches the pinned release automatically.
+
+```console
+cmake --preset dev
+cmake --build --preset dev
+ctest --preset dev
+```
+
+The build produces:
+
+- `wavlab::wavlab`, the reusable C++ library target;
+- `out/build/dev/wavlab`, the command-line executable;
+- the CTest suite, including parser, black-box CLI, DSP, fixture, and I/O tests.
+
+See [Development](docs/development.md) for supported toolchains, presets,
+sanitizers, formatting, and static analysis. Release-facing changes are
+recorded in the [changelog](CHANGELOG.md).
+
+The supported CI toolchains are GCC and Clang on Linux, MSVC on Windows, and
+Apple Clang on macOS. Other conforming C++20 toolchains may work but are not
+part of the release gate.
+
+## Install
+
+Build, test, and install an optimised release to a chosen prefix:
+
+```console
+cmake --preset release
+cmake --build --preset release
+ctest --preset release
+cmake --install out/build/release --prefix /your/install/prefix
+```
+
+The installed files include the `wavlab` executable, the static or shared
+library selected at configure time, public headers, licence, and CMake package
+metadata.
+
+## Command line
+
+CLI11 provides generated top-level and per-command help, typed arguments,
+consistent validation errors, and version output:
+
+```console
+./out/build/dev/wavlab --help
+./out/build/dev/wavlab --version
+./out/build/dev/wavlab chorus-mono --help
+```
+
+Examples:
+
+```console
+# Inspect metadata and scan peak/RMS levels
+wavlab metadata --full input.wav
+
+# Canonical British spelling; normalize remains an alias
+wavlab normalise-db input.wav -6 output.wav
+
+# Mix is normalised from 0 to 1; tail duration is an explicit option
+wavlab digital-delay-mono input.wav 250 0.45 0.35 output.wav --tail-ms 2000
+
+# Independent stereo chorus settings
+wavlab chorus-stereo input.wav 0.5 0.8 1.0 1.2 0.5 output.wav
+
+# Three-stage phaser is the default; override it explicitly when wanted
+wavlab phaser-mono input.wav 0.8 0.5 1000 triangle 0.5 output.wav --stages 6
+```
+
+The complete generated reference is in [docs/cli.md](docs/cli.md). A test
+fails if that checked-in document differs from the parser definitions.
 
 ## Features
-* Supports standard format PCM Wave files at all sample rates and 8, 16, 24 and 32 bit resolutions
-* Reading of BWAV/bext chunks
-* A variety of useful wave file tools including
-    * Normalisation
-	* Reversing
-	* Phase Flipping
-	* Stereo channel swapping
-	* Splitting stereo files to left/right and mid/side components, and recombining them
-    * Applying gain
-	* Calculating peak and RMS dB values
-	* Mixing multiple files together
-	* Joining and splitting wave files
-* Generation of
-	* Pure Sine/Square/Triangle and Sawtooth waves
-	* "Analogue" additive synthesised Square/Triangle and Sawtooth waves
-	* White/pink noise
-* Various signal processing functions including
-	* Peaking, shelving and all/band/low/pass filters/EQs
-	* Tape saturation effect
-	* Digital, Analog style and Tape style delays
-	* A fairly awful sounding algorithmic reverb
 
-## Usage
-run `wavlab [command]` using one of the following commands:
+- PCM WAV and BWF/BEXT v0 reading and writing
+- Metadata inspection with optional peak and RMS analysis
+- Gain, normalisation, reversal, phase inversion, and channel swapping
+- Stereo and mid/side splitting and recombination
+- Mixing, joining, and time-based splitting
+- Direct and additive waveform generation plus white and pink noise
+- Peaking, shelving, all-pass, band-pass, low-pass, and high-pass biquads
+- Tape saturation; digital, analogue-style, and tape-style delays
+- Schroeder reverb with independent per-channel state
+- Chorus, vibrato, flanging, tremolo, and automatic panning
+- Configurable phasing and LFO-modulated low/high-pass filters
 
-```
-help
-        description: shows the command list
+Effects validate complete settings before replacing input samples. Stereo
+operations use independent channel state, and commands that accept an omitted
+output path overwrite the input deliberately.
 
-analog-delay-mono <input> <delayMilliseconds> <feedback> <mix> [output] [maxOutputLengthMs]
-        description: applies a mono analog style delay to the specified wave file, with frequency rolloff in the feedback loop
-        parameters:
-                input: path to wave file
-                delayMilliseconds: delay time in milliseconds
-                feedback: feedback of the delay effect, from 0-100%
-                mix: mix of the delay effect vs dry signal, from 0-100%
-                output: path to output file. Optional, if not specified input will be overwritten
-                maxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail
+## Library
 
-analog-delay-stereo <input> <delayMillisecondsLeft> <feedbackLeft> <delayMillisecondsRight> <feedbackRight> <mix> [output] [maxOutputLengthMs]
-        description: applies a stereo analog style delay to the specified wave file, with frequency rolloff in the feedback loop
-        parameters:
-                input: path to wave file
-                delayMillisecondsLeft: delay time in milliseconds for the left channel
-                feedbackLeft: feedback of the delay effect, from 0-100% for the left channel
-                delayMillisecondsRight: delay time in milliseconds for the right channel
-                feedbackRight: feedback of the delay effect, from 0-100% for the right channel
-                mix: mix of the delay effect vs dry signal, from 0-100%
-                output: path to output file. Optional, if not specified input will be overwritten
-                maxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail
+Public headers are under `include/wavlab`. The CLI links the library but the
+library has no dependency on CLI11, terminal output, argument parsing, or
+process exit codes.
 
-digital-delay-mono <input> <delayMilliseconds> <feedback> <mix> [output] [maxOutputLengthMs]
-        description: applies a mono digital delay to the specified wave file
-        parameters:
-                input: path to wave file
-                delayMilliseconds: delay time in milliseconds
-                feedback: feedback of the delay effect, from 0-100%
-                mix: mix of the delay effect vs dry signal, from 0-100%
-                output: path to output file. Optional, if not specified input will be overwritten
-                maxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail
+```cpp
+#include <wavlab/Tools.h>
+#include <wavlab/WavFile.h>
 
-digital-delay-stereo <input> <delayMillisecondsLeft> <feedbackLeft> <delayMillisecondsRight> <feedbackRight> <mix> [output] [maxOutputLengthMs]
-        description: applies a stereo digital delay to the specified wave file
-        parameters:
-                input: path to wave file
-                delayMillisecondsLeft: delay time in milliseconds for the left channel
-                feedbackLeft: feedback of the delay effect, from 0-100% for the left channel
-                delayMillisecondsRight: delay time in milliseconds for the right channel
-                feedbackRight: feedback of the delay effect, from 0-100% for the right channel
-                mix: mix of the delay effect vs dry signal, from 0-100%
-                output: path to output file. Optional, if not specified input will be overwritten
-                maxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail
-
-eq-allpass <input> <frequency> <q> [output]
-        description: applies an all pass filter to a wave file
-        parameters:
-                input: path to wave file
-                frequency: centre frequency of the filter in Hz
-                q: q factor of the filter
-                output: path to output file. Optional, if not specified input will be overwritten
-
-eq-bandpass <input> <frequency> <q> [output]
-        description: applies a band pass filter to a wave file
-        parameters:
-                input: path to wave file
-                frequency: centre frequency of the filter in Hz
-                q: q factor of the filter
-                output: path to output file. Optional, if not specified input will be overwritten
-
-eq-highpass <input> <frequency> <q> [output]
-        description: applies a high pass filter to a wave file
-        parameters:
-                input: path to wave file
-                frequency: centre frequency of the filter in Hz
-                q: q factor of the filter
-                output: path to output file. Optional, if not specified input will be overwritten
-
-eq-highshelf <input> <frequency> <gain> <q> [output]
-        description: applies a positive or negative high shelf EQ to a wave file
-        parameters:
-                input: path to wave file
-                frequency: frequency in Hz of the start of the shelf
-                gain: gain in dB to cut/boost
-                q: q factor of the filter
-                output: path to output file. Optional, if not specified input will be overwritten
-
-eq-lowpass <input> <frequency> <q> [output]
-        description: applies a low pass filter to a wave file
-        parameters:
-                input: path to wave file
-                frequency: centre frequency of the filter in Hz
-                q: q factor of the filter
-                output: path to output file. Optional, if not specified input will be overwritten
-
-eq-lowshelf <input> <frequency> <gain> <q> [output]
-        description: applies a positive or negative low shelf EQ to a wave file
-        parameters:
-                input: path to wave file
-                frequency: frequency in Hz of the start of the shelf
-                gain: gain in dB to cut/boost
-                q: q factor of the filter
-                output: path to output file. Optional, if not specified input will be overwritten
-
-eq-peak <input> <frequency> <gain> <q> [output]
-        description: applies a positive or negative peak EQ to a wave file
-        parameters:
-                input: path to wave file
-                frequency: frequency in Hz of the cut/boost
-                gain: gain in dB to cut/boost
-                q: q factor of the filter
-                output: path to output file. Optional, if not specified input will be overwritten
-
-flip-phase <input> [output]
-        description: reverses the phase of a wave file
-        parameters:
-                input: path to wave file
-                output: path to output file. Optional, if not specified input will be overwritten
-
-gain <input> <gain> [output]
-        description: applies gain to a wave file
-        parameters:
-                input: path to wave file
-                gain: gain multiplier
-                output: path to output file. Optional, if not specified input will be overwritten
-
-gain-db <input> <dB> [output]
-        description: applies gain to a wave file, with input in decibels
-        parameters:
-                input: path to wave file
-                dB: gain to apply in decibels
-                output: path to output file. Optional, if not specified input will be overwritten
-
-get-peak-db <input>
-        description: shows the peak dB level of a wave file
-        parameters:
-                input: path to wave file
-
-get-rms-db <input>
-        description: shows the RMS dB level of a wave file
-        parameters:
-                input: path to wave file
-
-join <output> <input...>
-        description: joins multiple wave files into one.
-        parameters:
-                output: path to mixed wave file
-                input: arbitrary number of input files (minimum 2)
-
-left-right-to-stereo <leftInput> <rightInput> <output>
-        description: converts two left/right mono wave files to a combined stereo wave file
-        parameters:
-                leftInput: path to left wave file
-                rightInput: path to right wave file
-                output: path to combined output file
-
-mid-side-to-stereo <midInput> <sideInput> <output>
-        description: converts two mid/side mono wave files to a combined stereo wave file
-        parameters:
-                midInput: path to mid wave file
-                sideInput: path to side wave file
-                output: path to combined output file
-
-mix <output> <input...>
-        description: mixes multiple wave files into one. Will attenuate and re-normalise to ensure lack of clipping. Currently will start all files at zero.
-        parameters:
-                output: path to mixed wave file
-                input: arbitrary number of input files (minimum 2)
-
-normalise <input> [output]
-        description: normalises a wave file
-        parameters:
-                input: path to wave file
-                output: path to output file. Optional, if not specified input will be overwritten
-
-pink-noise <output> <sampleRate> <bitDepth> <length>
-        description: writes generated pink noise to specified output file
-        parameters:
-                output: path to output wave file
-                sampleRate: sample rate of the output wave file
-                bitDepth: bit depth of the output wave file
-                length: length of the output file in milliseconds
-				
-reverb <input> <size> <time> <mix> [output] [maxOutputLengthMs]
-        description: applies a basic algorithmic reverb effect to a wave file
-        parameters:
-                input: path to wave file
-                size: size of the reverb effect, from 0-100%
-                time: time of the reverb effect, from 0-100%
-                mix: mix of the reverb effect, from 0-100%
-                output: path to output file. Optional, if not specified input will be overwritten
-                maxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail
-
-reverse <input> [output]
-        description: reverses a wave file
-        parameters:
-                input: path to wave file
-                output: path to output file. Optional, if not specified input will be overwritten
-
-saturate <input> <drive> [output]
-        description: applies a tape saturation effect to a wave file
-        parameters:
-                input: path to wave file
-                drive: increase for dirtier sound
-                output: path to output file. Optional, if not specified input will be overwritten
-
-sawtooth-wave <output> <frequency> <sampleRate> <bitDepth> <length>
-        description: writes a sawtooth wave to the specified output file
-        parameters:
-                output: path to output wave file
-                frequency: frequency in Hz of the sawtooth wave
-                sampleRate: sample rate of the output wave file
-                bitDepth: bit depth of the output wave file
-                length: length of the output file in milliseconds
-
-sawtooth-wave-additive <output> <frequency> <sampleRate> <bitDepth> <length> [numberOfHarmonics]
-        description: writes a sawtooth wave generated by additive synthesis to the specified output file
-        parameters:
-                output: path to output wave file
-                frequency: frequency in Hz of the square wave
-                sampleRate: sample rate of the output wave file
-                bitDepth: bit depth of the output wave file
-                length: length of the output file in milliseconds
-                numberOfHarmonics: the number of harmonics to use. Optional, defaults to 1000
-
-sine-wave <output> <frequency> <sampleRate> <bitDepth> <length>
-        description: writes a sine wave to the specified output file
-        parameters:
-                output: path to output wave file
-                frequency: frequency in Hz of the sine wave
-                sampleRate: sample rate of the output wave file
-                bitDepth: bit depth of the output wave file
-                length: length of the output file in milliseconds
-
-split <input> <splitTimeMs...>
-        description: splits a wave file at the specified times in milliseconds. Output files will be named {original}_1.wav, {original}_2.wav etc
-        parameters:
-                input: path to wave file to split
-                splitTimeMs: arbitrary number of split times in milliseconds
-
-split-mid-side <input>
-        description: splits a stereo wave file to mid and side components, {original}_mid.wav and {original}_side.wav
-        parameters:
-                input: path to wave file
-
-split-stereo <input>
-        description: splits a stereo wave file to two mono files, {original}_l.wav and {original}_r.wav
-        parameters:
-                input: path to wave file
-
-square-wave <output> <frequency> <sampleRate> <bitDepth> <length>
-        description: writes a square wave to the specified output file
-        parameters:
-                output: path to output wave file
-                frequency: frequency in Hz of the square wave
-                sampleRate: sample rate of the output wave file
-                bitDepth: bit depth of the output wave file
-                length: length of the output file in milliseconds
-
-square-wave-additive <output> <frequency> <sampleRate> <bitDepth> <length> [numberOfHarmonics]
-        description: writes a square wave generated by additive synthesis to the specified output file
-        parameters:
-                output: path to output wave file
-                frequency: frequency in Hz of the square wave
-                sampleRate: sample rate of the output wave file
-                bitDepth: bit depth of the output wave file
-                length: length of the output file in milliseconds
-                numberOfHarmonics: the number of odd harmonics to use. Optional, defaults to 1000
-
-stat <input>
-        description: show stats of a wave file
-        parameters:
-                input: path to wave file
-
-swap-channels <input> [output]
-        description: swaps the left and right channels of a stereo wave file
-        parameters:
-                input: path to wave file
-                output: path to output file. Optional, if not specified input will be overwritten
-
-tape-delay-mono <input> <delayMilliseconds> <feedback> <mix> [output] [maxOutputLengthMs]
-        description: applies a mono tape style delay to the specified wave file, with frequency rolloff and tape saturation in the feedback loop. Warning: extremely prone to self oscilliation at higher feedbacks :)
-        parameters:
-                input: path to wave file
-                delayMilliseconds: delay time in milliseconds
-                feedback: feedback of the delay effect, from 0-100%
-                mix: mix of the delay effect vs dry signal, from 0-100%
-                output: path to output file. Optional, if not specified input will be overwritten
-                maxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail
-
-tape-delay-stereo <input> <delayMillisecondsLeft> <feedbackLeft> <delayMillisecondsRight> <feedbackRight> <mix> [output] [maxOutputLengthMs]
-        description: applies a stereo tape style delay to the specified wave file, with frequency rolloff and tape saturation in the feedback loop. Warning: extremely prone to self oscilliation at higher feedbacks :)
-        parameters:
-                input: path to wave file
-                delayMillisecondsLeft: delay time in milliseconds for the left channel
-                feedbackLeft: feedback of the delay effect, from 0-100% for the left channel
-                delayMillisecondsRight: delay time in milliseconds for the right channel
-                feedbackRight: feedback of the delay effect, from 0-100% for the right channel
-                mix: mix of the delay effect vs dry signal, from 0-100%
-                output: path to output file. Optional, if not specified input will be overwritten
-                maxOutputLengthMs: the max length of the output file in milliseconds, to allow for feedback tail
-
-triangle-wave <output> <frequency> <sampleRate> <bitDepth> <length>
-        description: writes a triangle wave to the specified output file
-        parameters:
-                output: path to output wave file
-                frequency: frequency in Hz of the triangle wave
-                sampleRate: sample rate of the output wave file
-                bitDepth: bit depth of the output wave file
-                length: length of the output file in milliseconds
-
-triangle-wave-additive <output> <frequency> <sampleRate> <bitDepth> <length> [numberOfHarmonics]
-        description: writes a triangle wave generated by additive synthesis to the specified output file
-        parameters:
-                output: path to output wave file
-                frequency: frequency in Hz of the triangle wave
-                sampleRate: sample rate of the output wave file
-                bitDepth: bit depth of the output wave file
-                length: length of the output file in milliseconds
-                numberOfHarmonics: the number of odd harmonics to use. Optional, defaults to 1000
-
-white-noise <output> <sampleRate> <bitDepth> <length>
-        description: writes generated white noise to specified output file
-        parameters:
-                output: path to output wave file
-                sampleRate: sample rate of the output wave file
-                bitDepth: bit depth of the output wave file
-                length: length of the output file in milliseconds
+auto wave = wavlab::WavFile::open("input.wav");
+wavlab::Tools::normaliseToDecibels(wave, -6.0);
+wave.save("output.wav");
 ```
 
-## Upcoming features
-* Test Mac support
-* Chorus, phaser, flanger and many more FX
-* Sample rate and bit rate (with dithering) conversion
-* Fades and ADSR
-* Dynamic processing (gate/compression)
-* Adding broadcast chunks to existing waves
-* Broadcast wav v1 and v2
-* Proper onscreen feedback for what is happening
+An installed consumer can discover the package without knowing its source-tree
+layout:
 
-## FAQ
-**Do you know that various C++ libraries exist for handling wave and many other audio formats?**
+```cmake
+find_package(wavlab 0.1 CONFIG REQUIRED)
 
-Yes. If I'd used them I wouldn't have learnt anything about importing and exporting wave files.
+add_executable(my_audio_tool main.cpp)
+target_link_libraries(my_audio_tool PRIVATE wavlab::wavlab)
+```
 
-**Why would I want to process files on the command line when Audacity/Sound Forge/Any number of DAWs exist?**
+Set `CMAKE_PREFIX_PATH` to the chosen installation prefix when it is not a
+standard system location. Both build-tree and installed consumers use the same
+`wavlab::wavlab` target name.
 
-Why do command line utilities exist for anything a GUI exists for?
+## Current limitations
 
-## Known issues
-* JUNK chunks are not written which may have as yet un-understood impact
-* If chunks are in some weird random order that doesn't match spec bad stuff will happen
+- Integer PCM WAV only; floating-point WAV and compressed codecs are not
+  supported.
+- BEXT writing currently targets version 0.
+- Unknown chunks are read safely but are not all preserved when saving.
+- Sample-rate and bit-depth conversion, dynamics, fades, and ADSR processing
+  are not implemented yet.
 
+## References
+
+The following technical publications and resources informed algorithm
+implementations in this project. They are cited as background material and do
+not represent bundled third-party source code.
+
+- Robert Bristow-Johnson, “[Cookbook formulae for audio equalizer biquad filter
+  coefficients](https://webaudio.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html),”
+  adapted for the Web Audio specification by Raymond Toy and Doug Schepers.
+- MusicDSP.org, “[C++ class implementation of RBJ
+  Filters](https://www.musicdsp.org/en/latest/Filters/128-c-class-implementation-of-rbj-filters.html),”
+  13 December 2002.
+- Robin Whittle, “[DSP generation of Pink (1/f)
+  Noise](https://www.firstpr.com.au/dsp/pink-noise/),” including Paul Kellet's
+  pinking-filter coefficients, 18 October 1999.
+- TAP-plugins, “[TAP Sigmoid
+  Booster](https://tomscii.sig7.se/tap-plugins/ladspa/sigmoid.html),” describing
+  the nonlinear transfer curve used for tape-style saturation.
+- Manfred R. Schroeder, “[Natural Sounding Artificial
+  Reverberation](https://aes.org/publications/elibrary/elibrary-page/?id=849),”
+  *Journal of the Audio Engineering Society*, volume 10, issue 3, pages 219–223,
+  July 1962. The reverb follows its parallel-comb, series-all-pass design.
+- AudioKit, “[Modulated Delay
+  Effects](https://www.audiokit.io/DunneAudioKit/documentation/dunneaudiokit/modulateddelayeffects),”
+  describing the delay ranges, LFO rates, wet/dry mixing, and feedback used by
+  chorus, flanger, and vibrato effects.
+- JUCE, “[Phaser](https://docs.juce.com/master/classjuce_1_1dsp_1_1Phaser.html),”
+  describing a multi-stage, LFO-modulated all-pass phaser and its standard
+  depth, centre-frequency, feedback, rate, and mix controls.
+
+## Licence
+
+Copyright (C) 2026 Christopher Clayton.
+
+This project is free software licensed under the
+[GNU General Public License version 3 or later](LICENSE).
