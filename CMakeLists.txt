@@ -14,7 +14,6 @@ option(BUILD_SHARED_LIBS "Build wavlab as a shared library" OFF)
 
 set(WAVLAB_PUBLIC_HEADERS
     WavLab/BinaryHelpers.h
-    WavLab/Commands.h
     WavLab/Constants.h
     WavLab/ConversionHelpers.h
     WavLab/Delay.h
@@ -24,13 +23,11 @@ set(WAVLAB_PUBLIC_HEADERS
     WavLab/LFO.h
     WavLab/StringHelpers.h
     WavLab/Tools.h
-    WavLab/TryParse.h
     WavLab/WavFile.h
 )
 
 set(WAVLAB_LIBRARY_SOURCES
     WavLab/BinaryHelpers.cpp
-    WavLab/Commands.cpp
     WavLab/ConversionHelpers.cpp
     WavLab/Delay.cpp
     WavLab/EQ.cpp
@@ -40,6 +37,15 @@ set(WAVLAB_LIBRARY_SOURCES
     WavLab/StringHelpers.cpp
     WavLab/Tools.cpp
     WavLab/WavFile.cpp
+)
+
+set(WAVLAB_CLI_SOURCES
+    src/cli/Commands.cpp
+    src/cli/EQCommands.cpp
+    src/cli/FXCommands.cpp
+    src/cli/GeneratorCommands.cpp
+    src/cli/ToolsCommands.cpp
+    src/cli/main.cpp
 )
 
 add_library(wavlab_lib ${WAVLAB_LIBRARY_SOURCES} ${WAVLAB_PUBLIC_HEADERS})
@@ -64,7 +70,7 @@ target_include_directories(
 )
 wavlab_apply_project_options(wavlab_lib)
 
-add_executable(wavlab_cli WavLab/WavLab.cpp)
+add_executable(wavlab_cli ${WAVLAB_CLI_SOURCES})
 set_target_properties(
     wavlab_cli
     PROPERTIES
@@ -74,6 +80,7 @@ set_target_properties(
         PDB_NAME wavlab_cli
 )
 target_compile_features(wavlab_cli PRIVATE cxx_std_20)
+target_include_directories(wavlab_cli PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/cli")
 target_link_libraries(wavlab_cli PRIVATE wavlab::wavlab)
 wavlab_apply_project_options(wavlab_cli)
 
