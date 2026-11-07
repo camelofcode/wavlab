@@ -1,0 +1,4 @@
+interface:
+  display_name: "WavLab C++ development"
+  short_description: "Maintain C++ library, CLI, and tests"
+  default_prompt: "Use $wavlab-cpp-development to implement this WavLab C++ change consistently."

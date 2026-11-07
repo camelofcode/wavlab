@@ -4,8 +4,10 @@ All notable changes to the modern C++ implementation are documented here.
 
 ## [Unreleased]
 
-The next release is version 0.1.0 and intentionally replaces the historical
-pre-release C++ API and command syntax.
+## [0.1.0] - 2026-11-07
+
+The first modern C++ release intentionally replaces the historical pre-release
+API and command syntax.
 
 ### Added
 

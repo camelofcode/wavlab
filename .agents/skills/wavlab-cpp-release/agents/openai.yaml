@@ -1,0 +1,4 @@
+interface:
+  display_name: "Release WavLab C++"
+  short_description: "Prepare tags and GitHub Releases safely"
+  default_prompt: "Use $wavlab-cpp-release to prepare and publish the requested WavLab C++ release."
