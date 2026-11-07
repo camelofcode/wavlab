@@ -75,6 +75,10 @@ Available configurations:
 `CMakeUserPresets.json` is ignored by Git and can contain machine-specific
 presets that inherit from the checked-in configurations.
 
+Visual Studio users can open the repository as a CMake project or configure
+the `windows-msvc` preset. Any generated solution and project files belong in
+the build tree and are not maintained in source control.
+
 ## Targets
 
 - `wavlab_lib` builds the library, with alias `wavlab::wavlab`.
