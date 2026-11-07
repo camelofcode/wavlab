@@ -147,19 +147,12 @@ install(
     DESTINATION "${WAVLAB_INSTALL_CMAKEDIR}"
 )
 
-add_executable(wavlab_normalise_example examples/normalise.cpp)
-set_target_properties(wavlab_normalise_example PROPERTIES CXX_EXTENSIONS OFF)
-target_compile_features(wavlab_normalise_example PRIVATE cxx_std_20)
-target_link_libraries(wavlab_normalise_example PRIVATE wavlab::wavlab)
-wavlab_apply_project_options(wavlab_normalise_example)
-
 include(CTest)
 if(BUILD_TESTING AND PROJECT_IS_TOP_LEVEL)
     add_subdirectory(tests)
 endif()
 
 wavlab_add_developer_targets(
-    examples/normalise.cpp
     include/wavlab/Delay.h
     include/wavlab/EQ.h
     include/wavlab/FX.h
